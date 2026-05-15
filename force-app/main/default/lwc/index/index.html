@@ -1,20 +1,30 @@
 <template>
 
     <!--Custom Login/Signup Component-->
-    <template if:false={signup}>
-         <div>
-            <input type="text" onkeyup={handleUsernameChange} placeholder="Username"></input>
-            <input type="password" onkeyup={handlePasswordChange} placeholder="Password"></input>
-            <button onclick={login}>Login</button>
-            <button onclick={showSignUp}>New User? Signup Here</button>
+    <template if:true={isLoginPage}>
+        <template if:false={signup}>
+            <div>
+                <input type="text" onkeyup={handleUsernameChange} placeholder="Username"></input>
+                <input type="password" onkeyup={handlePasswordChange} placeholder="Password"></input>
+                <button onclick={login}>Login</button>
+                <button onclick={showSignUp}>New User? Signup Here</button>
+            </div>
+        </template>
+        <template if:true={signup}>
+            <div>
+                <input type="text" onkeyup={handleUsernameChange} placeholder="Username"></input>
+                <input type="password" onkeyup={handlePasswordChange} placeholder="Password"></input>
+                <button onclick={signUp}>Signup</button>
+                <button onclick={showlogin}>Already have an account? Login Here</button>
+            </div>
+        </template>
+    </template>
+
+    <template if:false={isLoginPage}>
+        <div>
+            <h1>Welcome, {loginName}!</h1>
+            <button onclick={logout}>Logout</button>
         </div>
     </template>
-    <template if:true={signup}>
-        <div>
-            <input type="text" onkeyup={handleUsernameChange} placeholder="Username"></input>
-            <input type="password" onkeyup={handlePasswordChange} placeholder="Password"></input>
-            <button onclick={signUp}>Signup</button>
-            <button onclick={showlogin}>Already have an account? Login Here</button>
-        </div>
     
 </template>
