@@ -2,8 +2,13 @@
 
     <!--Custom Login/Signup Component-->
     <template if:true={isLoginPage}>
+
+        <div class="title-container">
+            <h1 class="app-title">Apex Arena</h1>
+            <p class="app-subtitle">Train. Compete. Become a Salesforce Champion.</p>
+        </div>
         <template if:false={signup}>
-            <div>
+            <div class="login-container">
                 <input type="text" onkeyup={handleUsernameChange} placeholder="Username"></input>
                 <input type="password" onkeyup={handlePasswordChange} placeholder="Password"></input>
                 <button onclick={login}>Login</button>
@@ -11,7 +16,7 @@
             </div>
         </template>
         <template if:true={signup}>
-            <div>
+            <div class="signup-container">
                 <input type="text" onkeyup={handleUsernameChange} placeholder="Username"></input>
                 <input type="password" onkeyup={handlePasswordChange} placeholder="Password"></input>
                 <button onclick={signUp}>Signup</button>

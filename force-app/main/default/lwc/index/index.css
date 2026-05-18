@@ -1,0 +1,273 @@
+/* =========================================
+   GLOBAL STYLING
+========================================= */
+
+:host {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+
+    background:
+        radial-gradient(circle at top left, #1e3a8a, transparent 30%),
+        radial-gradient(circle at bottom right, #0f172a, transparent 35%),
+        linear-gradient(135deg, #020617, #0f172a, #1e293b);
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    padding: 20px;
+    overflow: hidden;
+}
+
+/* =========================================
+   TITLE SECTION
+========================================= */
+
+.title-container {
+    text-align: center;
+    margin-bottom: 35px;
+    animation: fadeDown 0.7s ease;
+}
+
+.app-title {
+    font-size: 4rem;
+    font-weight: 800;
+    margin: 0;
+
+    letter-spacing: 3px;
+
+    background: linear-gradient(
+        90deg,
+        #60a5fa,
+        #3b82f6,
+        #93c5fd
+    );
+
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    text-shadow: 0 0 25px rgba(96,165,250,0.25);
+}
+
+.app-subtitle {
+    margin-top: 10px;
+    color: #cbd5e1;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    opacity: 0.85;
+}
+
+/* =========================================
+   LOGIN & SIGNUP CONTAINERS
+========================================= */
+
+.login-container,
+.signup-container {
+    width: 390px;
+
+    padding: 42px 36px;
+
+    border-radius: 26px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    box-shadow:
+        0 15px 45px rgba(0,0,0,0.45),
+        inset 0 1px 1px rgba(255,255,255,0.08);
+
+    position: relative;
+
+    overflow: hidden;
+
+    animation: fadeUp 0.6s ease;
+}
+
+/* Glow Border Effect */
+
+.login-container::before,
+.signup-container::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    padding: 1px;
+
+    border-radius: 26px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(96,165,250,0.6),
+        transparent,
+        rgba(59,130,246,0.4)
+    );
+
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+
+    pointer-events: none;
+}
+
+/* =========================================
+   INPUT FIELDS
+========================================= */
+
+input {
+    width: 100%;
+
+    padding: 15px 18px;
+
+    margin-bottom: 18px;
+
+    border: 1px solid transparent;
+    border-radius: 14px;
+
+    outline: none;
+
+    background: rgba(255,255,255,0.10);
+
+    color: white;
+
+    font-size: 15px;
+
+    box-sizing: border-box;
+
+    transition: all 0.3s ease;
+}
+
+input::placeholder {
+    color: rgba(255,255,255,0.60);
+}
+
+input:focus {
+    background: rgba(255,255,255,0.15);
+
+    border: 1px solid rgba(96,165,250,0.8);
+
+    box-shadow:
+        0 0 0 4px rgba(59,130,246,0.15),
+        0 0 20px rgba(96,165,250,0.35);
+
+    transform: translateY(-2px);
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+button {
+    width: 100%;
+
+    padding: 14px;
+
+    margin-top: 12px;
+
+    border: none;
+    border-radius: 14px;
+
+    cursor: pointer;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    transition: all 0.3s ease;
+}
+
+/* Primary Button */
+
+button:first-of-type {
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    );
+
+    color: white;
+
+    box-shadow:
+        0 6px 18px rgba(37,99,235,0.45);
+}
+
+button:first-of-type:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 10px 28px rgba(59,130,246,0.55);
+}
+
+/* Secondary Button */
+
+button:last-of-type {
+    background: transparent;
+
+    color: #cbd5e1;
+
+    border: 1px solid rgba(255,255,255,0.12);
+}
+
+button:last-of-type:hover {
+    background: rgba(255,255,255,0.08);
+
+    color: white;
+}
+
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(35px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeDown {
+    from {
+        opacity: 0;
+        transform: translateY(-25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media screen and (max-width: 480px) {
+
+    .app-title {
+        font-size: 2.8rem;
+    }
+
+    .login-container,
+    .signup-container {
+        width: 100%;
+        padding: 30px 24px;
+    }
+}
