@@ -1,3 +1,126 @@
 <template>
-    
+
+    <div class="main-container">
+
+        <!-- LEFT SIDEBAR -->
+        <div class="left-panel">
+
+            <!-- Logo -->
+            <div class="glass-card logo-card">
+                <h1>Apex Arena</h1>
+            </div>
+
+            <!-- Profile -->
+            <div class="glass-card profile-card">
+                <h2>{loginName}</h2>
+
+                <div class="profile-info">
+                    <p><span>Rank</span> #12</p>
+                    <p><span>Experience</span> 2450 XP</p>
+                </div>
+            </div>
+
+            <!-- Problem Types -->
+            <div class="glass-card problem-card">
+
+                <h3>Problem Type</h3>
+
+                <button>Trigger</button>
+                <button>Apex Class</button>
+                <button>SOQL</button>
+                <button>LWC</button>
+                <button>Governor Limits</button>
+
+            </div>
+
+        </div>
+
+        <!-- CENTER AREA -->
+        <div class="center-panel">
+
+            <div class="glass-card workspace-card">
+
+                <!-- Scenario -->
+                <div class="scenario-box">
+                    <h3>Scenario</h3>
+
+                    <p>
+                        Write an Apex Trigger to prevent deletion
+                        of Accounts with Active status.
+                    </p>
+                </div>
+
+                <!-- Code Area -->
+                <div class="code-box">
+
+                    <h3>Code Area</h3>
+
+                    <textarea
+                        placeholder="Write your Apex code here..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="right-panel">
+
+            <!-- Pass Fail -->
+            <div class="glass-card status-card">
+                <h3>Pass/Fail</h3>
+
+                <div class="status-badge">
+                    Pending
+                </div>
+            </div>
+
+            <!-- Console -->
+            <div class="glass-card console-card">
+
+                <h3>Error Console</h3>
+
+                <div class="console-output">
+                    No Errors
+                </div>
+
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="glass-card leaderboard-card">
+
+                <h3>Leaderboards</h3>
+
+                <div class="leaderboard-list">
+
+                    <div class="leader-item">
+                        <span>1. Alex</span>
+                        <span>5200 XP</span>
+                    </div>
+
+                    <div class="leader-item">
+                        <span>2. Sarah</span>
+                        <span>4700 XP</span>
+                    </div>
+
+                    <div class="leader-item">
+                        <span>3. John</span>
+                        <span>4500 XP</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="glass-card footer">
+        Apex Arena © 2026 | Salesforce Coding Battle Platform
+    </div>
+
 </template>

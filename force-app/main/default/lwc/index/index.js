@@ -33,10 +33,11 @@ export default class Index extends LightningElement {
 
     async login(event)
     {
-        const result=await loginHelper({Username:this.username,Password:this.password});
+        const result = await loginHelper({Username:this.username,Password:this.password});
         this.isLoginPage=false;
         this.loginName=result;
         console.log(result);
+        window.sessionStorage.setItem('loginName',result);
 
     }
 
