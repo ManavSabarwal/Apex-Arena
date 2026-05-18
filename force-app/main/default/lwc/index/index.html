@@ -1,7 +1,7 @@
 <template>
 
     <!--Custom Login/Signup Component-->
-    <template if:true={isLoginPage}>
+    <template if:false={isLoggedIn}>
 
         <div class="title-container">
             <h1 class="app-title">Apex Arena</h1>
@@ -25,7 +25,7 @@
         </template>
     </template>
 
-    <template if:false={isLoginPage}>
+    <template if:true={isLoggedIn}>
         <div>
             <c-home-page ></c-home-page>
         </div>

@@ -1,4 +1,5 @@
-import { LightningElement} from 'lwc';
+import { LightningElement } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import loginHelper from '@salesforce/apex/loginSignupController.loginHelper';
 import signupHelper from '@salesforce/apex/loginSignupController.signupHelper';
 
@@ -7,7 +8,7 @@ export default class Index extends LightningElement {
     username="";
     password="";
     signup=false;
-    isLoginPage=true;
+    isLoggedIn=false;
     loginName='';
     
     handleUsernameChange(event)
@@ -33,12 +34,32 @@ export default class Index extends LightningElement {
 
     async login(event)
     {
-        const result = await loginHelper({Username:this.username,Password:this.password});
-        this.isLoginPage=false;
-        this.loginName=result;
-        console.log(result);
-        window.sessionStorage.setItem('loginName',result);
 
+        try{
+            const result = await loginHelper({Username:this.username,Password:this.password});
+            if(result==null)
+            {
+                this.isLoggedIn=false;
+                this.dispatchEvent(new ShowToastEvent({
+                    title: "Login Failed",
+                    message: "Invalid username or password.",
+                    variant: "error"
+                }));
+            }
+            else{
+                this.isLoggedIn=true;
+                this.loginName=result;
+                console.log(result);
+                window.sessionStorage.setItem('loginName',result);
+                window.sessionStorage.setItem('isLoggedIn',true); 
+            }
+              
+        }
+        catch(error)
+        {
+            console.log(error);
+            alert('Login failed. Please check your credentials.');
+        }
     }
 
     async signUp(event)
