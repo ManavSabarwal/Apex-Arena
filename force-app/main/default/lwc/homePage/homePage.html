@@ -1,114 +1,93 @@
+<!-- codingArenaHome.html -->
 <template>
 
-    <div class="main-container">
+    <div class="app-container">
 
-        <!-- LEFT SIDEBAR -->
-        <div class="left-panel">
+        <!-- MAIN CONTENT -->
+        <div class="main-container">
 
-            <!-- Logo -->
-            <div class="glass-card logo-card">
-                <h1>Apex Arena</h1>2
-                <button onclick={logoutMethod}>Logout</button>
-            </div>
+            <!-- TOP NAVBAR -->
+            <div class="navbar">
 
-            <!-- Profile -->
-            <div class="glass-card profile-card">
-                <h2>{loginName}</h2>
-
-                <div class="profile-info">
-                    <p><span>Rank</span> #12</p>
-                    <p><span>Experience</span> 2450 XP</p>
-                </div>
-            </div>
-
-            <!-- Problem Types -->
-            <div class="glass-card problem-card">
-
-                <h3>Problem Type</h3>
-
-                <button>Trigger</button>
-                <button>Apex Class</button>
-                <button>SOQL</button>
-                <button>LWC</button>
-                <button>Governor Limits</button>
-
-            </div>
-
-        </div>
-
-        <!-- CENTER AREA -->
-        <div class="center-panel">
-
-            <div class="glass-card workspace-card">
-
-                <!-- Scenario -->
-                <div class="scenario-box">
-                    <h3>Scenario</h3>
-
-                    <p>
-                        Write an Apex Trigger to prevent deletion
-                        of Accounts with Active status.
-                    </p>
+                <div class="logo-section">
+                    <div class="logo-icon">AA</div>
+                    <div class="logo-text">Apex Arena</div>
                 </div>
 
-                <!-- Code Area -->
-                <div class="code-box">
+                <div class="nav-links">
+                    <a class="active-link">Homepage</a>
+                    <a>Contact</a>
+                </div>
 
-                    <h3>Code Area</h3>
+                <div class="nav-right">
 
-                    <textarea
-                        placeholder="Write your Apex code here..."
-                    ></textarea>
-
+                    <div class="user-box" title="Click to open profile">
+                        <div class="avatar"></div>
+                        <span>{loginName}</span>
+                    </div>
                 </div>
 
             </div>
 
-        </div>
+            <!-- HERO -->
+            <div class="hero-section">
 
-        <!-- RIGHT SIDEBAR -->
-        <div class="right-panel">
+                <h1 class="hero-title">
+                    Welcome, {loginName} Choose Your Path:
+                </h1>
 
-            <!-- Pass Fail -->
-            <div class="glass-card status-card">
-                <h3>Pass/Fail</h3>
+                <div class="cards-container">
 
-                <div class="status-badge">
-                    Pending
-                </div>
-            </div>
+                    <!-- CARD 1 -->
+                    <div class="path-card">
 
-            <!-- Console -->
-            <div class="glass-card console-card">
+                        
 
-                <h3>Error Console</h3>
+                        <div class="card-icon">
+                            <lightning-icon
+                                icon-name="utility:bug"
+                                size="large">
+                            </lightning-icon>
+                        </div>
 
-                <div class="console-output">
-                    No Errors
-                </div>
+                        <h2>Path 1: Debug Master</h2>
 
-            </div>
+                        <p>
+                            Analyze, Identify, and Correct. Fix flawed
+                            code snippets across multiple languages
+                            to climb the Debug Leaderboard.
+                        </p>
 
-            <!-- Leaderboard -->
-            <div class="glass-card leaderboard-card">
+                        <button class="outline-btn" onclick={startDebugging}>
+                            Start Debugging
+                        </button>
 
-                <h3>Leaderboards</h3>
-
-                <div class="leaderboard-list">
-
-                    <div class="leader-item">
-                        <span>1. Alex</span>
-                        <span>5200 XP</span>
                     </div>
 
-                    <div class="leader-item">
-                        <span>2. Sarah</span>
-                        <span>4700 XP</span>
-                    </div>
+                    <!-- CARD 2 -->
+                    <div class="path-card">
 
-                    <div class="leader-item">
-                        <span>3. John</span>
-                        <span>4500 XP</span>
+                       
+
+                        <div class="card-icon">
+                            <lightning-icon
+                                icon-name="utility:setup"
+                                size="large">
+                            </lightning-icon>
+                        </div>
+
+                        <h2>Path 2: Code Architect</h2>
+
+                        <p>
+                            Architect solutions from scratch. Tackle
+                            core algorithms and submit your optimized
+                            code for analysis.
+                        </p>
+
+                        <button class="filled-btn" onclick={startBuilding}>
+                            Start Building
+                        </button>
+
                     </div>
 
                 </div>
@@ -118,10 +97,4 @@
         </div>
 
     </div>
-
-    <!-- FOOTER -->
-    <div class="glass-card footer">
-        Apex Arena © 2026 | Salesforce Coding Battle Platform
-    </div>
-
 </template>

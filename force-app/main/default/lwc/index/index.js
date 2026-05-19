@@ -64,9 +64,15 @@ export default class Index extends LightningElement {
             else{
                 this.isLoggedIn=true;
                 this.loginName=result;
-                console.log(result);
-                window.sessionStorage.setItem('loginName',result);
-                window.sessionStorage.setItem('isLoggedIn',true); 
+                this.isLoading=true;
+                setTimeout(()=>{
+                    console.log('Loading...');
+                    console.log(result);
+                    window.sessionStorage.setItem('loginName',result);
+                    window.sessionStorage.setItem('isLoggedIn',true); 
+
+                },2000);
+                
             }
               
         }

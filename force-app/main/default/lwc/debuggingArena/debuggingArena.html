@@ -1,0 +1,159 @@
+<template>
+    <div class="app-container">
+
+        <!-- HEADER -->
+        <header class="topbar">
+            <div class="logo-section">
+                <div class="logo-icon">AA</div>
+                <div class="logo-text">Apex Arena</div>
+            </div>
+
+            <nav class="nav-menu">
+                <a class="active">Homepage</a>
+                <a>Contact</a>
+            </nav>
+
+            <div class="top-right">
+                <div class="timer-box">
+                    <span class="timer-icon">⏱</span>
+                    <span>42:15</span>
+                </div>
+
+                <div class="user-box">
+                    <img
+                        src="https://i.pravatar.cc/100"
+                        alt="user"
+                        class="avatar"
+                    />
+                    <span>{loginName}</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-layout">
+
+            <!-- PROBLEM PANEL -->
+            <section class="glass-card problem-panel">
+
+                <div class="card-header">
+                    <div>
+                        <span class="header-main">Problem</span>
+                    </div>
+
+                    <span class="dots">⋮</span>
+                </div>
+
+                <div class="scrollable-content">
+
+                    <h1 class="problem-title">
+                        <button onclick={generateProblem}> Generate Problem</button>
+                        {scenario}
+                    </h1>
+
+                    <div class="description">
+                        <pre>
+                            {code}
+                        </pre>
+                    </div>
+
+                    <p>
+                        {symptoms}
+                    </p>
+
+                </div>
+            </section>
+
+            <!-- CODE EDITOR -->
+            <section class="glass-card editor-panel">
+
+                <div class="card-header">
+                    <span class="header-main">Code Editor</span>
+                    <span class="dots">⋮</span>
+                </div>
+
+
+                <div class="editor-area">
+
+                    <textarea class="code-editor"
+                        placeholder="Write your code here..."
+                    >{code}</textarea>
+
+                </div>
+
+                <div class="editor-footer">
+                    <button class="secondary-btn">Run Code</button>
+                    <button class="primary-btn">Submit Solution</button>
+                </div>
+
+            </section>
+
+            <!-- LIVE ACTIVITY -->
+            <section class="glass-card activity-panel">
+
+                <div class="card-header">
+                    <span class="header-main">Live Activity</span>
+                </div>
+
+                <div class="success-strip">
+                    Recent Success:
+                    <span>Max_Flow</span>
+                    (1m ago)
+                </div>
+
+                <h2 class="submission-title">Top Submissions</h2>
+
+                <div class="submission-header">
+                    <span>Participant</span>
+                    <span>Execution Time</span>
+                </div>
+
+                <div class="submission-list">
+
+                    <div class="submission-item">
+                        <div class="participant">
+                            <img src="https://i.pravatar.cc/50?img=1" />
+                            <span>Pixel_Hunter</span>
+                        </div>
+                        <span class="green">12ms</span>
+                    </div>
+
+                    <div class="submission-item">
+                        <div class="participant">
+                            <img src="https://i.pravatar.cc/50?img=2" />
+                            <span>Sky_Bound</span>
+                        </div>
+                        <span>44ms</span>
+                    </div>
+
+                    <div class="submission-item">
+                        <div class="participant">
+                            <img src="https://i.pravatar.cc/50?img=3" />
+                            <span>Slarnerlout</span>
+                        </div>
+                        <span>34ms</span>
+                    </div>
+
+                    <div class="submission-item">
+                        <div class="participant">
+                            <img src="https://i.pravatar.cc/50?img=4" />
+                            <span>Renya</span>
+                        </div>
+                        <span>36ms</span>
+                    </div>
+
+                    <div class="submission-item">
+                        <div class="participant">
+                            <img src="https://i.pravatar.cc/50?img=5" />
+                            <span>Lempamon</span>
+                        </div>
+                        <span class="green">16ms</span>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+    </div>
+</template>

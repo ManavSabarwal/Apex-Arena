@@ -1,8 +1,12 @@
 import { LightningElement } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class HomePage extends LightningElement {
+export default class HomePage extends NavigationMixin(LightningElement) {
 
     loginName='';
+    debuggingArena=false;
+    buildingArena=false;
+    homepage=true;
 
     connectedCallback()
     {
@@ -18,5 +22,25 @@ export default class HomePage extends LightningElement {
         window.sessionStorage.setItem('isLoggedIn',false);
         this.loginName='';
         this.isLoggedIn=false;
+    }
+
+    startDebugging(event){
+        console.log('Navigating to Debugging Arena...');
+        window.sessionStorage.setItem('isLoggedIn',true);
+        window.sessionStorage.setItem('loginName',this.loginName);
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/debuggingArena'
+            }
+        });
+    }
+
+    startBuilding(event){
+        console.log('Navigating to Building Arena...');
+        this.buildingArena = true;
+        this.debuggingArena = false;
+        this.homepage = false;
+        
     }
 }
