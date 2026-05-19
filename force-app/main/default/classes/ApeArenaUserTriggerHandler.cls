@@ -7,5 +7,6 @@ public with sharing class ApeArenaUserTriggerHandler extends TriggerHandler{
     {
         ApexArenaTriggerHelper helper=new ApexArenaTriggerHelper();
         helper.validateUserName(newList);
+        helper.validatePassword(newList);
     }
 }

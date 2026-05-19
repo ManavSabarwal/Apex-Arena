@@ -10,6 +10,9 @@ export default class Index extends LightningElement {
     signup=false;
     isLoggedIn=false;
     loginName='';
+    confirmPassword='';
+    passwordMismatch=false;
+    isLoading=false;
     
     handleUsernameChange(event)
     {
@@ -20,6 +23,18 @@ export default class Index extends LightningElement {
     handlePasswordChange(event)
     {
         this.password=event.target.value;
+    }
+
+    handleConfirmPasswordChange(event)
+    {
+        this.confirmPassword=event.target.value;
+        if(this.password!=this.confirmPassword)
+        {
+         this.passwordMismatch=true;   
+        }
+        else{
+            this.passwordMismatch=false;
+        }
     }
 
     showSignUp(event)
@@ -60,13 +75,17 @@ export default class Index extends LightningElement {
             console.log(error);
             alert('Login failed. Please try again.');
         }
+        finally{
+            this.isLoading=false;
+        }
     }
 
     async signUp(event)
     {
         try{
+            this.isLoading = true;
             console.log('signup pressed');
-        const result=await signupHelper({Username:this.username,Password:this.password});
+        const result=await signupHelper({Username:this.username,Password:this.confirmPassword});
         console.log(result);
         if(result=='SignUp Successful')
         {
@@ -78,7 +97,7 @@ export default class Index extends LightningElement {
         else{
             this.dispatchEvent(new ShowToastEvent({
                 title:'Signup Failed',
-                message:'UserName already exists or an error occurred.',
+                message:result,
                 variant:'error'
             }))
         }
@@ -92,6 +111,9 @@ export default class Index extends LightningElement {
                 message:error,
                 variant:'error'
             }))
+        }
+        finally{
+            this.isLoading=false;
         }
         
         

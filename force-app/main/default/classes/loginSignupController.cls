@@ -8,7 +8,8 @@ public with sharing class loginSignupController {
     {
         string result=null;
         try{
-            List<Apex_Arena_User__C> user=[Select id,name from Apex_Arena_User__C where name=:Username and Password__c=:Password limit 1];
+            String lowerUsername=Username.toLowerCase();
+            List<Apex_Arena_User__C> user=[Select id,name from Apex_Arena_User__C where name=:lowerUsername and Password__c=:Password limit 1];
             if(user.size()==1)
             {
                 result=user[0].name;
@@ -27,7 +28,7 @@ public with sharing class loginSignupController {
         string result='';
         try{
             Apex_Arena_User__C user=new Apex_Arena_User__C();
-            user.name=Username;
+            user.name=Username.toLowerCase();
             user.password__c=Password;
 
             insert user;

@@ -7,6 +7,12 @@
             <h1 class="app-title">Apex Arena</h1>
             <p class="app-subtitle">Train. Compete. Become a Salesforce Champion.</p>
         </div>
+        <template if:true={isLoading}>
+            <div class="loading-container">
+                <p class="loading-message">Loading...</p>
+            </div>
+        </template>
+        <template if:false={isLoading}>
         <template if:false={signup}>
             <div class="login-container">
                 <input type="text" onkeyup={handleUsernameChange} placeholder="Username"></input>
@@ -19,9 +25,14 @@
             <div class="signup-container">
                 <input type="text" onkeyup={handleUsernameChange} placeholder="Username"></input>
                 <input type="password" onkeyup={handlePasswordChange} placeholder="Password"></input>
+                <input type="password" onkeyup={handleConfirmPasswordChange} placeholder="Confirm Password"></input>
+                <template if:true={passwordMismatch}>
+                    <p class="error-message">Passwords do not match. Please try again.</p>
+                </template>
                 <button onclick={signUp}>Signup</button>
                 <button onclick={showlogin}>Already have an account? Login Here</button>
             </div>
+        </template>
         </template>
     </template>
 
