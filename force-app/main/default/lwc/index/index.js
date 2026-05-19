@@ -58,14 +58,42 @@ export default class Index extends LightningElement {
         catch(error)
         {
             console.log(error);
-            alert('Login failed. Please check your credentials.');
+            alert('Login failed. Please try again.');
         }
     }
 
     async signUp(event)
     {
-        console.log('signup pressed');
+        try{
+            console.log('signup pressed');
         const result=await signupHelper({Username:this.username,Password:this.password});
         console.log(result);
+        if(result=='SignUp Successful')
+        {
+            this.dispatchEvent(new ShowToastEvent({
+                title:'Signup Successful',
+                variant:'success'
+            }))
+        }
+        else{
+            this.dispatchEvent(new ShowToastEvent({
+                title:'Signup Failed',
+                message:'UserName already exists or an error occurred.',
+                variant:'error'
+            }))
+        }
+    }
+        
+        catch(error)
+        {
+            console.log(error);
+            this.dispatchEvent(new ShowToastEvent({
+                title:'Signup Failed',
+                message:error,
+                variant:'error'
+            }))
+        }
+        
+        
     }
 }

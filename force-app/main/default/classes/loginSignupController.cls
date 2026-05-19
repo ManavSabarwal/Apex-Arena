@@ -30,13 +30,13 @@ public with sharing class loginSignupController {
             user.name=Username;
             user.password__c=Password;
 
-            Database.insert(user,false);
-            return 'SignUp Successfull';
+            insert user;
+            return 'SignUp Successful';
         }
         catch(Exception e)
         {
             system.debug('Exception from SignupHelper: ' + e.getMessage());
-            return 'SignUp Failed';
+            return e.getMessage();
         }
     }
 }
