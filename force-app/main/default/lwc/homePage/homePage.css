@@ -31,13 +31,13 @@
 
 /* NAVBAR */
 .navbar {
-    height: 82px;
+    height: 55px;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    padding: 0 35px;
+    padding: 0 15px;
 
     background: rgba(20, 20, 35, 0.45);
     backdrop-filter: blur(16px);
@@ -52,8 +52,8 @@
 }
 
 .logo-icon {
-    width: 38px;
-    height: 38px;
+    width: 30px;
+    height: 30px;
 
     border-radius: 12px;
 
@@ -63,12 +63,12 @@
     align-items: center;
     justify-content: center;
 
-    font-size: 22px;
+    font-size: 14px;
     font-weight: bold;
 }
 
 .logo-text {
-    font-size: 30px;
+    font-size: 20px;
     font-weight: 600;
 }
 
@@ -94,7 +94,7 @@
 .active-link::after {
     content: '';
     position: absolute;
-    bottom: -24px;
+    bottom: -15px;
     left: 0;
 
     width: 100%;
@@ -115,12 +115,12 @@
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.08);
 
-    height: 48px;
+    height: 40px;
 
     display: flex;
     align-items: center;
 
-    padding: 0 18px;
+    padding: 0 14px;
 
     border-radius: 14px;
     cursor: pointer;
@@ -128,7 +128,7 @@
 
 .timer-box {
     color: #ff8d7a;
-    font-size: 20px;
+    font-size: 14px;
 }
 
 .user-box {
@@ -136,8 +136,8 @@
 }
 
 .avatar {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: linear-gradient(135deg, #7c3aed, #c084fc);
 }
@@ -150,7 +150,7 @@
     flex-direction: column;
     align-items: center;
 
-    padding-top: 70px;
+    padding-top: 60px;
 }
 
 .hero-title {

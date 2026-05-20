@@ -2,33 +2,27 @@
     <div class="app-container">
 
         <!-- HEADER -->
-        <header class="topbar">
-            <div class="logo-section">
-                <div class="logo-icon">AA</div>
-                <div class="logo-text">Apex Arena</div>
-            </div>
+        <div class="navbar">
 
-            <nav class="nav-menu">
-                <a class="active">Homepage</a>
-                <a>Contact</a>
-            </nav>
-
-            <div class="top-right">
-                <div class="timer-box">
-                    <span class="timer-icon">⏱</span>
-                    <span>42:15</span>
+                <div class="logo-section">
+                    <div class="logo-icon">AA</div>
+                    <div class="logo-text">Apex Arena</div>
                 </div>
 
-                <div class="user-box">
-                    <img
-                        src="https://i.pravatar.cc/100"
-                        alt="user"
-                        class="avatar"
-                    />
-                    <span>{loginName}</span>
+                <div class="nav-links">
+                    <a class="active-link">Homepage</a>
+                    <a>Contact</a>
                 </div>
+
+                <div class="nav-right">
+
+                    <div class="user-box" title="Click to open profile">
+                        <div class="avatar"></div>
+                        <span>{loginName}</span>
+                    </div>
+                </div>
+
             </div>
-        </header>
 
         <!-- MAIN CONTENT -->
         <div class="main-layout">
@@ -36,30 +30,69 @@
             <!-- PROBLEM PANEL -->
             <section class="glass-card problem-panel">
 
-                <div class="card-header">
-                    <div>
-                        <span class="header-main">Problem</span>
-                    </div>
+                <div class="problem-header" >
+                    <p>Problem</p>
 
-                    <span class="dots">⋮</span>
                 </div>
+
+                <div class="difficulty-container">
+                    <span class="difficultylabel">Difficulty</span>
+                    <div class="difficulty-options">
+                    <button class={easyClass} data-value="Easy" onclick={handleDifficulty}>Easy</button>
+                    <button class={mediumClass} data-value="Medium" onclick={handleDifficulty}>Medium</button>
+                    <button class={hardClass} data-value="Hard" onclick={handleDifficulty}>Hard</button>
+                    </div>
+                </div>
+
+                <div class="type-container">
+                    <span class="typelabel">Type</span>
+                    <div class="type-options">
+                    <button class={SynchronousApex} data-value="Sync Apex" onclick={handleType}>Synchronous Apex</button>
+                    <button class={AsynchronousApex} data-value="Async Apex" onclick={handleType}>Asynchronous Apex</button>
+                    <button class={Trigger} data-value="Trigger" onclick={handleType}>Trigger</button>
+                    <button class={TestClass} data-value="Test Class" onclick={handleType}>Test Class</button>
+                    </div>
+                </div>
+                <button class="generateProblem-btn" onclick={generateProblem}> Generate New Problem</button>
 
                 <div class="scrollable-content">
 
-                    <h1 class="problem-title">
-                        <button onclick={generateProblem}> Generate Problem</button>
-                        {scenario}
-                    </h1>
+                    <template if:true={isLoading}>
+                        <div class="loading-state">
+                            <div class="spinner"></div>
+                            <span>Loading problem...</span>
+                        </div>
+                    </template>
+                    <template if:false={isLoading}>
+                        <template if:true={dataLoaded}>
+                            <div class="problem-title-container">
+                                <p class="problem-detail">Problem Details</p>
+                                <p class="problem-title">{problemTitle}</p>
+                                <span class="problemLevel">{difficultyfromPrompt}</span>
+                            </div>
+                        
 
-                    <div class="description">
-                        <pre>
-                            {code}
-                        </pre>
-                    </div>
+                        <div>
+                            <p class ="scenario-label">Scenario</p>
+                            <p class="scenario-text">{scenario}</p>
+                        </div> 
+                        <div class="error-code-label">
+                                <p>Erroneous Code</p>
+                        </div>
+                        <div class="error-code-container">
+                            
+                            <pre class="error-code-text">
+                                {code}
+                            </pre>
+                        </div>
+                        <div class="symptoms">
+                            <p class="symptoms-label">The Symptoms</p>
+                            <p class="symptoms-text">{symptoms}</p>
+                        </div>
+                        </template>
+                    </template>
 
-                    <p>
-                        {symptoms}
-                    </p>
+                    
 
                 </div>
             </section>
@@ -69,89 +102,38 @@
 
                 <div class="card-header">
                     <span class="header-main">Code Editor</span>
-                    <span class="dots">⋮</span>
                 </div>
 
 
                 <div class="editor-area">
 
                     <textarea class="code-editor"
-                        placeholder="Write your code here..."
+                        placeholder="*Once the problem is generated, the erroneous code will be displayed in this section for you to review and modify.
+*Carefully analyze the provided symptoms and identify the sections of code responsible for the issue.
+*Resolve the errors by eliminating or correcting the problematic logic to successfully complete the challenge."
                     >{code}</textarea>
 
                 </div>
 
                 <div class="editor-footer">
-                    <button class="secondary-btn">Run Code</button>
                     <button class="primary-btn">Submit Solution</button>
                 </div>
 
             </section>
 
             <!-- LIVE ACTIVITY -->
-            <section class="glass-card activity-panel">
+            <section class="activity-panel">
 
-                <div class="card-header">
-                    <span class="header-main">Live Activity</span>
-                </div>
-
-                <div class="success-strip">
-                    Recent Success:
-                    <span>Max_Flow</span>
-                    (1m ago)
-                </div>
-
-                <h2 class="submission-title">Top Submissions</h2>
-
-                <div class="submission-header">
-                    <span>Participant</span>
-                    <span>Execution Time</span>
-                </div>
-
-                <div class="submission-list">
-
-                    <div class="submission-item">
-                        <div class="participant">
-                            <img src="https://i.pravatar.cc/50?img=1" />
-                            <span>Pixel_Hunter</span>
-                        </div>
-                        <span class="green">12ms</span>
-                    </div>
-
-                    <div class="submission-item">
-                        <div class="participant">
-                            <img src="https://i.pravatar.cc/50?img=2" />
-                            <span>Sky_Bound</span>
-                        </div>
-                        <span>44ms</span>
-                    </div>
-
-                    <div class="submission-item">
-                        <div class="participant">
-                            <img src="https://i.pravatar.cc/50?img=3" />
-                            <span>Slarnerlout</span>
-                        </div>
-                        <span>34ms</span>
-                    </div>
-
-                    <div class="submission-item">
-                        <div class="participant">
-                            <img src="https://i.pravatar.cc/50?img=4" />
-                            <span>Renya</span>
-                        </div>
-                        <span>36ms</span>
-                    </div>
-
-                    <div class="submission-item">
-                        <div class="participant">
-                            <img src="https://i.pravatar.cc/50?img=5" />
-                            <span>Lempamon</span>
-                        </div>
-                        <span class="green">16ms</span>
-                    </div>
+                <div class="glass-card results-panel">
+                    <p class="result-label">Result</p>
+                    <span class={resultClass}>{result}</span>
 
                 </div>
 
+                <div class="glass-card reason-panel">
+                    <p class="reason-label">Reasoning</p>
+                    <p class="reason-text">{reason}</p>
+                </div>
             </section>
 
         </div>
