@@ -1,5 +1,6 @@
 import { LightningElement } from 'lwc';
 import invokePrompt from '@salesforce/apex/PromptTemplateController.invokePrompt';
+import invokeValidationPrompt from '@salesforce/apex/PromptTemplateController.invokeValidationPrompt';
 
 export default class DebuggingArena extends LightningElement {
 
@@ -7,6 +8,7 @@ export default class DebuggingArena extends LightningElement {
     problem;
     scenario='';
     code='';
+    textAreacode='';
     symptoms='';
     problemTitle='';
     difficulty='Easy';
@@ -16,6 +18,10 @@ export default class DebuggingArena extends LightningElement {
     difficultyfromPrompt='';
     result='Pending';
     reason='No Reasoning Yet';
+    thegood='';
+    thebad='';
+    optimizedCode='';
+    submitting=false;
 
     connectedCallback()
     {
@@ -28,11 +34,11 @@ export default class DebuggingArena extends LightningElement {
         {
             return 'result-pending';
         }
-        else if(this.result==='Pass')
+        else if(this.result==='Pass' || this.result==='PASS' || this.result.toUpperCase().includes('PASS'))
         {
             return 'result-passed';
         }
-        else if(this.result==='Fail')
+        else if(this.result==='FAIL' || this.result==='Fail' || this.result.toUpperCase().includes('FAIL'))
         {
             return 'result-failed';
         }
@@ -52,6 +58,7 @@ export default class DebuggingArena extends LightningElement {
         const parsedData = JSON.parse(response);
         this.scenario=parsedData.Scenario;
         this.code=parsedData.ErrorCode.replace('```apex','').replace('```','');
+        this.textAreacode=this.code;
         this.symptoms=parsedData.Requirements;
         this.problemTitle=parsedData.ProblemTitle;
         this.difficultyfromPrompt=parsedData.DifficultyMatrixLevel;
@@ -61,6 +68,11 @@ export default class DebuggingArena extends LightningElement {
         } finally {
             this.isLoading = false;
         }
+    }
+
+    handleCodeChange(event) {
+        this.textAreacode = event.target.value;
+        console.log('Code updated:', this.textAreacode);
     }
 
     handleDifficulty(event) {
@@ -98,6 +110,26 @@ export default class DebuggingArena extends LightningElement {
 
     get TestClass() {
         return `type-btn ${this.type === 'Test Class' ? 'active' : ''}`;
+    }
+
+    async submitSolution(){
+        try{
+            console.log('Submitting solution...');
+            this.submitting=true;
+            const response = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode});
+            console.log('Submission Response:', response);
+            const parsedResponse = JSON.parse(response);
+            this.result=parsedResponse.Result;
+            this.reason=parsedResponse.Reasoning;
+            this.thebad=parsedResponse.CodeReviewBad;
+            this.thegood=parsedResponse.CodeReviewGood;
+            this.optimizedCode=parsedResponse.ArchitectOptimization;
+        }catch(error){
+            console.error('Error submitting solution:', error);
+        }
+        finally{
+            this.submitting=false;
+        }
     }
 
 }

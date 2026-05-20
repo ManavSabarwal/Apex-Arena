@@ -111,30 +111,45 @@
                         placeholder="*Once the problem is generated, the erroneous code will be displayed in this section for you to review and modify.
 *Carefully analyze the provided symptoms and identify the sections of code responsible for the issue.
 *Resolve the errors by eliminating or correcting the problematic logic to successfully complete the challenge."
-                    >{code}</textarea>
+                    onkeyup={handleCodeChange}>{textAreacode}</textarea>
 
                 </div>
 
                 <div class="editor-footer">
-                    <button class="primary-btn">Submit Solution</button>
+                    <button class="primary-btn" onclick={submitSolution}>Submit Solution</button>
                 </div>
 
             </section>
 
             <!-- LIVE ACTIVITY -->
             <section class="activity-panel">
-
+                <template if:true={submitting}>
+                    <div class="submitting-state">
+                        <div class="spinner"></div>
+                        <span>Submitting your solution...</span>
+                    </div>
+                </template>
+                <template if:false={submitting}>
                 <div class="glass-card results-panel">
                     <p class="result-label">Result</p>
                     <span class={resultClass}>{result}</span>
-
                 </div>
 
                 <div class="glass-card reason-panel">
                     <p class="reason-label">Reasoning</p>
                     <p class="reason-text">{reason}</p>
-                </div>
+                </div> 
+
+                <div class="glass-card codeReview-panel">
+                    <p class="reason-label">Code Review</p>
+                    <p class="codereview-label">The Good</p>
+                    <p class="reason-text thegood">{thegood}</p>
+                    <p class="codereview-label">The Bad</p>
+                    <p class="reason-text thebad ">{thebad}</p>
+                </div> 
+                </template>
             </section>
+
 
         </div>
     </div>

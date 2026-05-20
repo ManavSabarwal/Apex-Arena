@@ -329,6 +329,15 @@
     animation: spin 1s linear infinite;
 }
 
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .scrollable-content {
     overflow-y: auto;
     margin:5px 10px 0px 10px;
@@ -387,7 +396,7 @@
 .error-code-text
 {
     font-size: 11px;
-    margin-top:-10px;
+    margin-top:-8px;
     font-weight: 600;
 }
 
@@ -493,10 +502,6 @@
 
 /* ACTIVITY */
 
-.activity-panel {
-    padding-bottom: 24px;
-}
-
 .results-panel{
 padding: 10px;
 }
@@ -550,70 +555,42 @@ padding: 10px;
     scroll-behavior: smooth;
     border: 1px solid #c7c7c750;
     border-radius: 12px;
-    padding: 10px;;
+    padding: 10px;
 }
 
-.success-strip {
-    margin: 20px;
-    margin-bottom: 30px;
 
-    padding-bottom: 10px;
-
-    border-bottom: 2px solid #8b5cf6;
-
-    color: #bcbcd2;
-}
-
-.success-strip span {
-    color: #b46cff;
-}
-
-.submission-title {
-    padding: 0 20px;
-}
-
-.submission-header {
-    display: flex;
-    justify-content: space-between;
-
-    padding: 0 20px;
-    margin-top: 20px;
-
-    color: #8f90aa;
-    font-size: 14px;
-}
-
-.submission-list {
-    margin-top: 18px;
-    padding: 0 14px;
-}
-
-.submission-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    padding: 12px 10px;
-    border-radius: 14px;
-
-    margin-bottom: 12px;
-
-    background: rgba(255,255,255,0.03);
-}
-
-.participant {
+.submitting-state{
     display: flex;
     align-items: center;
     gap: 12px;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
 }
 
-.participant img {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+.codeReview-panel{
+    padding: 10px;
+    margin-top: 10px;
 }
 
+.codereview-label{
+    font-size: 12px;
+    font-weight: 700;
+}
 
+.thegood{
+    border-color: rgb(0, 210, 106);
+    box-shadow: 0 0 15px rgba(0,210,106,0.35);
+    color: #00ff84;
+    background-color: rgba(0, 210, 106, 0.2);
+}
+.thebad{
+    border-color: #ff5c7a;
+    box-shadow: 0 0 15px rgba(255,92,122,0.35);
+    color: #ff8ea3;
+    background-color: rgba(255,92,122,0.2);
+}
 
 /* SCROLLBAR */
 

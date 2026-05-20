@@ -18,4 +18,25 @@ public with sharing class PromptTemplateController {
             String response = PromptTemplateService.invokePrompt('Challenge_Generator', inputParams);
             return response;
         }
+
+        @AuraEnabled(cacheable=true)
+        public static string invokeValidationPrompt(String scenario,String solution){
+            try {
+                ConnectApi.WrappedValue inputValueMapScenario = new ConnectApi.WrappedValue();
+                inputValueMapScenario.value = scenario;
+                ConnectApi.WrappedValue inputValueMapSolution = new ConnectApi.WrappedValue();
+                inputValueMapSolution.value = solution ;
+                
+                //Add Prompt input variables to a Map
+                Map<String, ConnectApi.WrappedValue> inputParams = new Map<String, ConnectApi.WrappedValue>();        
+                inputParams.put('Input:Scenario', inputValueMapScenario);
+                inputParams.put('Input:Solution', inputValueMapSolution);
+
+                String response = PromptTemplateService.invokePrompt('Coding_Challenge_Resolution', inputParams);
+                return response;
+                
+            } catch (Exception e) {
+                throw new AuraHandledException(e.getMessage());
+            }
+        }
 }
