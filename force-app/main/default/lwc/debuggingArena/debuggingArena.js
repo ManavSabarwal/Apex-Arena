@@ -22,6 +22,8 @@ export default class DebuggingArena extends LightningElement {
     thebad='';
     optimizedCode='';
     submitting=false;
+    isReadonly=true;
+    submitCount=0;
 
     connectedCallback()
     {
@@ -45,17 +47,22 @@ export default class DebuggingArena extends LightningElement {
     }
 
     async generateProblem(event){
+        let response='';
+        let parsedData='';
+        this.textAreacode='';
+        this.isReadonly=true;
+        this.submitCount=0;
         try{
         this.isLoading = true;
         console.log('Generating problem...');
         console.log('Selected Difficulty:', this.difficulty);
         console.log('Selected Type:', this.type); 
-        const response = await invokePrompt({ difficulty: this.difficulty, type: this.type });
+        response = await invokePrompt({ difficulty: this.difficulty, type: this.type });
         console.log('Generated Problem:', response);
         this.dataLoaded=true;
         this.problem=response;
         console.log('Type of this.problem:', typeof this.problem);
-        const parsedData = JSON.parse(response);
+        parsedData = JSON.parse(response);
         this.scenario=parsedData.Scenario;
         this.code=parsedData.ErrorCode.replace('```apex','').replace('```','');
         this.textAreacode=this.code;
@@ -67,12 +74,37 @@ export default class DebuggingArena extends LightningElement {
             this.dataLoaded=false;
         } finally {
             this.isLoading = false;
+            this.isReadonly=false;
+            response='';
         }
     }
 
     handleCodeChange(event) {
         this.textAreacode = event.target.value;
         console.log('Code updated:', this.textAreacode);
+    }
+
+    tabspacing(event){
+       if (event.key === 'Tab') {
+
+        event.preventDefault();
+
+        const textarea = event.target;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+
+        const spaces = '\t';
+
+        textarea.value =
+            textarea.value.substring(0, start) +
+            spaces +
+            textarea.value.substring(end);
+
+        textarea.selectionStart =
+            textarea.selectionEnd =
+            start + spaces.length;
+    }
     }
 
     handleDifficulty(event) {
@@ -115,6 +147,8 @@ export default class DebuggingArena extends LightningElement {
     async submitSolution(){
         try{
             console.log('Submitting solution...');
+            this.submitCount++;
+            console.log(this.submitCount);
             this.submitting=true;
             const response = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode});
             console.log('Submission Response:', response);
@@ -124,6 +158,8 @@ export default class DebuggingArena extends LightningElement {
             this.thebad=parsedResponse.CodeReviewBad;
             this.thegood=parsedResponse.CodeReviewGood;
             this.optimizedCode=parsedResponse.ArchitectOptimization;
+
+            
         }catch(error){
             console.error('Error submitting solution:', error);
         }

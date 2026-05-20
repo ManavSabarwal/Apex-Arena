@@ -1,0 +1,193 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+/* ===================================
+   FOOTER
+=================================== */
+
+.footer {
+
+    width: 100%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 30px;
+
+    padding: 22px 30px;
+
+    border-radius: 24px;
+
+    background: rgba(255,255,255,0.06);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    box-shadow:
+        0 8px 30px rgba(0,0,0,0.35),
+        inset 0 1px 1px rgba(255,255,255,0.04);
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    position: relative;
+}
+
+/* Glow Border */
+
+.footer::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+
+    padding: 1px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(96,165,250,0.35),
+        transparent,
+        rgba(59,130,246,0.18)
+    );
+
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+
+    pointer-events: none;
+}
+
+/* ===================================
+   LEFT SECTION
+=================================== */
+
+.footer-left h2 {
+
+    margin: 0;
+
+    font-size: 1.8rem;
+    font-weight: 800;
+
+    background: linear-gradient(
+        90deg,
+        #60a5fa,
+        #3b82f6,
+        #93c5fd
+    );
+
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.footer-left p {
+
+    margin-top: 6px;
+
+    color: #cbd5e1;
+
+    font-size: 14px;
+}
+
+/* ===================================
+   CENTER LINKS
+=================================== */
+
+.footer-center {
+
+    display: flex;
+    gap: 24px;
+}
+
+.footer-center a {
+
+    color: #cbd5e1;
+
+    text-decoration: none;
+
+    font-weight: 600;
+
+    transition: all 0.25s ease;
+}
+
+.footer-center a:hover {
+
+    color: #60a5fa;
+
+    transform: translateY(-2px);
+}
+
+/* ===================================
+   RIGHT BUTTONS
+=================================== */
+
+.footer-right {
+
+    display: flex;
+    gap: 12px;
+}
+
+.footer-right button {
+
+    padding: 10px 18px;
+
+    border: none;
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    font-weight: 600;
+
+    color: white;
+
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    );
+
+    transition: all 0.3s ease;
+}
+
+.footer-right button:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 6px 18px rgba(37,99,235,0.45);
+}
+
+/* ===================================
+   RESPONSIVE
+=================================== */
+
+@media screen and (max-width: 900px) {
+
+    .footer {
+
+        flex-direction: column;
+
+        text-align: center;
+    }
+
+    .footer-center {
+
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}

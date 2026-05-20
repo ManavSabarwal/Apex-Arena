@@ -3,7 +3,7 @@ public with sharing class PromptTemplateController {
 
     }
 
-        @AuraEnabled(cacheable=true)
+        @AuraEnabled
         public static String invokePrompt(String difficulty, String type){
             ConnectApi.WrappedValue inputValueMapdifficulty = new ConnectApi.WrappedValue();
             inputValueMapdifficulty.value = difficulty;
@@ -19,7 +19,7 @@ public with sharing class PromptTemplateController {
             return response;
         }
 
-        @AuraEnabled(cacheable=true)
+        @AuraEnabled
         public static string invokeValidationPrompt(String scenario,String solution){
             try {
                 ConnectApi.WrappedValue inputValueMapScenario = new ConnectApi.WrappedValue();

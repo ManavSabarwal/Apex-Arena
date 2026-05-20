@@ -399,7 +399,9 @@
     margin-top:-8px;
     font-weight: 600;
 }
-
+.symptoms{
+    margin-bottom: 10px;
+}
 .symptoms-label{
     font-size: 13px;
     font-weight: 700;
@@ -445,14 +447,7 @@
     background: rgba(3, 7, 18, 0.7);
     border: 1px solid rgba(255,255,255,0.05);
 
-    overflow: auto;
-}
-
-.editor-area pre {
-    margin: 0;
-    color: #d6d6e9;
-    line-height: 1.9;
-    font-size: 15px;
+    overflow: scroll;
 }
 
 .code-editor{
@@ -460,11 +455,19 @@
     color: #d6d6e9;
     min-width: 100%;
     min-height: 100%;
-    scroll-behavior: smooth;
     max-height: 100%;
     max-width: 100%;
     border-radius: 18px;
-    padding: 10px;
+    padding: 10px 10px 0px 10px;
+    overflow: auto;
+    font-size: 13px;
+    white-space: pre;
+    font-family:
+        Consolas,
+        Monaco,
+        monospace;
+    flex: 1;
+
 }
 
 /* FOOTER */
