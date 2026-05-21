@@ -486,7 +486,6 @@
         #451da3,
         #37214c
     );
-
     color: white;
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 8px;
@@ -497,9 +496,17 @@
     cursor: pointer;
     box-shadow: 0 0 15px rgba(69,29,163,0.35);
 }
+
 .primary-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 0 15px rgba(69,29,163,0.35);
+}
+
+.primary-btn:disabled{
+    background-color: #d3d3d3;
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 

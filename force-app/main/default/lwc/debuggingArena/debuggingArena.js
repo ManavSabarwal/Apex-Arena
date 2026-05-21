@@ -26,7 +26,6 @@ export default class DebuggingArena extends LightningElement {
     optimizedCode='Submit your code for review...';
     submitting=false;
     isReadonly=true;
-    submitCount=0;
     savedId='';
     passed=false;
 
