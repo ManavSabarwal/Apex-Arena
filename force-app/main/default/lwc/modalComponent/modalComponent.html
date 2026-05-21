@@ -1,0 +1,36 @@
+<!-- challengeSuccessModal.html -->
+<template>
+    <template if:true={showModal}>
+        
+        <!-- BACKDROP -->
+        <div class="backdrop"></div>
+
+        <!-- MODAL -->
+        <section class="modal-container">
+
+            <!-- CLOSE -->
+            <button class="close-btn" onclick={closeModal}>
+                ✕
+            </button>
+
+            <!-- XP CIRCLE -->
+            <div class="xp-circle">
+                <div class="xp-text">{exppoints}</div>
+                <div class="xp-label">EXP</div>
+            </div>
+
+            <!-- CONTENT -->
+            <h1>
+                Congratulations on <br />
+                passing the challenge!
+            </h1>
+
+            <!-- BUTTON -->
+            <button class="continue-btn" onclick={closeModal}>
+                Keep Challenging →
+            </button>
+
+        </section>
+
+    </template>
+</template>

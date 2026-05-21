@@ -2,6 +2,8 @@ import { LightningElement } from 'lwc';
 import invokePrompt from '@salesforce/apex/PromptTemplateController.invokePrompt';
 import invokeValidationPrompt from '@salesforce/apex/PromptTemplateController.invokeValidationPrompt';
 import saveAttemptedChallenge from '@salesforce/apex/recordController.saveAttemptedChallenge';
+import createChallengeAttempt from '@salesforce/apex/recordController.createChallengeAttempt';
+
 
 export default class DebuggingArena extends LightningElement {
 
@@ -25,6 +27,8 @@ export default class DebuggingArena extends LightningElement {
     submitting=false;
     isReadonly=true;
     submitCount=0;
+    savedId='';
+    passed=false;
 
     connectedCallback()
     {
@@ -86,16 +90,18 @@ export default class DebuggingArena extends LightningElement {
             response='';
             try{
 
-                let savedId=await saveAttemptedChallenge({
+                    this.savedId=await saveAttemptedChallenge({
                     problemTitle:this.problemTitle,
                     scenario:this.scenario,
                     errorcode:this.code,
                     symptoms:this.symptoms,
                     type:this.type,
                     difficultylevel:this.difficulty,
-                    username:this.loginName
+                    username:this.loginName,
+                    path:'Debugging'
                 })
                 console.log('Challenge Saved');
+                console.log(this.savedId);
 
             }
             catch(error)
@@ -175,8 +181,6 @@ export default class DebuggingArena extends LightningElement {
     async submitSolution(){
         try{
             console.log('Submitting solution...');
-            this.submitCount++;
-            console.log(this.submitCount);
             this.submitting=true;
             const response = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode});
             console.log('Submission Response:', response);
@@ -188,11 +192,48 @@ export default class DebuggingArena extends LightningElement {
             this.optimizedCode=parsedResponse.ArchitectOptimization;
 
             
+
+            
         }catch(error){
             console.error('Error submitting solution:', error);
         }
         finally{
             this.submitting=false;
+
+            try{
+
+                let saveRes=await createChallengeAttempt(
+                    {
+                        id:this.savedId,
+                        result:this.result,
+                        solution:this.textAreacode ,
+                        thegood:this.thegood,
+                        thebad:this.thebad
+
+                    }
+                );
+
+                if(saveRes.length>0)
+                {
+                    console.log(saveRes);
+                    if(this.result.toLowerCase().includes('pass'))
+                    {
+                        this.template.querySelector('c-modal-component').openModal(this.difficultyfromPrompt,saveRes);
+                    }
+
+                }
+                else
+                {
+                    console.log(saveRes);
+                    console.log('Error in creating attempt. Check logs');
+                }
+
+            }
+            catch(error)
+            {
+                console.log('Error in Creating Attempt');
+                console.log(error);
+            }
         }
     }
 
