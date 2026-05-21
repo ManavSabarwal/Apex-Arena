@@ -2,8 +2,9 @@ import { LightningElement } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import loginHelper from '@salesforce/apex/loginSignupController.loginHelper';
 import signupHelper from '@salesforce/apex/loginSignupController.signupHelper';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class Index extends LightningElement {
+export default class Index extends NavigationMixin(LightningElement) {
 
     username="";
     password="";
@@ -13,6 +14,9 @@ export default class Index extends LightningElement {
     confirmPassword='';
     passwordMismatch=false;
     isLoading=false;
+    errorMessage='';
+    loginError=false;
+
     
     handleUsernameChange(event)
     {
@@ -47,31 +51,50 @@ export default class Index extends LightningElement {
         this.signup=false;
     }
 
+    showError(message)
+    {
+        this.loginError=true;
+        this.errorMessage=message;
+                setTimeout(()=>{
+                    this.loginError=false;
+                },3000);
+    }
+
     async login(event)
     {
 
+        if(this.username=='' || this.password=='')
+        {
+            this.showError('Please enter your Username and Password.');
+        }
+
+        else{
+
         try{
             const result = await loginHelper({Username:this.username,Password:this.password});
+            console.log(result);
             if(result==null)
             {
                 this.isLoggedIn=false;
-                this.dispatchEvent(new ShowToastEvent({
-                    title: "Login Failed",
-                    message: "Invalid username or password.",
-                    variant: "error"
-                }));
+                console.log('In if result==null');
+                this.showError('Invalid Username or Password');
             }
             else{
                 this.isLoggedIn=true;
                 this.loginName=result;
                 this.isLoading=true;
-                setTimeout(()=>{
-                    console.log('Loading...');
-                    console.log(result);
-                    window.sessionStorage.setItem('loginName',result);
-                    window.sessionStorage.setItem('isLoggedIn',true); 
+                console.log('Loading...');
+                console.log(result);
+                window.sessionStorage.setItem('loginName',result);
+                window.sessionStorage.setItem('isLoggedIn',true); 
+                this[NavigationMixin.Navigate]({
+                        type: 'standard__webPage',
+                        attributes: {
+                                        url: '/choosepath'
+                                    }
+                });
 
-                },2000);
+
                 
             }
               
@@ -79,11 +102,12 @@ export default class Index extends LightningElement {
         catch(error)
         {
             console.log(error);
-            alert('Login failed. Please try again.');
+            this.showError('An error has Occured. Please try again later');
         }
         finally{
             this.isLoading=false;
         }
+    }
     }
 
     async signUp(event)

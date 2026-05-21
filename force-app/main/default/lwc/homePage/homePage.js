@@ -7,6 +7,7 @@ export default class HomePage extends NavigationMixin(LightningElement) {
     debuggingArena=false;
     buildingArena=false;
     homepage=true;
+    isLoggedIn=false;
 
     connectedCallback()
     {

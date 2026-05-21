@@ -11,10 +11,10 @@ public with sharing class recordController {
             {
                 string lowerUsername=username.toLowerCase();
                 
-                List<Attempted_Challenge__c> prevChallenges=[SELECT Id,Challenge__r.Scenario__c FROM Attempted_Challenge__c WHERE Apex_Arena_User__r.Name =:lowerUsername];
+                List<Attempted_Challenge__c> prevChallenges=[SELECT Id FROM Attempted_Challenge__c WHERE Apex_Arena_User__r.Name =:lowerUsername];
                 for(Attempted_Challenge__c ac:prevChallenges)
                 {
-                    challenge =challenge+'\n\n'+ac.Challenge__r.Scenario__c;
+                    challenge =challenge+'\n\n'+ac.id;
                     
                 }
                 system.debug(challenge);
@@ -31,6 +31,33 @@ public with sharing class recordController {
         {
             system.debug('Exception : '+e.getMessage());
             return 'none';
+        }
+    }
+
+    @AuraEnabled
+    public static void saveAttemptedChallenge(String problemTitle,String scenario,String errorcode,String symptoms,String type, String difficultylevel,string username){
+        try {
+
+            List<Apex_Arena_User__C> aau=[Select id from Apex_Arena_User__C where name=:username];
+            String aauId=aau[0].ID;
+            system.debug(aauId);
+            Attempted_Challenge__c ac= new Attempted_Challenge__c();
+            ac.scenario__c=scenario;
+            ac.errorcode__c=errorcode;
+            ac.Symptoms__c=symptoms;
+            ac.type__C=type;
+            ac.DifficultyLevel__c=difficultylevel;
+            ac.Apex_Arena_User__c=aauId;
+            ac.name=problemTitle + username;
+            ac.result__C='Pending';
+            ac.Solution_Provided__c='Not Attempted';
+
+            insert(ac);
+
+            system.debug(ac.id);
+            
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
         }
     }
 }

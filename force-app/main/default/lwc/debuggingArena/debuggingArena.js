@@ -1,6 +1,7 @@
 import { LightningElement } from 'lwc';
 import invokePrompt from '@salesforce/apex/PromptTemplateController.invokePrompt';
 import invokeValidationPrompt from '@salesforce/apex/PromptTemplateController.invokeValidationPrompt';
+import saveAttemptedChallenge from '@salesforce/apex/recordController.saveAttemptedChallenge';
 
 export default class DebuggingArena extends LightningElement {
 
@@ -18,9 +19,9 @@ export default class DebuggingArena extends LightningElement {
     difficultyfromPrompt='';
     result='Pending';
     reason='No Reasoning Yet';
-    thegood='';
-    thebad='';
-    optimizedCode='';
+    thegood='Submit your code for review...';
+    thebad='Submit your code for review...';
+    optimizedCode='Submit your code for review...';
     submitting=false;
     isReadonly=true;
     submitCount=0;
@@ -28,6 +29,7 @@ export default class DebuggingArena extends LightningElement {
     connectedCallback()
     {
         this.loginName=window.sessionStorage.getItem('loginName');
+        console.log(this.loginName);
     }
 
     get resultClass()
@@ -52,16 +54,22 @@ export default class DebuggingArena extends LightningElement {
         this.textAreacode='';
         this.isReadonly=true;
         this.submitCount=0;
+
+
+        //reseting the results we get after submitting the solution
+        this.result='Pending';
+        this.reason='No Reasoning Yet';
+        this.thebad='Submit your code for review...';
+        this.thegood='Submit your code for review...';
+        this.optimizedCode='Submit your code for review...';
+
+
         try{
         this.isLoading = true;
         console.log('Generating problem...');
-        console.log('Selected Difficulty:', this.difficulty);
-        console.log('Selected Type:', this.type); 
         response = await invokePrompt({ difficulty: this.difficulty, type: this.type });
-        console.log('Generated Problem:', response);
         this.dataLoaded=true;
         this.problem=response;
-        console.log('Type of this.problem:', typeof this.problem);
         parsedData = JSON.parse(response);
         this.scenario=parsedData.Scenario;
         this.code=parsedData.ErrorCode.replace('```apex','').replace('```','');
@@ -76,6 +84,26 @@ export default class DebuggingArena extends LightningElement {
             this.isLoading = false;
             this.isReadonly=false;
             response='';
+            try{
+
+                let savedId=await saveAttemptedChallenge({
+                    problemTitle:this.problemTitle,
+                    scenario:this.scenario,
+                    errorcode:this.code,
+                    symptoms:this.symptoms,
+                    type:this.type,
+                    difficultylevel:this.difficulty,
+                    username:this.loginName
+                })
+                console.log('Challenge Saved');
+
+            }
+            catch(error)
+            {
+                console.error('Error generating problem:', error);
+            }
+
+            
         }
     }
 

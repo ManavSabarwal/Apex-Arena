@@ -23,7 +23,15 @@
 /* =========================================
    TITLE SECTION
 ========================================= */
+.errorNotification
+{
+    border: 1px solid rgba(220, 82, 36, 0.781);
+    border-radius: 10px;
+    color: rgba(220, 82, 36, 0.781);
+    padding:5px 10px;
+    margin-bottom: 10px;
 
+}
 .title-container {
     text-align: center;
     margin-bottom: 35px;

@@ -14,6 +14,11 @@
         </template>
         <template if:false={isLoading}>
         <template if:false={signup}>
+            <template if:true={loginError}>
+                <div class="errorNotification">
+                    {errorMessage}
+                </div>
+            </template>
             <div class="login-container">
                 <input type="text" onkeyup={handleUsernameChange} placeholder="Username"></input>
                 <input type="password" onkeyup={handlePasswordChange} placeholder="Password"></input>
@@ -34,12 +39,6 @@
             </div>
         </template>
         </template>
-    </template>
-
-    <template if:true={isLoggedIn}>
-        <div>
-            <c-home-page ></c-home-page>
-        </div>
     </template>
     
 </template>
