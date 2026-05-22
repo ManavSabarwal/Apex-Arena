@@ -3,6 +3,7 @@ import invokePrompt from '@salesforce/apex/PromptTemplateController.invokePrompt
 import invokeValidationPrompt from '@salesforce/apex/PromptTemplateController.invokeValidationPrompt';
 import saveAttemptedChallenge from '@salesforce/apex/recordController.saveAttemptedChallenge';
 import createChallengeAttempt from '@salesforce/apex/recordController.createChallengeAttempt';
+import updateApexArenaUser from '@salesforce/apex/recordController.updateApexArenaUser';
 
 
 export default class DebuggingArena extends LightningElement {
@@ -190,9 +191,6 @@ export default class DebuggingArena extends LightningElement {
             this.thegood=parsedResponse.CodeReviewGood;
             this.optimizedCode=parsedResponse.ArchitectOptimization;
 
-            
-
-            
         }catch(error){
             console.error('Error submitting solution:', error);
         }
@@ -215,10 +213,19 @@ export default class DebuggingArena extends LightningElement {
                 if(saveRes && Object.keys(saveRes).length > 0)
                 {
                     console.log(saveRes);
+                    
                     if(this.result.toLowerCase().includes('pass'))
                     {
-                        this.template.querySelector('c-modal-component').openModal(this.difficultyfromPrompt,saveRes.oldresult,saveRes.attempt);
-                        //write logic to update the exp points of the user based on the difficulty level and the result of the attempt.
+                       let exppoints= this.template.querySelector('c-modal-component').openModal(this.loginName,this.difficultyfromPrompt,saveRes.oldresult,saveRes.attempt,'debug');
+                       if(exppoints!=0)
+                       {
+                            let updateResponse=await updateApexArenaUser({
+                                    userName:this.loginName,
+                                    expPoints:exppoints
+
+                            });
+                            console.log(updateResponse + ' - '+ exppoints);
+                        }
                     }
 
                 }

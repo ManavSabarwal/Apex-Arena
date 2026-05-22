@@ -1,36 +1,62 @@
 import { LightningElement,api,track } from 'lwc';
 
+
 export default class ModalComponent extends LightningElement {
 
     @track showModal = false;
     exppoints=0;
     multiplier=1;
+    message=''
+    updateResponse='';
 
-    @api openModal(level,oldresult,attempt) {
+    @api openModal(username,level,oldresult,attempt,type) {
+        this.showModal = true;
+        const diffLevel=level.toLowerCase();
         if(oldresult.toLowerCase().includes('pass'))
         {
             this.exppoints=0;
+            this.message='Challenge already completed successfully — XP reward unavailable for repeat clears.';
         }
         else{
-         const diffLevel=level.toLowerCase();
-         if(attempt.includes('1'))
-         {
-            this.multiplier=1.20;
-            message='First Attempt - +20% EXP Points';
-         }
-        switch (diffLevel)
-        {
-            case 'beginner': this.exppoints=75*this.multiplier; break;
-            case 'apprentice': this.exppoints=150*this.multiplier; break;
-            case 'skilled developer': this.exppoints=250*this.multiplier; break;
-            case 'expert architect': this.exppoints=500*this.multiplier; break;
-            case 'Legendary Salesforce Hero': this.exppoints=1000*this.multiplier; break;
-            default: this.exppoints=0;break;
+            if(attempt.includes('1'))
+                {
+                    this.multiplier=1.20;
+                    this.message='First Attempt - +20% EXP Points';
+                } 
+            if(type==='debug')
+            {
+                switch (diffLevel)
+                {
+                    case 'beginner': this.exppoints=(50*this.multiplier); break;
+                    case 'apprentice': this.exppoints=(100*this.multiplier); break;
+                    case 'skilled developer': this.exppoints=(200*this.multiplier); break;
+                    case 'expert architect': this.exppoints=(400*this.multiplier); break;
+                    case 'Legendary Salesforce Hero': this.exppoints=(800*this.multiplier); break;
+                    default: this.exppoints=0;break;
 
-        }
+                }
+            }
+            else if(type==='coding')
+            {
+                switch (diffLevel)
+                {
+                    case 'beginner': this.exppoints=Math.round(80*this.multiplier); break;
+                    case 'apprentice': this.exppoints=Math.round(160*this.multiplier); break;
+                    case 'skilled developer': this.exppoints=Math.round(320*this.multiplier); break;
+                    case 'expert architect': this.exppoints=Math.round(640*this.multiplier); break;
+                    case 'Legendary Salesforce Hero': Math.round(1280*this.multiplier); break;
+                    default: this.exppoints=0;break;
+
+                }
+
+            }
+
+            return this.exppoints;
+
+        //call method to update exp points in apex Arena User
     }
 
-        this.showModal = true;
+        
     }
 
     @api closeModal() {
