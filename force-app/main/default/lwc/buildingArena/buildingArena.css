@@ -312,6 +312,30 @@
     box-shadow: 0 0 15px rgba(69,29,163,0.35);
 }
 
+.showSampledata-btn
+{
+    background: linear-gradient(
+        135deg,
+        #451da3,
+        #37214c
+    );
+
+    color: white;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+
+    padding: 5px 10px;
+
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.showSampledata-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(69,29,163,0.35);
+}
+
 .loading-state {
     display: flex;
     flex-direction: column;

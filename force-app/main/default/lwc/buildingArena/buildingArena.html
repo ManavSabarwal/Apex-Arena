@@ -3,6 +3,8 @@
 
         <c-modal-component></c-modal-component>
 
+        <c-sampledata-modal-component></c-sampleData-modal-component>
+
         <!-- HEADER -->
         <div class="navbar">
 
@@ -88,24 +90,7 @@
                             <p class="symptoms-text">{requirements}</p>
                         </div>
 
-                        <div class="error-code-label">
-                                <p>Sample Data</p>
-                        </div>
-                        <div class="error-code-container">
-                            
-                            <pre class="error-code-text">
-                                {sampleData}
-                            </pre>
-                        </div>
-                        <div class="error-code-label">
-                                <p>Expected Output</p>
-                        </div>
-                        <div class="error-code-container">
-                            
-                            <pre class="error-code-text">
-                                {expectedOutput}
-                            </pre>
-                        </div>
+                        <button class="generateProblem-btn" onclick={showSampleData}>Sample Data and Expected Output</button>
                         
                         </template>
                     </template>

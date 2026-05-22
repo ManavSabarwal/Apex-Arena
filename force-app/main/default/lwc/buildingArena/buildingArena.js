@@ -51,6 +51,14 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         });
     }
 
+    showSampleData()
+    {
+        console.log('showSampleData clicked ');
+        this.template.querySelector('c-sampledata-modal-component').openModal(this.sampleData,this.expectedOutput);
+    }
+
+
+
     get resultClass()
     {
         if(this.result==='Pending')
