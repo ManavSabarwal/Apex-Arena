@@ -63,10 +63,11 @@ public with sharing class recordController {
     }
 
     @AuraEnabled
-    public static string createChallengeAttempt(String id, String result,String solution,string thegood,string thebad){
+    public static Map<String,String> createChallengeAttempt(String id, String result,String solution,string thegood,string thebad){
         try {
 
             List<Attempted_challenge__C> ac=[Select id, attempts__C,result__c from Attempted_challenge__C where id=:id];
+            Map<String,String> res=new Map<String,String>();
 
             Challenge_Attempt__C ca=new Challenge_Attempt__c();
                 ca.result__c=result;
@@ -77,8 +78,10 @@ public with sharing class recordController {
                 ca.Code_Review_Good__c=thegood;
                 ca.Code_Review_Bad__c=thebad;
 
+                res.put('oldresult',ac[0].result__C);
+                res.put('attempt',attempt.toString());
                 insert(ca);
-                return ac[0].result__C;
+                return res;
             }
              catch (Exception e) {
                     throw new AuraHandledException(e.getMessage());

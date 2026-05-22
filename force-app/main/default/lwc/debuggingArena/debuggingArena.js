@@ -212,12 +212,13 @@ export default class DebuggingArena extends LightningElement {
                     }
                 );
 
-                if(saveRes.length>0)
+                if(saveRes && Object.keys(saveRes).length > 0)
                 {
                     console.log(saveRes);
                     if(this.result.toLowerCase().includes('pass'))
                     {
-                        this.template.querySelector('c-modal-component').openModal(this.difficultyfromPrompt,saveRes);
+                        this.template.querySelector('c-modal-component').openModal(this.difficultyfromPrompt,saveRes.oldresult,saveRes.attempt);
+                        //write logic to update the exp points of the user based on the difficulty level and the result of the attempt.
                     }
 
                 }
