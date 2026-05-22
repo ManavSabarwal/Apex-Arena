@@ -3,7 +3,7 @@ public with sharing class recordController {
 
     }
 
-    public string getPreviousScenarios(String username)
+    public string getPreviousScenarios(String username,String type,String path)
     {
         try{
             string challenge='';
@@ -11,7 +11,7 @@ public with sharing class recordController {
             {
                 string lowerUsername=username.toLowerCase();
                 
-                List<Attempted_Challenge__c> prevChallenges=[SELECT Id FROM Attempted_Challenge__c WHERE Apex_Arena_User__r.Name =:lowerUsername];
+                List<Attempted_Challenge__c> prevChallenges=[SELECT Id FROM Attempted_Challenge__c WHERE Apex_Arena_User__r.Name =:lowerUsername and result__c!='pass' and Type__c=:type and Path__c=:path];
                 for(Attempted_Challenge__c ac:prevChallenges)
                 {
                     challenge =challenge+'\n\n'+ac.id;
@@ -35,7 +35,7 @@ public with sharing class recordController {
     }
 
     @AuraEnabled
-    public static String saveAttemptedChallenge(String problemTitle,String scenario,String errorcode,String symptoms,String type, String difficultylevel,string username,String path){
+    public static String saveAttemptedChallenge(String problemTitle,String scenario,String errorcode,String symptoms,String type, String difficultylevel,string username,String path,String sampledata,String expectedOutput,String constraints){
         try {
 
             List<Apex_Arena_User__C> aau=[Select id from Apex_Arena_User__C where name=:username];
@@ -51,6 +51,9 @@ public with sharing class recordController {
             ac.name=problemTitle +' - ' +username;
             ac.result__C='Pending';
             ac.path__c=path;
+            ac.sampledata__c=sampledata;
+            ac.expectedOutput__c=expectedOutput;
+            ac.constraints__c=constraints;
 
             insert(ac);
 

@@ -4,13 +4,13 @@ public with sharing class PromptTemplateController {
     }
 
         @AuraEnabled
-        public static String invokePrompt(String difficulty, String type,String UserName)
+        public static String invokePrompt(String difficulty, String type,String UserName,string path)
         {
             recordController rc=new recordController();
             String response='';
             try{
                 
-                String prev=rc.getPreviousScenarios(UserName);
+                String prev=rc.getPreviousScenarios(UserName,type,path);
                 ConnectApi.WrappedValue inputValueMapdifficulty = new ConnectApi.WrappedValue();
                 inputValueMapdifficulty.value = difficulty;
                 ConnectApi.WrappedValue inputValueMapType = new ConnectApi.WrappedValue();
@@ -18,20 +18,37 @@ public with sharing class PromptTemplateController {
 
                 ConnectApi.WrappedValue inputValueMapPrev = new ConnectApi.WrappedValue();
                 inputValueMapPrev.value = prev ;
-            
-                //Add Prompt input variables to a Map
-                Map<String, ConnectApi.WrappedValue> inputParams = new Map<String, ConnectApi.WrappedValue>();        
-                inputParams.put('Input:Difficulty_Level', inputValueMapdifficulty);
-                inputParams.put('Input:Type', inputValueMapType);
-                inputParams.put('Input:AttemptedChallenge_c', inputValueMapPrev);
 
-                response = PromptTemplateService.invokePrompt('Challenge_Generator', inputParams);
-                return response;
+                if(path=='debug')
+                {
+            
+                    //Add Prompt input variables to a Map
+                    Map<String, ConnectApi.WrappedValue> inputParams = new Map<String, ConnectApi.WrappedValue>();        
+                    inputParams.put('Input:Difficulty_Level', inputValueMapdifficulty);
+                    inputParams.put('Input:Type', inputValueMapType);
+                    inputParams.put('Input:AttemptedChallenge_c', inputValueMapPrev);
+
+                    response = PromptTemplateService.invokePrompt('Challenge_Generator', inputParams);
+                    return response;
+                }
+                else if(path=='build')
+                {
+
+                    //Add Prompt input variables to a Map
+                    Map<String, ConnectApi.WrappedValue> inputParams = new Map<String, ConnectApi.WrappedValue>();        
+                    inputParams.put('Input:Difficulty_Level', inputValueMapdifficulty);
+                    inputParams.put('Input:Type', inputValueMapType);
+                    inputParams.put('Input:AttemptedChallenge_c', inputValueMapPrev);
+
+                    response = PromptTemplateService.invokePrompt('Challenge_Generator_Coding', inputParams);
+                    return response;
+
+                }
 
             }catch (Exception e) {
                 throw new AuraHandledException(e.getMessage());
             }
-            
+            return response;
         }
 
         @AuraEnabled
@@ -54,4 +71,5 @@ public with sharing class PromptTemplateController {
                 throw new AuraHandledException(e.getMessage());
             }
         }
+
 }

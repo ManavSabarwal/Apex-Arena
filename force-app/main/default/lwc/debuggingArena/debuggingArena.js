@@ -4,9 +4,10 @@ import invokeValidationPrompt from '@salesforce/apex/PromptTemplateController.in
 import saveAttemptedChallenge from '@salesforce/apex/recordController.saveAttemptedChallenge';
 import createChallengeAttempt from '@salesforce/apex/recordController.createChallengeAttempt';
 import updateApexArenaUser from '@salesforce/apex/recordController.updateApexArenaUser';
+import { NavigationMixin } from 'lightning/navigation';
 
 
-export default class DebuggingArena extends LightningElement {
+export default class DebuggingArena extends NavigationMixin(LightningElement) {
 
     loginName='';
     problem;
@@ -34,6 +35,18 @@ export default class DebuggingArena extends LightningElement {
     {
         this.loginName=window.sessionStorage.getItem('loginName');
         console.log(this.loginName);
+    }
+
+    choosePath()
+    {
+        window.sessionStorage.setItem('isLoggedIn',true);
+        window.sessionStorage.setItem('loginName',this.loginName);
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/choosepath'
+            }
+        });
     }
 
     get resultClass()
@@ -71,7 +84,14 @@ export default class DebuggingArena extends LightningElement {
         try{
         this.isLoading = true;
         console.log('Generating problem...');
-        response = await invokePrompt({ difficulty: this.difficulty, type: this.type });
+        response = await invokePrompt(
+            { 
+                difficulty: this.difficulty, 
+                type: this.type, 
+                UserName: this.loginName,
+                path:'debug'
+            });
+
         this.dataLoaded=true;
         this.problem=response;
         parsedData = JSON.parse(response);
@@ -98,7 +118,10 @@ export default class DebuggingArena extends LightningElement {
                     type:this.type,
                     difficultylevel:this.difficulty,
                     username:this.loginName,
-                    path:'Debugging'
+                    path:'Debugging',
+                    sampledata:'',
+                    expectedOutput:'',
+                    constraints:''
                 })
                 console.log('Challenge Saved');
                 console.log(this.savedId);
@@ -213,7 +236,7 @@ export default class DebuggingArena extends LightningElement {
                 if(saveRes && Object.keys(saveRes).length > 0)
                 {
                     console.log(saveRes);
-                    
+
                     if(this.result.toLowerCase().includes('pass'))
                     {
                        let exppoints= this.template.querySelector('c-modal-component').openModal(this.loginName,this.difficultyfromPrompt,saveRes.oldresult,saveRes.attempt,'debug');

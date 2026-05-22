@@ -39,9 +39,14 @@ export default class HomePage extends NavigationMixin(LightningElement) {
 
     startBuilding(event){
         console.log('Navigating to Building Arena...');
-        this.buildingArena = true;
-        this.debuggingArena = false;
-        this.homepage = false;
+        window.sessionStorage.setItem('isLoggedIn',true);
+        window.sessionStorage.setItem('loginName',this.loginName);
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/buildinarena'
+            }
+        });
         
     }
 }
