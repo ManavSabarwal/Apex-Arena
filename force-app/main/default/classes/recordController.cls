@@ -87,4 +87,19 @@ public with sharing class recordController {
                     throw new AuraHandledException(e.getMessage());
             }
     }
+
+    @AuraEnabled
+    public static string updateApexArenaUser(String userName,Integer expPoints){
+        try {
+
+                List<Apex_Arena_User__C> aac=[Select id,name,Experience_Points__c from Apex_Arena_User__C where name=: username limit 1];
+                Apex_Arena_User__C a=aac[0];
+                a.Experience_Points__c=a.Experience_Points__c+expPoints;
+                update a;
+                return 'Exp Point Updated ';
+
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
 }
