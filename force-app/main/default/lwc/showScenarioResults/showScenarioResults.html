@@ -1,0 +1,77 @@
+<template>
+
+<template if:true={showModal}>
+
+    <section class="modal-overlay">
+
+        <div class="modal-container">
+
+            <!-- HEADER -->
+            <div class="modal-header">
+                <div class="title">Scenario Validation Results</div>
+                <button class="close-btn" onclick={closeModal}>✕</button>
+            </div>
+
+            <!-- GRID -->
+            <div class="modal-grid">
+
+                <template for:each={resultsWithStyle} for:item="sc">
+
+                    <div key={sc.scenarioName} class="scenario-row">
+
+                        <div class="card-title">
+                                {sc.scenarioName}
+                        </div>
+
+                        <!-- LEFT -->
+                        <div class="card left-card">
+
+                            
+
+                            <div class="section">
+                                <div class="label">Sample Input</div>
+                                <div class="box">{sc.sampleInput}</div>
+                            </div>
+
+                            <div class="section">
+                                <div class="label">Expected Output</div>
+                                <div class="box">{sc.expectedOutput}</div>
+                            </div>
+
+                        </div>
+
+                        <!-- RIGHT -->
+                        <div class="card right-card">
+
+                            <div class="section">
+                                <div class="label">Actual Output</div>
+                                <div class="box">{sc.actualOutput}</div>
+                            </div>
+
+                            <div class="status-row">
+                                <span class="status-label">Status</span>
+                                <span class={sc.statusClass}>
+                                    {sc.status}
+                                </span>
+                            </div>
+
+                            <div class="section">
+                                <div class="label">Failure Reason</div>
+                                <div class="box error-box">
+                                    {sc.failureReason}
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </template>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</template>

@@ -1,13 +1,13 @@
 import { LightningElement } from 'lwc';
 import invokePrompt from '@salesforce/apex/PromptTemplateController.invokePrompt';
-import invokeValidationPrompt from '@salesforce/apex/PromptTemplateController.invokeValidationPrompt';
+import invokeValidationPromptCoding from '@salesforce/apex/PromptTemplateController.invokeValidationPromptCoding';
 import saveAttemptedChallenge from '@salesforce/apex/recordController.saveAttemptedChallenge';
 import createChallengeAttempt from '@salesforce/apex/recordController.createChallengeAttempt';
 import updateApexArenaUser from '@salesforce/apex/recordController.updateApexArenaUser';
 import { NavigationMixin } from 'lightning/navigation';
 
 
-export default class DebuggingArena extends NavigationMixin(LightningElement) {
+export default class buildingArena extends NavigationMixin(LightningElement) {
 
     loginName='';
     problem;
@@ -24,10 +24,14 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
     dataLoaded=false;
     difficultyfromPrompt='';
     result='Pending';
-    reason='No Reasoning Yet';
+    
     thegood='Submit your code for review...';
     thebad='Submit your code for review...';
-    optimizedCode='Submit your code for review...';
+
+    scenarioResults='';
+    recommendations='';
+    compilationStatus='';
+
     submitting=false;
     isReadonly=true;
     savedId='';
@@ -55,6 +59,12 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
     {
         console.log('showSampleData clicked ');
         this.template.querySelector('c-sampledata-modal-component').openModal(this.sampleData,this.expectedOutput);
+    }
+
+    showResults()
+    {
+        console.log('showResults clicked ');
+        this.template.querySelector('c-show-scenario-results').openModal(this.scenarioResults);
     }
 
 
@@ -85,11 +95,11 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
 
         //reseting the results we get after submitting the solution
         this.result='Pending';
-        this.reason='No Reasoning Yet';
         this.thebad='Submit your code for review...';
         this.thegood='Submit your code for review...';
-        this.optimizedCode='Submit your code for review...';
-
+        this.scenarioResults='';
+        this.recommendations='';
+        this.compilationStatus='';
 
         try{
         this.isLoading = true;
@@ -112,6 +122,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         this.constraints=parsedData.TechnicalConstraints;
         this.expectedOutput=parsedData.ExpectedOutput;
         this.sampleData=parsedData.SampleData;
+        
 
 
         } catch(error){
@@ -142,7 +153,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             }
             catch(error)
             {
-                console.error('Error generating problem:', error);
+                console.error('Error Saving Attempted Challenge:', error);
             }
 
             
@@ -218,20 +229,26 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         try{
             console.log('Submitting solution...');
             this.submitting=true;
-            const response = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode});
+            this.isReadonly=true;
+            const response = await invokeValidationPromptCoding({ scenario: this.scenario, solution: this.textAreacode,sampleData:this.sampleData,expectedOutput:this.expectedOutput,requirements:this.requirements});
             console.log('Submission Response:', response);
-            const parsedResponse = JSON.parse(response);
-            this.result=parsedResponse.Result;
-            this.reason=parsedResponse.Reasoning;
-            this.thebad=parsedResponse.CodeReviewBad;
-            this.thegood=parsedResponse.CodeReviewGood;
-            this.optimizedCode=parsedResponse.ArchitectOptimization;
+            this.result=response.overallVerdict;
+            this.compilationStatus=response.compilationStatus;
+            this.thebad =response.badCodeReview;
+            this.thegood =response.goodCodeReview;
+            this.recommendations =response.recommendedImprovements;
+            this.scenarioResults =response.scenarioResults;
+            console.log(this.scenarioResults);
+
+
+            
 
         }catch(error){
             console.error('Error submitting solution:', error);
         }
         finally{
             this.submitting=false;
+            this.isReadonly=false;
 
             try{
 
@@ -240,8 +257,8 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                         id:this.savedId,
                         result:this.result,
                         solution:this.textAreacode ,
-                        thegood:this.thegood,
-                        thebad:this.thebad
+                        thegood:this.thegood.join(',/n'),
+                        thebad:this.thebad.join(',/n')
 
                     }
                 );
@@ -268,7 +285,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                 else
                 {
                     console.log(saveRes);
-                    console.log('Error in creating attempt. Check logs');
+                    console.log('Error in updating EXP Points. Check logs');
                 }
 
             }

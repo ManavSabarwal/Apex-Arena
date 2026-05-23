@@ -74,7 +74,9 @@ public with sharing class recordController {
 
             Challenge_Attempt__C ca=new Challenge_Attempt__c();
                 ca.result__c=result;
+                system.debug(result);
                 ca.Attempted_Challenge__c=(ID)id;
+                system.debug('ID Parameter-------------'+id);
                 Integer attempt=(Integer)ac[0].attempts__c+1;
                 ca.name='Attempt '+attempt;
                 ca.Solution_Provided__c=solution;

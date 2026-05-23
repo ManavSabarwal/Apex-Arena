@@ -572,18 +572,18 @@ padding: 10px;
     color: #ef4444;
 }
 
-.reason-panel{
+.compile-panel{
     padding: 10px;
     margin-top: 10px;
 }
 
-.reason-label{
+.compile-label{
     font-size: 16px;
     font-weight: 700;
     margin-bottom: 10px;
     
 }
-.reason-text{
+.compile-text{
     font-size: 11px;
     background-color: #020617;
     color: #d6d6e9;

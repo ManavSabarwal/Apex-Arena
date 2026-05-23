@@ -205,6 +205,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         try{
             console.log('Submitting solution...');
             this.submitting=true;
+            this.isReadonly=true;
             const response = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode});
             console.log('Submission Response:', response);
             const parsedResponse = JSON.parse(response);
@@ -219,6 +220,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         }
         finally{
             this.submitting=false;
+            this.isReadonly=false;
 
             try{
 

@@ -5,6 +5,8 @@
 
         <c-sampledata-modal-component></c-sampleData-modal-component>
 
+        <c-show-scenario-results></c-show-scenario-results>
+
         <!-- HEADER -->
         <div class="navbar">
 
@@ -134,17 +136,19 @@
                     <span class={resultClass}>{result}</span>
                 </div>
 
-                <div class="glass-card reason-panel">
-                    <p class="reason-label">Reasoning</p>
-                    <p class="reason-text">{reason}</p>
+                <button class="primary-btn" onclick={showResults} disabled={isReadonly}>Show Scenario Results</button>
+
+                <div class="glass-card compile-panel">
+                    <p class="compile-label">Compilation Status</p>
+                    <p class="compile-text">{compilationStatus}</p>
                 </div> 
 
                 <div class="glass-card codeReview-panel">
-                    <p class="reason-label">Code Review</p>
+                    <p class="compile-label">Code Review</p>
                     <p class="codereview-label">The Good</p>
-                    <p class="reason-text thegood">{thegood}</p>
+                    <p class="compile-text thegood">{thegood}</p>
                     <p class="codereview-label">The Bad</p>
-                    <p class="reason-text thebad ">{thebad}</p>
+                    <p class="compile-text thebad ">{thebad}</p>
                 </div> 
                 </template>
             </section>
