@@ -17,12 +17,12 @@
 
                 <template for:each={resultsWithStyle} for:item="sc">
 
-                    <div key={sc.scenarioName} class="scenario-row">
+                    <div key={sc.scenarioName} >
 
                         <div class="card-title">
                                 {sc.scenarioName}
                         </div>
-
+                        <div class="scenario-row">
                         <!-- LEFT -->
                         <div class="card left-card">
 
@@ -62,6 +62,7 @@
                                 </div>
                             </div>
 
+                        </div>
                         </div>
 
                     </div>
