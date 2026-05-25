@@ -8,21 +8,46 @@ export default class HomePage extends NavigationMixin(LightningElement) {
     buildingArena=false;
     homepage=true;
     isLoggedIn=false;
+    handleBackButton ='';
 
     connectedCallback()
     {
         this.loginName=window.sessionStorage.getItem('loginName');
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        if(this.loginName ==null || this.isLoggedIn ==null ||this.isLoggedIn ==false)
+        {
+            this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/'
+            }
+        });
+        }
+        this.handleBackButton = this.disableBack.bind(this);
+
+        history.pushState(null, null, location.href);
+
+        window.addEventListener('popstate', this.handleBackButton);
     }
 
+    disconnectedCallback() {
+        window.removeEventListener('popstate', this.handleBackButton);
+    }
 
-    logoutMethod(event)
+    disableBack() {
+        history.pushState(null, null, location.href);
+    }
+
+    openProfile()
     {
-        console.log('Logging out...');
-        window.sessionStorage.removeItem('loginName');
-        window.sessionStorage.setItem('isLoggedIn',false);
-        this.loginName='';
-        this.isLoggedIn=false;
+        window.sessionStorage.setItem('isLoggedIn',true);
+        window.sessionStorage.setItem('loginName',this.loginName);
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/userProfile'
+            }
+        });
     }
 
     startDebugging(event){
@@ -49,4 +74,5 @@ export default class HomePage extends NavigationMixin(LightningElement) {
         });
         
     }
+
 }

@@ -107,4 +107,23 @@ public with sharing class recordController {
             throw new AuraHandledException(e.getMessage());
         }
     }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Attempted_Challenge__c> getAttemptedChallenges(String username,String recordLimit){
+        try {
+
+            string queryText='SELECT Id, Name, Result__c, DifficultyLevel__c, Type__c, Path__c ' +
+                                'FROM Attempted_Challenge__c ' +
+                                'WHERE Apex_Arena_User__r.Name = \'' + username + '\' ' +
+                                'ORDER BY LastModifiedDate DESC ' +
+                                'LIMIT ' + recordLimit;
+
+            List<Attempted_Challenge__c> ac=Database.query(queryText);
+
+            return ac;
+            
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
 }

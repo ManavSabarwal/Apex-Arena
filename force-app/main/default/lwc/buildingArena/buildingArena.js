@@ -37,10 +37,34 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     savedId='';
     passed=false;
 
+    isLoggedIn=false;
+
     connectedCallback()
     {
         this.loginName=window.sessionStorage.getItem('loginName');
         console.log(this.loginName);
+        this.isLoggedIn=window.sessionStorage.getItem('isLoggedIn');
+        if(this.loginName ==null || this.isLoggedIn ==null ||this.isLoggedIn ==false)
+        {
+            this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/'
+            }
+        });
+        }
+    }
+
+    openProfile()
+    {
+        window.sessionStorage.setItem('isLoggedIn',true);
+        window.sessionStorage.setItem('loginName',this.loginName);
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/userProfile'
+            }
+        });
     }
 
     choosePath()

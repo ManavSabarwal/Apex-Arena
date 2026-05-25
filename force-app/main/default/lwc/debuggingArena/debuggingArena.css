@@ -97,7 +97,6 @@
     gap: 18px;
 }
 
-.timer-box,
 .user-box {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.08);
@@ -113,10 +112,6 @@
     cursor: pointer;
 }
 
-.timer-box {
-    color: #ff8d7a;
-    font-size: 14px;
-}
 
 .user-box {
     gap: 10px;

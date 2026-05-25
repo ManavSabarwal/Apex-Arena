@@ -17,6 +17,22 @@ export default class Index extends NavigationMixin(LightningElement) {
     errorMessage='';
     loginError=false;
 
+    connectedCallback()
+    {
+        this.loginName=window.sessionStorage.getItem('loginName');
+        this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        if(this.loginName !=null || this.isLoggedIn !=null ||this.isLoggedIn ==false)
+        {
+            this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/choosepath'
+            }
+        });
+
+    }
+}
+
     
     handleUsernameChange(event)
     {
@@ -60,7 +76,7 @@ export default class Index extends NavigationMixin(LightningElement) {
                 },3000);
     }
 
-    async login(event)
+    async login()
     {
 
         if(this.username=='' || this.password=='')
@@ -110,7 +126,7 @@ export default class Index extends NavigationMixin(LightningElement) {
     }
     }
 
-    async signUp(event)
+    async signUp()
     {
         try{
             this.isLoading = true;

@@ -1,0 +1,146 @@
+<template>
+
+    <div class="app-container">
+
+        <!-- HEADER -->
+        <div class="navbar">
+
+                <div class="logo-section">
+                    <div class="logo-icon">AA</div>
+                    <div class="logo-text">Apex Arena</div>
+                </div>
+
+                <div class="nav-links">
+                    <a class="active-link">Homepage</a>
+                    <a>Contact</a>
+                </div>
+
+                <div class="nav-right">
+
+                    <div class="user-box" >
+                        <span onclick={choosePath}>Choose Path</span>
+                    </div>
+
+                    <div class="logout-btn" onclick={logout}>
+                        <span>⎋ Logout</span>
+                    </div>
+                </div>
+
+            </div>
+
+        <!-- MAIN CONTENT -->
+
+        <div class="main-container">
+
+            <div class="hero">
+                <div class="hero-left-container">
+                    <div class="hero-left">
+                        <div class="avatar"></div>
+                        <div class="user-data">
+                            <span class="login-name">{loginName}</span>
+                            <span class="user-level">{userLevel}</span>
+                            <span class="user-about">{userAbout}</span>
+                            <span class="user-join">📅 {joinDate}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-right">
+
+                    <button class="edit-btn">
+                        <lightning-icon icon-name="utility:edit" size="x-small"></lightning-icon> Edit Profile
+                    </button>
+
+                    <div class="exp-container">
+                        <span class="exp-label"> Exp Points</span>
+                        <span class="exp-value">{expPoints} XP</span>
+                    </div>
+                
+                </div>
+                
+
+            </div>
+
+            <div class="problem-details">
+                <div class="detail-container">
+                        <div class="label-container">
+
+                            <div class="tick">
+                                ✓
+                            </div>
+                            <div class="label">
+                                <span class="detail-label">Problems Solved</span>
+                                <span class="detail-value solved">{solved}</span>
+                            </div>
+
+
+                        </div>
+                        <div class="div-values">
+                            <span class="easy">Easy <span class="value-count">{easy}</span></span>
+                            <span class="medium">Medium <span class="value-count">{medium}</span></span>
+                            <span class="hard">Hard <span class="value-count">{hard}</span></span>
+                        </div>
+
+                </div>
+                <div class="detail-container">
+                        <div class="label-container">
+                            <div class="submission-icon">
+                                📝
+                            </div>
+                            <div class="label">
+                                <span class="detail-label"> Submissions</span>
+                                <span class="detail-value submissions">{submissions}</span>
+                            </div>
+
+                        </div>
+                        <div class="div-values">
+                            <span class="easy">Accepted <span class="value-count">{solved}</span></span>
+                            <span class="hard">Wrong <span class="value-count">{wrong}</span></span>
+                        </div>
+
+                </div>
+
+                <div class="detail-container">
+                        <div class="label-container">
+                            <div class="accepted-icon">
+                                🏆
+                            </div>
+                            <div class="label">
+                                <span class="detail-label">Acceptance Rate</span>
+                                <span class="detail-value accepted">{acceptanceRate}</span>
+                            </div>
+                        </div>
+
+                </div>
+
+            </div>
+
+            <div class="recent-problems">
+                <div class="recent-title">
+                    <span class="recent-title-label">Recent Activity</span>
+                    <span class="activity-link">View All</span>
+                </div>
+
+                <div class="recent-problem-details-container">
+                    <template for:each={recent4problems} for:item="recentProblem">
+                        <div key={recentProblem.Id} class="recent-problem-cont">
+                            <div class="recent-problem-details">
+                                <span class="detail-label">{recentProblem.Name}</span>
+                                <div class="capsules">
+                                    <span class={recentProblem.Result__c}>{recentProblem.Result__c}</span>
+                                    <span class="path-details">{recentProblem.Path__c}</span>
+                                </div>
+                            </div>
+                            <div class="activity-time">
+                                <span>{recentProblem.timeAgo} ></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+            </div>
+        </div>
+        
+    </div>
+    
+</template>
