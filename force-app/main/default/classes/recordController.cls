@@ -112,7 +112,7 @@ public with sharing class recordController {
     public static List<Attempted_Challenge__c> getAttemptedChallenges(String username,String recordLimit){
         try {
 
-            string queryText='SELECT Id, Name, Result__c, DifficultyLevel__c, Type__c, Path__c ' +
+            string queryText='SELECT Id, Name, Result__c, DifficultyLevel__c, Type__c, Path__c,LastModifiedDate ' +
                                 'FROM Attempted_Challenge__c ' +
                                 'WHERE Apex_Arena_User__r.Name = \'' + username + '\' ' +
                                 'ORDER BY LastModifiedDate DESC ' +
@@ -122,6 +122,20 @@ public with sharing class recordController {
 
             return ac;
             
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static List<Challenge_Attempt__C> getUserandChalengeDetails(String username){
+        try {
+
+            string queryText='select id,Result__c,Attempted_Challenge__r.DifficultyLevel__c, Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Experience_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = \'' + username + '\' ' ;
+            List<Challenge_Attempt__C> ca=Database.query(queryText);
+
+            return ca;
+
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }

@@ -193,11 +193,57 @@
 }
 .edit-btn{
 
+    position: relative;
+    overflow: hidden;
+
     color: rgb(104, 50, 197);
+
     padding: 10px 15px;
+
     border-radius: 12px;
+
     border: 1px solid rgb(104, 50, 197);
-    background-color: rgb(0, 0, 0, 0);
+
+    background: transparent;
+
+    cursor: pointer;
+
+    transition:
+        color 0.35s ease,
+        transform 0.25s ease;
+
+    z-index: 1;
+}
+
+.edit-btn::before{
+
+    content: '';
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 0%;
+    height: 100%;
+
+    background: rgb(104, 50, 197);
+
+    transition: width 0.35s ease;
+
+    z-index: -1;
+}
+
+.edit-btn:hover::before{
+
+    width: 100%;
+}
+
+.edit-btn:hover{
+
+    color: white;
+
+    transform: translateY(-2px);
 }
 
 .exp-container{
@@ -313,7 +359,7 @@
 }
 .recent-title{
     display: flex;
-    padding: 5px 0px;
+    padding: 10px 0px;
     border-bottom: 1px solid rgba(196, 196, 196, 0.14);
 }
 .recent-title-label{
@@ -341,6 +387,7 @@
 .capsules{
     display:flex;
     gap:10px;
+    padding:5px 0px;
 }
 .Pending{
     border: 1px solid rgb(235, 179, 65);
@@ -380,5 +427,7 @@
     right: 20px;
     position: absolute;
     padding-top: 20px;
+    font-size: 15px;
+    color:#9f9f9f;
 }
 

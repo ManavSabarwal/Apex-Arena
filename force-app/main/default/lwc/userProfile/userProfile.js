@@ -1,6 +1,7 @@
-import { LightningElement,wire } from 'lwc';
+import { LightningElement, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
-import getAttemptedChallenges from '@salesforce/apex/recordController.getAttemptedChallenges'
+import getAttemptedChallenges from '@salesforce/apex/recordController.getAttemptedChallenges';
+import getUserandChalengeDetails from '@salesforce/apex/recordController.getUserandChalengeDetails';
 
 export default class UserProfile extends NavigationMixin(LightningElement) {
     loginName='';
@@ -10,14 +11,13 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     userAbout='Code. Compete. Conquer. Forge your legacy in the Apex Arena.';
     joinDate='May 25, 2026';
     expPoints='899';
-    submissions=324;
-    winRate=67;
-    solved=124;
-    easy=76;
-    medium=35;
-    hard=13;
-    wrong=this.submissions-this.solved;
-    acceptanceRate=(this.solved/this.submissions)*100;
+    submissions=0;
+    solved=0;
+    easy=0;
+    medium=0;
+    hard=0;
+    wrong=0;
+    acceptanceRate=0;
     recent4problems=[];
 
 
@@ -35,6 +35,65 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 }
             });
             }
+            else{
+                getUserandChalengeDetails({
+                                username: this.loginName
+                        })
+
+                .then(result => {
+
+                        console.log(result);
+                        this.bifData(result);
+                })
+
+                .catch(error => {
+
+                        console.log(error);
+                });
+            }
+            
+        }
+
+        bifData(result)
+        {
+            console.log('In Function');
+            try{
+            this.submissions = result.length;
+                        for(let res of result)
+                        {
+                            if(res.Result__c=='Pass')
+                            {
+                                this.solved++;
+                            }
+                            if(res.Attempted_Challenge__r.DifficultyLevel__c=='Easy')
+                            {
+                                this.easy++;
+                            }
+                            else if(res.Attempted_Challenge__r.DifficultyLevel__c=='Medium')
+                            {
+                                this.medium++;
+                            }
+                            else if(res.Attempted_Challenge__r.DifficultyLevel__c=='Hard')
+                            {
+                                this.hard++;
+                            }
+                            
+                        }
+                        this.wrong=this.submissions-this.solved;
+                        this.acceptanceRate=((this.solved/this.submissions)*100).toFixed(2);
+                        this.expPoints=result[0].Attempted_Challenge__r.Apex_Arena_User__r.Experience_Points__c;
+                        this.joinDate= new Date(result[0].Attempted_Challenge__r.Apex_Arena_User__r.CreatedDate)
+                                        .toLocaleDateString('en-US', {
+                                                    month: 'long',
+                                                    day: '2-digit',
+                                                    year: 'numeric'
+                                        });
+                        this.userLevel=result[0].Attempted_Challenge__r.Apex_Arena_User__r.Level__c;
+                    }
+                    catch(error)
+                    {
+                        console.log(error);
+                    }
         }
 
         @wire (getAttemptedChallenges,
@@ -95,6 +154,16 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                     console.log(error);
                 }
         }
-
+        logoutFunc()
+        {
+            window.sessionStorage.removeItem('loginName');
+            window.sessionStorage.removeItem('isLoggedIn');
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/'
+                }
+            });
+        }
 
 }
