@@ -1,0 +1,313 @@
+/* CONTACT PAGE */
+
+.contact-page{
+
+    min-height: 100vh;
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 80px 40px;
+
+    background:
+        radial-gradient(circle at top left,
+        #1e3a8a, transparent 30%),
+
+        radial-gradient(circle at bottom right,
+        #0f172a, transparent 35%),
+
+        linear-gradient(
+            135deg,
+            #020617,
+            #0f172a,
+            #1e293b
+        );
+
+    color: white;
+
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Background Orbs */
+
+.bg-orb{
+
+    position: absolute;
+
+    border-radius: 50%;
+
+    filter: blur(90px);
+
+    opacity: 0.25;
+
+    pointer-events: none;
+}
+
+.orb-1{
+
+    width: 300px;
+    height: 300px;
+
+    background: #8b5cf6;
+
+    top: -100px;
+    left: -100px;
+}
+
+.orb-2{
+
+    width: 280px;
+    height: 280px;
+
+    background: #2563eb;
+
+    bottom: -100px;
+    right: -100px;
+}
+
+/* Header */
+
+.contact-header{
+
+    text-align: center;
+
+    margin-bottom: 60px;
+
+    position: relative;
+    z-index: 2;
+}
+
+.contact-header h1{
+
+    font-size: 52px;
+
+    font-weight: 700;
+
+    margin-bottom: 15px;
+}
+
+.contact-header p{
+
+    font-size: 18px;
+
+    color: rgba(255,255,255,0.7);
+
+    max-width: 700px;
+
+    margin: auto;
+
+    line-height: 1.8;
+}
+
+/* Main Card */
+
+.contact-card{
+
+    max-width: 1200px;
+
+    margin: auto;
+
+    display: flex;
+
+    gap: 40px;
+
+    padding: 45px;
+
+    border-radius: 32px;
+
+    background: rgba(255,255,255,0.05);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(20px);
+
+    box-shadow:
+        0 0 35px rgba(139,92,246,0.12);
+
+    position: relative;
+    z-index: 2;
+}
+
+/* Left Info */
+
+.contact-info{
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 30px;
+}
+
+.info-item{
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 20px;
+
+    border-radius: 20px;
+
+    background: rgba(255,255,255,0.03);
+
+    transition: 0.3s ease;
+}
+
+.info-item:hover{
+
+    transform: translateY(-4px);
+
+    background: rgba(139,92,246,0.12);
+}
+
+.icon{
+
+    font-size: 28px;
+}
+
+.info-item h3{
+
+    margin: 0;
+
+    font-size: 20px;
+}
+
+.info-item p{
+
+    margin: 5px 0 0;
+
+    color: rgba(255,255,255,0.7);
+}
+
+/* Form */
+
+.contact-form{
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 22px;
+}
+
+.contact-form input,
+.contact-form textarea{
+
+    width: 100%;
+
+    padding: 18px 20px;
+
+    border-radius: 16px;
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    background: rgba(255,255,255,0.04);
+
+    color: white;
+
+    outline: none;
+
+    font-size: 16px;
+
+    transition: 0.3s ease;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus{
+
+    border-color: #8b5cf6;
+
+    box-shadow:
+        0 0 15px rgba(139,92,246,0.25);
+}
+
+.contact-form textarea{
+
+    resize: none;
+}
+
+/* Button */
+
+.send-btn{
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 16px;
+
+    border: none;
+
+    border-radius: 16px;
+
+    background: transparent;
+
+    color: #8b5cf6;
+
+    border: 1px solid #8b5cf6;
+
+    font-size: 17px;
+
+    cursor: pointer;
+
+    transition: 0.3s ease;
+
+    z-index: 1;
+}
+
+.send-btn::before{
+
+    content: '';
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 0%;
+
+    height: 100%;
+
+    background: #8b5cf6;
+
+    transition: width 0.35s ease;
+
+    z-index: -1;
+}
+
+.send-btn:hover::before{
+
+    width: 100%;
+}
+
+.send-btn:hover{
+
+    color: white;
+
+    transform: translateY(-3px);
+}
+
+/* Responsive */
+
+@media(max-width: 950px){
+
+    .contact-card{
+
+        flex-direction: column;
+    }
+
+    .contact-header h1{
+
+        font-size: 40px;
+    }
+}

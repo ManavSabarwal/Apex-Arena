@@ -19,7 +19,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     wrong=0;
     acceptanceRate=0;
     recent4problems=[];
-
+    showProfile=false;
 
     connectedCallback()
         {
@@ -64,19 +64,20 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                             if(res.Result__c=='Pass')
                             {
                                 this.solved++;
+                                if(res.Attempted_Challenge__r.DifficultyLevel__c=='Easy' )
+                                {
+                                    this.easy++;
+                                }
+                                else if(res.Attempted_Challenge__r.DifficultyLevel__c=='Medium')
+                                {
+                                    this.medium++;
+                                }
+                                else if(res.Attempted_Challenge__r.DifficultyLevel__c=='Hard')
+                                {
+                                    this.hard++;
+                                }
                             }
-                            if(res.Attempted_Challenge__r.DifficultyLevel__c=='Easy')
-                            {
-                                this.easy++;
-                            }
-                            else if(res.Attempted_Challenge__r.DifficultyLevel__c=='Medium')
-                            {
-                                this.medium++;
-                            }
-                            else if(res.Attempted_Challenge__r.DifficultyLevel__c=='Hard')
-                            {
-                                this.hard++;
-                            }
+                            
                             
                         }
                         this.wrong=this.submissions-this.solved;
@@ -153,6 +154,18 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
                     console.log(error);
                 }
+        }
+
+        choosePath(){
+            window.sessionStorage.setItem('isLoggedIn',true);
+            window.sessionStorage.setItem('loginName',this.loginName);
+            this[NavigationMixin.Navigate]({
+                            type: 'standard__webPage',
+                            attributes: {
+                                        url: '/choosepath'
+                                        }
+                        });
+
         }
         logoutFunc()
         {

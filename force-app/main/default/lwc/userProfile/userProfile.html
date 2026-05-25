@@ -28,6 +28,8 @@
 
             </div>
 
+        <template if:true={showProfile}>
+
         <!-- MAIN CONTENT -->
 
         <div class="main-container">
@@ -123,7 +125,7 @@
 
                 <div class="recent-problem-details-container">
                     <template for:each={recent4problems} for:item="recentProblem">
-                        <div key={recentProblem.Id} class="recent-problem-cont">
+                        <div key={recentProblem.Id} class="recent-problem-cont" >
                             <div class="recent-problem-details">
                                 <span class="detail-label">{recentProblem.Name}</span>
                                 <div class="capsules">
@@ -140,7 +142,45 @@
 
             </div>
         </div>
+        </template>
+        <!--Problem List-->
+        <template if:false={showProfile}>
+
+            <div class="main-container-List">
+
+                <div class="back-btn"> ← Back to Profile</div>
+                <div class="Header-cont">
+                    <div class="outer-exclamation">
+                        <span class="inner-exclamation">!</span>
+                    </div>
+                    <div style="display:grid;">
+                        <span class="header">All Challenges</span>
+                        <p class="exp-label">A history of all the challenges you have solved</p>
+                    </div>
+                    <div class="subm-solv-class">
+                    <div class="exp-container">
+                        <span class="exp-label">Submissions</span>
+                        <span class="exp-value">{submissions}</span>
+                    </div>
+                    <div class="exp-container">
+                        <span class="exp-label">Problems Solved</span>
+                        <span class="detail-value solved">{solved}</span>
+                    </div>
+                    </div>
+                </div>
+                <div class="utilities-container">
+
+                     <input type="text" placeholder="🔍 Search by problem name or path" class="search-input"/>
+
+
+                </div>
+
+            </div>
+
+
+        </template>
         
     </div>
+    
     
 </template>
