@@ -2,66 +2,12 @@ import { LightningElement, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import getAttemptedChallenges from '@salesforce/apex/recordController.getAttemptedChallenges';
 import getUserandChalengeDetails from '@salesforce/apex/recordController.getUserandChalengeDetails';
+import getSolvedChallenges from '@salesforce/apex/recordController.getSolvedChallenges';
 
-
-const COLUMNS = [
-
-    {
-        label: 'CHALLENGE',
-        fieldName: 'Name',
-        type: 'text',
-        cellAttributes: {
-            class: 'challenge-column'
-        }
-    },
-
-    {
-        label: 'PATH',
-        fieldName: 'Path__c',
-        type: 'text',
-        cellAttributes: {
-            class: 'category-column'
-        }
-    },
-
-    {
-        label: 'CATEGORY',
-        fieldName: 'Type__c',
-        type: 'text',
-        cellAttributes: {
-            class: 'category-column'
-        }
-    },
-
-    {
-        label: 'DIFFICULTY',
-        fieldName: 'DifficultyLevel__c',
-        type: 'text',
-    },
-
-
-    {
-        label: 'SOLVED ON',
-        fieldName: 'LastModifiedDate',
-        type: 'text'
-    },
-
-
-    {
-        type: 'button',
-        fixedWidth: 180,
-        typeAttributes: {
-            label: 'View Details',
-            name: 'view',
-            variant: 'base'
-        }
-    }
-
-];
 
 export default class UserProfile extends NavigationMixin(LightningElement) {
     loginName='';
-    limitSize='4';
+    limitSize='3';
     isLoggedIn=false;
     userLevel='Beginner';
     userAbout='Code. Compete. Conquer. Forge your legacy in the Apex Arena.';
@@ -75,8 +21,13 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     wrong=0;
     acceptanceRate=0;
     recent4problems=[];
-    tableData=[];
-    columns = COLUMNS;
+    challengeData=[];
+    pageSize = 6;
+    currentPage = 1;
+
+    totalPages = 0;
+    totalRecords = 0;
+
     showProfile=true;
     selectedCategory='All Categories';
     selectedDifficulty='All Difficulties';
@@ -275,19 +226,106 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         {
             this.showProfile=false;
             console.log('In View All Problems');
-            let result= await getAttemptedChallenges({
+            let result= await getSolvedChallenges({
                 username:this.loginName,
-                recordLimit:0
+                pageSize:this.pageSize,
+                pageNumber:this.currentPage
             });
             console.log(result);
-            this.tableData=result;
+            this.challengeData=result.records;
+            this.challengeData=this.challengeData.map(item => ({
+                                ...item,
+                                Result__c: item.Result__c?.toUpperCase()
+                            }));
+            this.challengeData = this.challengeData.map(item => ({
+
+                                ...item,
+
+                                statusIcon:
+                                item.Result__c === 'PASS'
+                                ? 'utility:success'
+                                : item.Result__c === 'FAIL'
+                                ? 'utility:error'
+                                : 'utility:clock',
+
+                                statusClass:
+                                item.Result__c === 'PASS'
+                                ? 'pass-icon'
+                                : item.Result__c === 'FAIL'
+                                ? 'fail-icon'
+                                : 'pending-icon'
+
+                    }));
             console.log('Tabale Data');
-            console.log(this.tableData);
-            console.log(typeof this.tableData);
+            console.log(this.challengeData);
+            console.log(typeof this.challengeData);
+
+            this.totalPages = result.totalPages;
+            this.totalRecords = result.totalRecords;
 
         }
 
-        backToProfile(event)
+        async handleNext() {
+
+            if(this.currentPage < this.totalPages){
+
+                this.currentPage++;
+
+                this.viewAllProblems();
+            }
+        }
+
+        async handlePrevious() {
+
+            if(this.currentPage > 1){
+
+                this.currentPage--;
+
+                this.viewAllProblems();
+            }
+        }
+
+        async handlePageClick(event){
+
+                this.currentPage =
+                    Number(event.target.dataset.page);
+
+                this.viewAllProblems();
+            }
+
+        get pageNumbers(){
+
+                let pages = [];
+
+                for(let i = 1; i <= this.totalPages; i++){
+
+                    pages.push({
+                        number: i,
+                        className:
+                            i === this.currentPage
+                            ? 'page-btn active'
+                            : 'page-btn'
+                    });
+                }
+
+                return pages;
+            }
+
+        get showingText(){
+
+                let start =
+                    ((this.currentPage - 1) * this.pageSize) + 1;
+
+                let end =
+                    Math.min(
+                        this.currentPage * this.pageSize,
+                        this.totalRecords
+                    );
+
+                return `Showing ${start} to ${end} of ${this.totalRecords} results`;
+            }
+
+        backToProfile()
         {
             this.showProfile=true;
         }

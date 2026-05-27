@@ -150,4 +150,59 @@ public with sharing class recordController {
             throw new AuraHandledException(e.getMessage());
         }
     }
+    @AuraEnabled
+     public static PaginationWrapper getSolvedChallenges(String username,Integer pageSize,Integer pageNumber)
+      {
+
+        if(pageSize == null || pageSize <= 0){
+            pageSize = 6;
+        }
+
+        if(pageNumber == null || pageNumber <= 0){
+            pageNumber = 1;
+        }
+
+        Integer offsetValue = (pageNumber - 1) * pageSize;
+
+        // TOTAL RECORDS
+        Integer totalRecords = [
+            SELECT COUNT()
+            FROM Attempted_Challenge__c
+        ];
+
+        // FETCH PAGE DATA
+        List<Attempted_Challenge__c> records = [SELECT Id, Name, Result__c, DifficultyLevel__c, Type__c, Path__c,LastModifiedDate FROM Attempted_Challenge__c WHERE Apex_Arena_User__r.Name =:username ORDER BY LastModifiedDate DESC LIMIT :pageSize OFFSET :offsetValue];
+        
+
+        PaginationWrapper wrapper = new PaginationWrapper();
+
+        wrapper.records = records;
+        wrapper.totalRecords = totalRecords;
+        wrapper.pageSize = pageSize;
+        wrapper.currentPage = pageNumber;
+        wrapper.totalPages =
+            (Integer)Math.ceil(
+                (Decimal)totalRecords / pageSize
+            );
+
+        return wrapper;
+    }
+
+    public class PaginationWrapper {
+
+        @AuraEnabled
+        public List<Attempted_Challenge__c> records;
+
+        @AuraEnabled
+        public Integer totalRecords;
+
+        @AuraEnabled
+        public Integer pageSize;
+
+        @AuraEnabled
+        public Integer currentPage;
+
+        @AuraEnabled
+        public Integer totalPages;
+    }
 }
