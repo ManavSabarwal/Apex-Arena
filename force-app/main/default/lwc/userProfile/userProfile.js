@@ -3,6 +3,54 @@ import { NavigationMixin } from 'lightning/navigation';
 import getAttemptedChallenges from '@salesforce/apex/recordController.getAttemptedChallenges';
 import getUserandChalengeDetails from '@salesforce/apex/recordController.getUserandChalengeDetails';
 
+
+const COLUMNS = [
+
+    {
+        label: 'CHALLENGE',
+        fieldName: 'name',
+        type: 'text',
+        cellAttributes: {
+            class: 'challenge-column'
+        }
+    },
+
+    {
+        label: 'CATEGORY',
+        fieldName: 'category',
+        type: 'text',
+        cellAttributes: {
+            class: 'category-column'
+        }
+    },
+
+    {
+        label: 'DIFFICULTY',
+        fieldName: 'difficulty',
+        type: 'text',
+        cellAttributes: {
+            class: { fieldName: 'difficultyClass' }
+        }
+    },
+
+    {
+        label: 'SOLVED ON',
+        fieldName: 'lastModifiedDate',
+        type: 'text'
+    },
+
+    {
+        type: 'button',
+        fixedWidth: 180,
+        typeAttributes: {
+            label: 'View Details',
+            name: 'view',
+            variant: 'base'
+        }
+    }
+
+];
+
 export default class UserProfile extends NavigationMixin(LightningElement) {
     loginName='';
     limitSize='4';
@@ -19,7 +67,64 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     wrong=0;
     acceptanceRate=0;
     recent4problems=[];
-    showProfile=false;
+    tableData=[];
+    showProfile=true;
+    selectedCategory='All Categories';
+    selectedDifficulty='All Difficulties';
+    categoryOptions=[
+                {
+                    label: "All Categories",
+                    value: "All Categories"
+                },
+                {
+                    label: "Synchronous Apex",
+                    value: "Sync Apex"
+                },
+                {
+                    label: "Asynchronous Apex",
+                    value: "Async Apex"
+                },
+                {
+                    label: "Trigger",
+                    value: "Trigger"
+                },
+                {
+                    label: "Test Class",
+                    value: "Test Class"
+                }
+                
+            ];
+        difficultyOptions=[
+            
+        {
+            label: "All Difficulties",
+            value: "All Difficulties"
+        },
+        {
+            label: "Easy",
+            value: "Easy"
+        },
+        {
+            label: "Medium",
+            value: "Medium"
+        },
+        {
+            label: "Hard",
+            value: "Hard"
+        }];
+        pathOptions=[{
+            label:"All Paths",
+            value:"All Paths"
+            },
+        {
+            label:"Debugging",
+            value:"Debugging"
+        },
+        {
+            label:"Coding",
+            value:"Coding"
+        }
+    ]
 
     connectedCallback()
         {
@@ -43,6 +148,9 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 .then(result => {
 
                         console.log(result);
+                        this.tableData=result;
+                        console.log('Table Data');
+                        console.log(this.tableData);
                         this.bifData(result);
                 })
 
@@ -58,7 +166,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         {
             console.log('In Function');
             try{
-            this.submissions = result.length;
+                        this.submissions = result.length;
                         for(let res of result)
                         {
                             if(res.Result__c=='Pass')
@@ -90,6 +198,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                                                     year: 'numeric'
                                         });
                         this.userLevel=result[0].Attempted_Challenge__r.Apex_Arena_User__r.Level__c;
+
                     }
                     catch(error)
                     {
@@ -156,6 +265,16 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 }
         }
 
+            viewAllProblems()
+        {
+            this.showProfile=false;
+        }
+
+        backToProfile(event)
+        {
+            this.showProfile=true;
+        }
+
         choosePath(){
             window.sessionStorage.setItem('isLoggedIn',true);
             window.sessionStorage.setItem('loginName',this.loginName);
@@ -166,6 +285,17 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                                         }
                         });
 
+        }
+
+        handleCategoryChange(event)
+        {
+            this.selectedCategory = event.detail.value;
+            console.log(this.selectedCategory);
+        }
+        handleDifficultyChange(event)
+        {
+            this.selectedDifficulty = event.detail.value;
+            console.log(this.selectedDifficulty);
         }
         logoutFunc()
         {
