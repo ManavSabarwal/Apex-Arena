@@ -8,7 +8,7 @@ const COLUMNS = [
 
     {
         label: 'CHALLENGE',
-        fieldName: 'name',
+        fieldName: 'Name',
         type: 'text',
         cellAttributes: {
             class: 'challenge-column'
@@ -16,8 +16,17 @@ const COLUMNS = [
     },
 
     {
+        label: 'PATH',
+        fieldName: 'Path__c',
+        type: 'text',
+        cellAttributes: {
+            class: 'category-column'
+        }
+    },
+
+    {
         label: 'CATEGORY',
-        fieldName: 'category',
+        fieldName: 'Type__c',
         type: 'text',
         cellAttributes: {
             class: 'category-column'
@@ -26,18 +35,17 @@ const COLUMNS = [
 
     {
         label: 'DIFFICULTY',
-        fieldName: 'difficulty',
+        fieldName: 'DifficultyLevel__c',
         type: 'text',
-        cellAttributes: {
-            class: { fieldName: 'difficultyClass' }
-        }
     },
+
 
     {
         label: 'SOLVED ON',
-        fieldName: 'lastModifiedDate',
+        fieldName: 'LastModifiedDate',
         type: 'text'
     },
+
 
     {
         type: 'button',
@@ -68,6 +76,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     acceptanceRate=0;
     recent4problems=[];
     tableData=[];
+    columns = COLUMNS;
     showProfile=true;
     selectedCategory='All Categories';
     selectedDifficulty='All Difficulties';
@@ -148,9 +157,6 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 .then(result => {
 
                         console.log(result);
-                        this.tableData=result;
-                        console.log('Table Data');
-                        console.log(this.tableData);
                         this.bifData(result);
                 })
 
@@ -265,9 +271,20 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 }
         }
 
-            viewAllProblems()
+        async viewAllProblems()
         {
             this.showProfile=false;
+            console.log('In View All Problems');
+            let result= await getAttemptedChallenges({
+                username:this.loginName,
+                recordLimit:0
+            });
+            console.log(result);
+            this.tableData=result;
+            console.log('Tabale Data');
+            console.log(this.tableData);
+            console.log(typeof this.tableData);
+
         }
 
         backToProfile(event)

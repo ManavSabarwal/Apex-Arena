@@ -591,7 +591,7 @@
     box-shadow: 0 0 12px rgba(168,85,247,0.4);
 }
 
-/*Datatable*/
+/* Datatable*/
 .table-wrapper{
 
     border-radius:28px;
@@ -614,7 +614,7 @@
 
 }
 
-/* TABLE */
+
 
 lightning-datatable{
 
@@ -653,7 +653,7 @@ lightning-datatable{
 
 }
 
-/* HEADER */
+
 
 :host ::ng-deep .slds-table thead th{
 
@@ -669,7 +669,7 @@ lightning-datatable{
 
 }
 
-/* ROW */
+
 
 :host ::ng-deep .slds-table tbody tr{
 
@@ -686,7 +686,7 @@ lightning-datatable{
 
 }
 
-/* CELLS */
+
 
 :host ::ng-deep .slds-table tbody td{
 
@@ -699,7 +699,7 @@ lightning-datatable{
 
 }
 
-/* CHALLENGE */
+
 
 .challenge-column{
 
@@ -711,7 +711,7 @@ lightning-datatable{
 
 }
 
-/* CATEGORY */
+
 
 .category-column{
 
@@ -719,7 +719,7 @@ lightning-datatable{
 
 }
 
-/* XP */
+
 
 .xp-column{
 
@@ -729,7 +729,7 @@ lightning-datatable{
 
 }
 
-/* DIFFICULTY PILLS */
+
 
 .easy-pill{
 
@@ -785,7 +785,7 @@ lightning-datatable{
 
 }
 
-/* BUTTON */
+
 
 :host ::ng-deep .slds-button{
 
@@ -812,4 +812,6 @@ lightning-datatable{
         0 0 18px rgba(139,92,246,0.2);
 
 }
+
+
 
