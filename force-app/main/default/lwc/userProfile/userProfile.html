@@ -259,7 +259,7 @@
                 <div class="utilities-container">
 
                     <input type="text" placeholder="🔍 Search by problem name or path" class="search-input"
-                        onkeydown={searchChallenges} />
+                        onkeyup={handleSearch} />
                     <select id="category" onchange={handleCategoryChange} class="category-dropdown">
                         <template for:each={categoryOptions} for:item="category">
                             <option key={category.value} value={category.value}>{category.label}</option>
@@ -272,7 +272,7 @@
                         </template>
                     </select>
 
-                    <select id="sort" onchange={handleSortChange} class="category-dropdown">
+                    <select id="sort" onchange={handlePathChange} class="category-dropdown">
                         <template for:each={pathOptions} for:item="path">
                             <option key={path.value} value={path.value}>{path.label}</option>
                         </template>
@@ -299,7 +299,7 @@
                     <!-- Rows -->
                     <template for:each={challengeData} for:item="item">
 
-                        <div key={item.id} class="table-row">
+                        <div key={item.id} data-id={item.id} class="table-row">
 
                             <!-- Challenge -->
                             <div class="challenge-section">
@@ -343,7 +343,7 @@
 
                             <!-- Action -->
                             <div class="btn-container">
-                                <button class="details-btn">
+                                <button class="details-btn" onclick={viewDetails}>
                                     View Details
                                 </button>
                             </div>

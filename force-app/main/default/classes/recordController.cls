@@ -156,41 +156,66 @@ public with sharing class recordController {
         }
     }
     @AuraEnabled
-     public static PaginationWrapper getSolvedChallenges(String username,Integer pageSize,Integer pageNumber)
+     public static PaginationWrapper getSolvedChallenges(Integer pageNumber,
+        Integer pageSize,
+        String searchKey,
+        String categoryFilter,
+        String difficultyFilter,
+        String pathFilter,String username)
       {
-
-        if(pageSize == null || pageSize <= 0){
-            pageSize = 6;
-        }
 
         if(pageNumber == null || pageNumber <= 0){
             pageNumber = 1;
         }
 
+        if(pageSize == null || pageSize <= 0){
+            pageSize = 6;
+        }
+
         Integer offsetValue = (pageNumber - 1) * pageSize;
 
-        // TOTAL RECORDS
-        Integer totalRecords = [
-            SELECT COUNT()
-            FROM Attempted_Challenge__c
-        ];
+        String baseQuery = 'FROM Attempted_Challenge__c WHERE Apex_Arena_User__r.name = :username';
 
-        // FETCH PAGE DATA
-        List<Attempted_Challenge__c> records = [SELECT Id, Name, Result__c, DifficultyLevel__c, Type__c, Path__c,LastModifiedDate FROM Attempted_Challenge__c WHERE Apex_Arena_User__r.Name =:username ORDER BY LastModifiedDate DESC LIMIT :pageSize OFFSET :offsetValue];
-        
+        String searchPattern = '%' + searchKey + '%';
 
-        PaginationWrapper wrapper = new PaginationWrapper();
+        if(String.isNotBlank(searchKey)){
+                baseQuery += ' AND (Name LIKE :searchPattern OR Path__c LIKE :searchPattern)';
+        }
+        if(String.isNotBlank(categoryFilter) && categoryFilter != 'All Categories'){
+            baseQuery += ' AND Type__c = :categoryFilter ';
+        }
+        if(String.isNotBlank(difficultyFilter) && difficultyFilter != 'All Difficulties'){
+            baseQuery += ' AND DifficultyLevel__c = :difficultyFilter ';
+        }
 
-        wrapper.records = records;
-        wrapper.totalRecords = totalRecords;
-        wrapper.pageSize = pageSize;
-        wrapper.currentPage = pageNumber;
-        wrapper.totalPages =
+        if(String.isNotBlank(pathFilter) && pathFilter != 'All Paths'){
+            baseQuery += ' AND Path__c = :pathFilter ';
+        }
+
+        system.debug(baseQuery);
+
+        // TOTAL COUNT
+        Integer totalRecords = Database.countQuery('SELECT COUNT() ' + baseQuery);
+
+        // DATA QUERY
+        String finalQuery = 'SELECT Id,Name,Result__c,DifficultyLevel__c,Type__c,Path__c,LastModifiedDate ' + baseQuery + ' ORDER BY LastModifiedDate DESC LIMIT :pageSize OFFSET :offsetValue';
+        system.debug(finalQuery);
+        List<Attempted_Challenge__c> records =
+            Database.query(finalQuery);
+
+        PaginationWrapper response =
+            new PaginationWrapper();
+
+        response.records = records;
+        response.totalRecords = totalRecords;
+        response.totalPages =
             (Integer)Math.ceil(
                 (Decimal)totalRecords / pageSize
             );
+        response.pageSize = pageSize;
+        response.currentPage = pageNumber;
 
-        return wrapper;
+        return response;
     }
 
     public class PaginationWrapper {

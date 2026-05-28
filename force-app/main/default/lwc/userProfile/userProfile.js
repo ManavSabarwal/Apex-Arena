@@ -27,10 +27,11 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
     totalPages = 0;
     totalRecords = 0;
-
+    searchKey='';
     showProfile=true;
     selectedCategory='All Categories';
     selectedDifficulty='All Difficulties';
+    selectedPath='All Paths'
     categoryOptions=[
                 {
                     label: "All Categories",
@@ -228,10 +229,15 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         {
             this.showProfile=false;
             console.log('In View All Problems');
-            let result= await getSolvedChallenges({
-                username:this.loginName,
-                pageSize:this.pageSize,
-                pageNumber:this.currentPage
+            try{
+            const result = await getSolvedChallenges({
+                pageNumber: this.currentPage,
+                pageSize: this.pageSize,
+                searchKey: this.searchKey,
+                categoryFilter: this.selectedCategory,
+                difficultyFilter: this.selectedDifficulty,
+                pathFilter: this.selectedPath,
+                username:this.loginName
             });
             console.log(result);
             this.challengeData=result.records;
@@ -270,6 +276,11 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
             this.totalPages = result.totalPages;
             this.totalRecords = result.totalRecords;
+                                }
+                                catch(error)
+                                {
+                                    console.log(error);
+                                }
 
         }
 
@@ -300,6 +311,12 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
                 this.viewAllProblems();
             }
+
+        async viewDetails(event)
+        {
+            const recordId=event.currenttarget.dataset.id;
+            console.log(recordId);
+        }
 
         get pageNumbers(){
 
@@ -350,16 +367,45 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
         }
 
-        handleCategoryChange(event)
-        {
-            this.selectedCategory = event.detail.value;
-            console.log(this.selectedCategory);
-        }
-        handleDifficultyChange(event)
-        {
-            this.selectedDifficulty = event.detail.value;
-            console.log(this.selectedDifficulty);
-        }
+
+        handleSearch(event){
+
+        this.searchKey = event.target.value;
+
+        this.pageNumber = 1;
+
+        this.viewAllProblems();
+    }
+
+    handleCategoryChange(event){
+
+        this.selectedCategory = event.target.value;
+
+        this.pageNumber = 1;
+
+        this.viewAllProblems();
+    }
+
+    handleDifficultyChange(event){
+
+        this.selectedDifficulty = event.target.value;
+
+        this.pageNumber = 1;
+
+        this.viewAllProblems();
+    }
+
+    handlePathChange(event){
+
+        this.selectedPath = event.target.value;
+
+        this.pageNumber = 1;
+
+        this.viewAllProblems();
+    }
+
+
+
         logoutFunc()
         {
             window.sessionStorage.removeItem('loginName');
