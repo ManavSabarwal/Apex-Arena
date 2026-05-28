@@ -37,7 +37,18 @@
                 <div class="hero">
                     <div class="hero-left-container">
                         <div class="hero-left">
-                            <div class="avatar"></div>
+                            <div class="avatar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+
+                                    <!-- Head -->
+                                    <circle cx="12" cy="8" r="4"></circle>
+
+                                    <!-- Body -->
+                                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+                                </svg>
+                            </div>
                             <div class="user-data">
                                 <span class="login-name">{loginName}</span>
                                 <span class="user-level">{userLevel}</span>
@@ -247,7 +258,8 @@
                 </div>
                 <div class="utilities-container">
 
-                    <input type="text" placeholder="🔍 Search by problem name or path" class="search-input" onkeydown={searchChallenges}/>
+                    <input type="text" placeholder="🔍 Search by problem name or path" class="search-input"
+                        onkeydown={searchChallenges} />
                     <select id="category" onchange={handleCategoryChange} class="category-dropdown">
                         <template for:each={categoryOptions} for:item="category">
                             <option key={category.value} value={category.value}>{category.label}</option>
@@ -269,124 +281,120 @@
 
                 </div>
 
-                <div class="table-wrapper">
 
 
-                    <div class="history-container">
+                <div class="history-container">
 
-                        <!-- Header -->
-                        <div class="table-header">
-                            <div>CHALLENGE</div>
-                            <div>CATEGORY</div>
-                            <div>DIFFICULTY</div>
-                            <div>RESULT</div>
-                            <div>SOLVED ON</div>
-                            <div>PATH</div>
-                            <div></div>
+                    <!-- Header -->
+                    <div class="table-header">
+                        <div>CHALLENGE</div>
+                        <div>CATEGORY</div>
+                        <div>DIFFICULTY</div>
+                        <div>RESULT</div>
+                        <div>SOLVED ON</div>
+                        <div>PATH</div>
+                        <div></div>
+                    </div>
+
+                    <!-- Rows -->
+                    <template for:each={challengeData} for:item="item">
+
+                        <div key={item.id} class="table-row">
+
+                            <!-- Challenge -->
+                            <div class="challenge-section">
+                                <div>
+                                    <div class="challenge-name">
+                                        {item.Name}
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Category -->
+                            <div class="category">
+
+                                <span>{item.Type__c}</span>
+                            </div>
+
+                            <!-- Difficulty -->
+                            <div>
+                                <span class={item.DifficultyLevel__c}>
+                                    {item.DifficultyLevel__c}
+                                </span>
+                            </div>
+
+                            <!-- Points -->
+                            <div class={item.Result__c}>
+                                <lightning-icon icon-name={item.statusIcon} size="small" class={item.statusClass}
+                                    alternative-text={item.Result__c}>
+                                </lightning-icon>
+                            </div>
+
+                            <!-- Solved On -->
+                            <div class="date">
+                                {item.LastModifiedDate}
+                            </div>
+
+                            <!-- Time -->
+                            <div class={item.Path__c}>
+                                {item.Path__c}
+                            </div>
+
+                            <!-- Action -->
+                            <div class="btn-container">
+                                <button class="details-btn">
+                                    View Details
+                                </button>
+                            </div>
+
                         </div>
 
-                        <!-- Rows -->
-                        <template for:each={challengeData} for:item="item">
+                    </template>
 
-                            <div key={item.id} class="table-row">
+                    <!-- Footer -->
+                    <div class="footer">
 
-                                <!-- Challenge -->
-                                <div class="challenge-section">
-                                    <div>
-                                        <div class="challenge-name">
-                                            {item.Name}
-                                        </div>
-                                    </div>
+                        <div class="results-text">
+                            {showingText}
+                        </div>
 
-                                </div>
+                        <div class="pagination">
 
-                                <!-- Category -->
-                                <div class="category">
+                            <!-- Previous -->
+                            <button class="page-btn" onclick={handlePrevious}>
 
-                                    <span>{item.Type__c}</span>
-                                </div>
+                                ‹
 
-                                <!-- Difficulty -->
-                                <div>
-                                    <span class={item.DifficultyLevel__c}>
-                                        {item.DifficultyLevel__c}
-                                    </span>
-                                </div>
+                            </button>
 
-                                <!-- Points -->
-                                <div class={item.Result__c}>
-                                    <lightning-icon
-                                        icon-name={item.statusIcon}
-                                        size="small"
-                                        class={item.statusClass}
-                                        alternative-text={item.Result__c}>
-                                    </lightning-icon>
-                                </div>
+                            <!-- Dynamic Pages -->
+                            <template for:each={pageNumbers} for:item="page">
 
-                                <!-- Solved On -->
-                                <div class="date">
-                                    {item.LastModifiedDate}
-                                </div>
+                                <button key={page.number} data-page={page.number} class={page.className}
+                                    onclick={handlePageClick}>
 
-                                <!-- Time -->
-                                <div class="time">
-                                    {item.Path__c}
-                                </div>
-
-                                <!-- Action -->
-                                <div class="btn-container">
-                                    <button class="details-btn">
-                                        View Details
-                                    </button>
-                                </div>
-
-                            </div>
-
-                        </template>
-
-                        <!-- Footer -->
-                        <div class="footer">
-
-                            <div class="results-text">
-                                {showingText}
-                            </div>
-
-                            <div class="pagination">
-
-                                <!-- Previous -->
-                                <button class="page-btn" onclick={handlePrevious}>
-
-                                    ‹
+                                    {page.number}
 
                                 </button>
 
-                                <!-- Dynamic Pages -->
-                                <template for:each={pageNumbers} for:item="page">
+                            </template>
 
-                                    <button key={page.number} data-page={page.number} class={page.className}
-                                        onclick={handlePageClick}>
+                            <!-- Next -->
+                            <button class="page-btn" onclick={handleNext}>
 
-                                        {page.number}
+                                ›
 
-                                    </button>
-
-                                </template>
-
-                                <!-- Next -->
-                                <button class="page-btn" onclick={handleNext}>
-
-                                    ›
-
-                                </button>
-
-                            </div>
+                            </button>
 
                         </div>
 
                     </div>
 
-
                 </div>
+
+
+
 
             </div>
 

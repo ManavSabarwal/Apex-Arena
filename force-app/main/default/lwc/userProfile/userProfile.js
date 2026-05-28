@@ -147,7 +147,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                         }
                         this.wrong=this.submissions-this.solved;
                         this.acceptanceRate=((this.solved/this.submissions)*100).toFixed(2);
-                        this.expPoints=result[0].Attempted_Challenge__r.Apex_Arena_User__r.Experience_Points__c;
+                        this.expPoints=result[0].Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c;
                         this.joinDate= new Date(result[0].Attempted_Challenge__r.Apex_Arena_User__r.CreatedDate)
                                         .toLocaleDateString('en-US', {
                                                     month: 'long',
@@ -208,10 +208,12 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
                                                     return {
                                                             ...record,
-                                                            timeAgo: timeAgo
+                                                            timeAgo: timeAgo,
+                                                        
                                                             };
                             });
 
+                    this.recent4problems.forEach(item => {item.Result__c=item.Result__c.charAt(0).toUpperCase()+item.Result__c.substring(1)});
                     console.log(this.recent4problems);
                 }
 
@@ -256,9 +258,15 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                                 : 'pending-icon'
 
                     }));
-            console.log('Tabale Data');
-            console.log(this.challengeData);
-            console.log(typeof this.challengeData);
+            this.challengeData.forEach(item =>
+                                    {
+                                        item.LastModifiedDate= new Date(item.LastModifiedDate).toLocaleDateString('en-US', 
+                                            {
+                                                    month: 'long',
+                                                    day: '2-digit',
+                                                    year: 'numeric'
+                                        });
+                                    });
 
             this.totalPages = result.totalPages;
             this.totalRecords = result.totalRecords;

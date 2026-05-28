@@ -38,6 +38,10 @@ public with sharing class recordController {
     public static String saveAttemptedChallenge(String problemTitle,String scenario,String errorcode,String symptoms,String type, String difficultylevel,string username,String path,String sampledata,String expectedOutput,String constraints){
         try {
 
+            if(problemTitle.length() > 80){
+                    problemTitle = problemTitle.substring(0, 75)+'...';
+            }
+
             List<Apex_Arena_User__C> aau=[Select id from Apex_Arena_User__C where name=:username];
             String aauId=aau[0].ID;
             system.debug(aauId);
@@ -48,7 +52,7 @@ public with sharing class recordController {
             ac.type__C=type;
             ac.DifficultyLevel__c=difficultylevel;
             ac.Apex_Arena_User__c=aauId;
-            ac.name=problemTitle +' - ' +username;
+            ac.name=problemTitle;
             ac.result__C='Pending';
             ac.path__c=path;
             ac.sampledata__c=sampledata;
@@ -86,6 +90,7 @@ public with sharing class recordController {
                 res.put('oldresult',ac[0].result__C);
                 res.put('attempt',attempt.toString());
                 insert(ca);
+                res.put('attemptId',ca.Id);
                 return res;
             }
              catch (Exception e) {
@@ -94,13 +99,13 @@ public with sharing class recordController {
     }
 
     @AuraEnabled
-    public static string updateApexArenaUser(String userName,Integer expPoints){
+    public static string updateExpPoints(Integer expPoints,String attemptId){
         try {
 
-                List<Apex_Arena_User__C> aac=[Select id,name,Experience_Points__c from Apex_Arena_User__C where name=: username limit 1];
-                Apex_Arena_User__C a=aac[0];
-                a.Experience_Points__c=a.Experience_Points__c+expPoints;
-                update a;
+                List<Challenge_Attempt__c> ca=[Select id,name,Exp_gained__C from Challenge_Attempt__c where id=: attemptId limit 1];
+                Challenge_Attempt__c c=ca[0];
+                c.Exp_gained__C=expPoints;
+                update c;
                 return 'Exp Point Updated ';
 
         } catch (Exception e) {
@@ -141,7 +146,7 @@ public with sharing class recordController {
     public static List<Challenge_Attempt__C> getUserandChalengeDetails(String username){
         try {
 
-            string queryText='select id,Result__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Experience_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = \'' + username + '\' ' ;
+            string queryText='select id,Result__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = \'' + username + '\' ' ;
             List<Challenge_Attempt__C> ca=Database.query(queryText);
 
             return ca;

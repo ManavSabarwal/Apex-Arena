@@ -3,7 +3,7 @@ import invokePrompt from '@salesforce/apex/PromptTemplateController.invokePrompt
 import invokeValidationPrompt from '@salesforce/apex/PromptTemplateController.invokeValidationPrompt';
 import saveAttemptedChallenge from '@salesforce/apex/recordController.saveAttemptedChallenge';
 import createChallengeAttempt from '@salesforce/apex/recordController.createChallengeAttempt';
-import updateApexArenaUser from '@salesforce/apex/recordController.updateApexArenaUser';
+import updateExpPoints from '@salesforce/apex/recordController.updateExpPoints';
 import { NavigationMixin } from 'lightning/navigation';
 
 
@@ -53,24 +53,26 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
     {
         window.sessionStorage.setItem('isLoggedIn',true);
         window.sessionStorage.setItem('loginName',this.loginName);
-        this[NavigationMixin.Navigate]({
-            type: 'standard__webPage',
-            attributes: {
-                url: '/userProfile'
-            }
-        });
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/userProfile'
+                }
+            });
     }
 
     choosePath()
     {
         window.sessionStorage.setItem('isLoggedIn',true);
         window.sessionStorage.setItem('loginName',this.loginName);
-        this[NavigationMixin.Navigate]({
-            type: 'standard__webPage',
-            attributes: {
-                url: '/choosepath'
-            }
-        });
+        
+        
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/choosepath'
+                }
+            });
     }
 
     get resultClass()
@@ -262,15 +264,15 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                 if(saveRes && Object.keys(saveRes).length > 0)
                 {
                     console.log(saveRes);
-
+                    let attemptId=saveRes.attemptId.toString();
                     if(this.result.toLowerCase().includes('pass'))
                     {
                        let exppoints= this.template.querySelector('c-modal-component').openModal(this.loginName,this.difficultyfromPrompt,saveRes.oldresult,saveRes.attempt,'debug');
                        if(exppoints!=0)
                        {
-                            let updateResponse=await updateApexArenaUser({
-                                    userName:this.loginName,
-                                    expPoints:exppoints
+                            let updateResponse=await updateExpPoints({
+                                    expPoints:exppoints,
+                                    attemptId:attemptId
 
                             });
                             console.log(updateResponse + ' - '+ exppoints);

@@ -140,20 +140,34 @@
 
 .hero-left-container{
     display:flex;
+    margin-left: 30px;
 
 }
 .hero-left{
     display:flex;
 }
-.avatar{
+/*.avatar{
         width: 190px;
     height: 190px;
     border-radius: 50%;
     background: linear-gradient(135deg, #7c3aed, #c084fc);
     margin: 10px;
+}*/
+
+.avatar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #c084fc);
+    color: #111827;
+    border: 1px solid rgba(139,92,246,0.3);
+    margin: 10px;
 }
 .user-data{
-    padding: 25px 35px;
+    padding: 25px 10px;
     display: grid;
     align-items: center;
     justify-items: start;
@@ -196,7 +210,7 @@
     position: relative;
     overflow: hidden;
 
-    color: rgb(104, 50, 197);
+    color: rgb(173 166 255);
 
     padding: 10px 15px;
 
@@ -359,10 +373,17 @@
 }
 .activity-link
 {
-    color:#7c3aed;
-    font-size: 15px;
+    color:rgb(173 166 255);
+    font-size: 17px;
     position: absolute;
     right: 25px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+.activity-link:hover
+{
+    color:white;
+    font-weight: 600;
 }
 .recent-problem-details-container{
     margin-top: 10px;
@@ -387,7 +408,7 @@
     padding:5px 15px;
     color:rgb(235, 179, 65);
 }
-.pass{
+.Pass{
     border: 1px solid rgb(36, 255, 98);
     border-radius: 12px;
     background-color: rgb(36, 255, 98,0.12);
@@ -395,7 +416,7 @@
     padding:5px 15px;
     color:rgb(36, 255, 98);
 }
-.fail
+.Fail
 {
     border: 1px solid rgb(235, 65, 65);
     border-radius: 12px;
@@ -430,8 +451,14 @@
     padding: 20px;
 }
 .back-btn{
-    color: #7c3aed;
-    font-size: 13px;
+    color: rgb(173 166 255);
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+.back-btn:hover{
+    color: white;
+    font-weight:600;
 }
 
 .Header-cont{
@@ -594,6 +621,8 @@
 /*table*/
 
 .history-container {
+    height: 470px;
+    display: grid;
     width: 100%;
     border-radius: 18px;
     overflow: hidden;
@@ -749,6 +778,12 @@
     transform: translateY(-1px);
 
     box-shadow: 0 0 12px rgba(157, 78, 221, 0.2);
+}
+.Coding{
+    color:#00E5FF;
+}
+.Debugging{
+    color: #FF5C5C;
 }
 
 /* FOOTER */
