@@ -9,6 +9,11 @@ import { NavigationMixin } from 'lightning/navigation';
 
 export default class buildingArena extends NavigationMixin(LightningElement) {
 
+    isProblemOptionHidden = false;
+    isProblemHidden = false;
+    expReward=0;
+    estimatedTime='10:00'
+
     loginName = '';
     problem;
     scenario = '';
@@ -24,7 +29,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     dataLoaded = false;
     difficultyfromPrompt = '';
     result = 'Pending';
-    
+
 
     thegood = 'Submit your code for review...';
     thebad = 'Submit your code for review...';
@@ -54,28 +59,62 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         }
     }
 
+    get sectionClass() {
+        return this.isProblemOptionHidden
+            ? 'selectOptions collapsed'
+            : 'selectOptions expanded';
+    }
+
+    get arrowClass() {
+        return this.isProblemOptionHidden
+            ? 'down-arrow'
+            : 'up-arrow';
+    }
+
+    get arrowIcon()
+    {
+        return this.isProblemOptionHidden
+            ? '⌄'
+            : '^';
+    }
+
+    get problemSectionClass() {
+        return this.isProblemHidden
+            ? 'problemSection collapsed'
+            : 'problemSection problemSectionexpanded';
+    }
+    hideProblemOptions() {
+
+        this.isProblemOptionHidden=!this.isProblemOptionHidden;
+    }
+
+    hideProblem()
+    {
+        this.isProblemHidden=!this.isProblemHidden;
+    }
+
     openProfile() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/userProfile'
-                }
-            });
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/userProfile'
+            }
+        });
 
     }
 
     choosePath() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/choosepath'
-                }
-            });
-        
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/choosepath'
+            }
+        });
+
 
     }
 
@@ -140,6 +179,15 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             this.constraints = parsedData.TechnicalConstraints;
             this.expectedOutput = parsedData.ExpectedOutput;
             this.sampleData = parsedData.SampleData;
+
+            switch(this.difficultyfromPrompt)
+            {
+                case 'Beginner': this.estimatedTime='20:00';this.expReward='80 XP';break;
+                case 'Apprentice':this.estimatedTime='30:00';this.expReward='160 XP';break;
+                case 'Skilled Developer':this.estimatedTime='45:00';this.expReward='320 XP';break;
+                case 'Expert Architect':this.estimatedTime='1:00:00';this.expReward='640 XP';break;
+                case 'Legendary Salesforce Hero':this.estimatedTime='1:30:00';this.expReward='1280 XP';break;
+            }
 
 
 

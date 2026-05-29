@@ -127,7 +127,7 @@
 
 .main-layout {
     display: grid;
-    grid-template-columns: 1fr 1.2fr 0.5fr;
+    grid-template-columns: 0.7fr 1.2fr 0.5fr;;
     min-height: 90vh;
     gap: 10px;
     height: 100%;
@@ -146,7 +146,7 @@
 
     border: 1px solid rgba(255,255,255,0.08);
 
-    border-radius: 24px;
+    border-radius: 8px;
 
     backdrop-filter: blur(20px);
 
@@ -175,8 +175,44 @@
     margin: 10px 10px 0px 10px;
     padding-bottom: 10px;
     font-weight: 700;
+    cursor:pointer;
 }
 
+.up-arrow{
+    font-size: 1.2rem;
+    transition: 0.3s ease;
+}
+
+.up-arrow:hover{
+    color:#8b5cf6;
+    transform: translateY(-3px);
+}
+
+.down-arrow{
+    font-size: 1.2rem;
+    transition: 0.3s ease;
+}
+
+.down-arrow:hover{
+    color:#8b5cf6;
+    transform: translateY(3px);
+}
+
+.selectOptions{
+    transition: all 0.35s ease;
+    overflow: hidden;
+    display: grid
+}
+
+.expanded{
+    max-height: 500px;
+    opacity: 1;
+}
+
+.collapsed{
+    max-height: 0;
+    opacity: 0;
+}
 
 .difficulty-container
 {
@@ -249,22 +285,19 @@
 }
 .type-options
 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
     gap: 10px;
     min-width: 100%;
     margin-top: 5px;
+    flex-wrap: wrap;
+    grid-template-columns: 1fr 1fr 0.5fr 0.5fr;
 }
 .type-btn
 {
 
-    flex: 1;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.08);
-
     color: white;
-
     padding: 5px 10px;
     border-radius: 8px;
     cursor: pointer;
@@ -357,13 +390,26 @@
 }
 
 .scrollable-content {
-    overflow-y: auto;
-    margin:5px 10px 0px 10px;
-    border-top: #8f90aa30 1px solid;
+    margin: 5px 0px;
+    padding: 0px 10px;
+}
+
+.problemSection{
+    display:grid;
+    transition: all 0.35s ease;
+}
+
+.problemSectionexpanded{
+    max-height: fit-content;
+    opacity: 1;
 }
 
 .problem-title-container{
     margin-bottom: 10px;
+    cursor:pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 10px;
+    
 }
 .problem-detail{
     font-size: 11px;
@@ -389,44 +435,39 @@
 
 .scenario-label{
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
 }
 .scenario-text{
     font-size: 11px;
+    color:rgb(170, 170, 170);
 
-}
-.error-code-container{
-
-    border: 1px solid rgba(255, 255, 255, 0.288);
-    border-radius: 12px;
-    margin-top: 5px;
-    margin-bottom:10px;
-    background: rgba(255, 255, 255, 0.05);
-    padding:5px;
-
-}
-
-.error-code-label{
-    font-size: 13px;
-    font-weight: 700;
-    margin-top: 5px;
-}
-.error-code-text
-{
-    font-size: 11px;
-    margin-top:-8px;
-    font-weight: 600;
 }
 .symptoms{
     margin-bottom: 10px;
 }
 .symptoms-label{
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     margin-top: 5px;
 }
 .symptoms-text{
     font-size: 11px;
+    color:rgb(170, 170, 170);
+}
+
+.bottom-problem-details{
+    display:flex;
+}
+
+.data-card
+{
+    display:flex;
+    padding:15px 15px;
+    text-align: center;
+}
+.estTime{
+    color:#5a81c5;
+
 }
 
 
