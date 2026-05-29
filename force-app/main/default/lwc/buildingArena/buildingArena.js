@@ -11,16 +11,14 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
     isProblemOptionHidden = false;
     isProblemHidden = false;
-    expReward=0;
-    estimatedTime='10:00'
+    expReward = 0;
+    estimatedTime = '10:00'
 
     loginName = '';
     problem;
     scenario = '';
     textAreacode = '';
-    constraints = ''
-    expectedOutput = '';
-    sampleData = '';
+    sampleData = [];
     requirements = '';
     problemTitle = '';
     difficulty = 'Easy';
@@ -71,8 +69,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             : 'up-arrow';
     }
 
-    get arrowIcon()
-    {
+    get arrowIcon() {
         return this.isProblemOptionHidden
             ? '⌄'
             : '^';
@@ -85,12 +82,11 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     }
     hideProblemOptions() {
 
-        this.isProblemOptionHidden=!this.isProblemOptionHidden;
+        this.isProblemOptionHidden = !this.isProblemOptionHidden;
     }
 
-    hideProblem()
-    {
-        this.isProblemHidden=!this.isProblemHidden;
+    hideProblem() {
+        this.isProblemHidden = !this.isProblemHidden;
     }
 
     openProfile() {
@@ -120,7 +116,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
     showSampleData() {
         console.log('showSampleData clicked ');
-        this.template.querySelector('c-sampledata-modal-component').openModal(this.sampleData, this.expectedOutput);
+        this.template.querySelector('c-sampledata-modal-component').openModal(this.sampleData);
     }
 
     showResults() {
@@ -176,17 +172,24 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             this.requirements = parsedData.BusinessRequirements;
             this.problemTitle = parsedData.ProblemTitle;
             this.difficultyfromPrompt = parsedData.DifficultyLevel;
-            this.constraints = parsedData.TechnicalConstraints;
-            this.expectedOutput = parsedData.ExpectedOutput;
-            this.sampleData = parsedData.SampleData;
+            const sampData = parsedData.SampleData;
+            console.log(sampData);
+            this.sampleData = sampData;
 
-            switch(this.difficultyfromPrompt)
-            {
-                case 'Beginner': this.estimatedTime='20:00';this.expReward='80 XP';break;
-                case 'Apprentice':this.estimatedTime='30:00';this.expReward='160 XP';break;
-                case 'Skilled Developer':this.estimatedTime='45:00';this.expReward='320 XP';break;
-                case 'Expert Architect':this.estimatedTime='1:00:00';this.expReward='640 XP';break;
-                case 'Legendary Salesforce Hero':this.estimatedTime='1:30:00';this.expReward='1280 XP';break;
+            console.log('Sample Data =============');
+
+            console.log(typeof this.sampleData);
+
+            switch (this.difficultyfromPrompt) {
+                case 'Beginner': this.estimatedTime = '20:00'; this.expReward = '80 XP'; break;
+                case 'Apprentice': this.estimatedTime = '30:00'; this.expReward = '160 XP'; break;
+                case 'Skilled Developer': this.estimatedTime = '45:00'; this.expReward = '320 XP'; break;
+                case 'Expert Architect': this.estimatedTime = '1:00:00'; this.expReward = '640 XP'; break;
+                case 'Legendary Salesforce Hero': this.estimatedTime = '1:30:00'; this.expReward = '1280 XP'; break;
+            }
+
+            if (!this.isProblemOptionHidden) {
+                this.isProblemOptionHidden = !this.isProblemOptionHidden;
             }
 
 
@@ -204,13 +207,13 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                     problemTitle: this.problemTitle,
                     scenario: this.scenario,
                     errorcode: '',
-                    symptoms: this.symptoms,
+                    symptoms: this.requirements,
                     type: this.type,
                     difficultylevel: this.difficulty,
                     username: this.loginName,
                     path: 'Coding',
                     sampledata: this.sampleData,
-                    expectedOutput: this.expectedOutput,
+                    expectedOutput: '',
                     constraints: this.constraints
                 })
                 console.log('Challenge Saved');

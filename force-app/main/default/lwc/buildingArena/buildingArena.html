@@ -82,8 +82,11 @@
                             <span>Loading problem...</span>
                         </div>
                     </template>
+                </div>
+                
                     <template if:false={isLoading}>
                         <template if:true={dataLoaded}>
+                            <div class="scrollable-content glass-card">
 
                             <div class="problem-title-container" onclick={hideProblem}>
                                 <p class="problem-detail">Problem Details</p>
@@ -104,14 +107,14 @@
 
                                 <div class="bottom-problem-details">
                                     <div class="data-card estTime" >
-                                        <span style="color:#38bdf8;font-size:1.2rem;text-shadow:0 0 10px rgba(56, 189, 248, 0.7);">⏱</span>
+                                        <span style="color:#38bdf8;font-size:2.2rem;text-shadow:0 0 10px rgba(56, 189, 248, 0.7);">⏱</span>
                                         <div style="display:grid">
                                             <p>Estimated Time</p>
                                             <p>{estimatedTime}</p>
                                         </div>
                                     </div>
                                     <div class="data-card expRew">
-                                        <span style="color:#facc15;font-size:1.2rem;text-shadow:0 0 10px rgba(250, 204, 21, 0.7);">☆</span>
+                                        <span style="color:#facc15;font-size:2.2rem;text-shadow:0 0 10px rgba(250, 204, 21, 0.7);">☆</span>
                                         <div style="display:grid">
                                             <p>Exp Reward</p>
                                             <p>{expReward}</p>
@@ -119,8 +122,9 @@
                                     </div>
                                 </div>
                             </div>
+                            </div>
 
-                            <button class="generateProblem-btn" onclick={showSampleData}>Sample Data and Expected
+                            <button class="sampleData-btn" onclick={showSampleData}>Sample Data and Expected
                                 Output</button>
 
                         </template>
@@ -128,7 +132,7 @@
 
 
 
-                </div>
+                
             </section>
 
             <!-- CODE EDITOR -->

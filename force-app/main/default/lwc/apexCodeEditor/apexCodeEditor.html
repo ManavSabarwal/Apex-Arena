@@ -1,0 +1,41 @@
+<template>
+    <div class="editor-container">
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <span class="title">Apex Editor</span>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor-wrapper">
+
+            <!-- Line Numbers -->
+            <div class="line-numbers">
+                <template for:each={lineNumbers} for:item="line">
+                    <div key={line}>{line}</div>
+                </template>
+            </div>
+
+            <!-- Code Area -->
+            <div class="code-container">
+
+                <!-- Highlight Layer -->
+                <pre class="highlight-layer">
+<code lwc:dom="manual" class="highlight-code"></code>
+                </pre>
+
+                <!-- Input Layer -->
+                <textarea
+                    class="editor-input"
+                    value={code}
+                    oninput={handleInput}
+                    onkeydown={handleKeyDown}
+                    onscroll={syncScroll}
+                    spellcheck="false"
+                ></textarea>
+
+            </div>
+
+        </div>
+    </div>
+</template>

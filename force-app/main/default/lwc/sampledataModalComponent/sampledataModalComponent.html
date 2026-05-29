@@ -1,31 +1,29 @@
 <template>
 
     <template if:true={showModal}>
-        
+
         <!-- BACKDROP -->
         <div class="backdrop"></div>
 
         <!-- MODAL -->
         <section class="modal-container">
 
-            <!-- CLOSE -->
-            <button class="close-btn" onclick={closeModal}>
-                ✕
-            </button>
-
-            <div class="data-container">
-
+                <div class="sample-data-header">
+                    <h1 class="sample-data-label">Sample Data</h1>
+                    <button class="close-btn" onclick={closeModal}>✕</button>
+                </div>
                 <div class="sample-data-container">
-                    <h1 class = "sample-data-label">Sample Data</h1>
-                    <pre class="sample-data">{sampleData}</pre>
+                    <template for:each={sampleData} for:item="item">
+                        <div key={item.id} class="sample-data">
+                            <p class="scenario-label">Scenario {item.Id}</p>
+                            <div class="text-class">
+                            <pre class="sample-data-text">{item.scenario}</pre>
+                            <pre class="expected-output">{item.expectedOutput}</pre>
+                            </div>
+                        </div>
+                    </template>
                 </div>
-                <div class="expected-output-container">
-                    <h1 class="expected-output-label">Expected Output</h1>
-                    <pre class="expected-output">{expectedOutput}</pre>
-                </div>
-
-            </div>
 
         </section>
-    
-</template>
+
+    </template>

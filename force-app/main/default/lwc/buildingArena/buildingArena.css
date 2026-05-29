@@ -456,18 +456,43 @@
 }
 
 .bottom-problem-details{
-    display:flex;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    grid-template-columns: 1fr 1fr;
+    padding: 0px 10px;
+    margin-bottom: 10px;
 }
 
 .data-card
 {
     display:flex;
-    padding:15px 15px;
-    text-align: center;
+    padding: 10px 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 0 15px rgba(69, 29, 163, 0.35);
+    border-radius: 10px;
+    
+    gap: 5px;
+    font-size: 15px;
+    align-items: center;
 }
 .estTime{
     color:#5a81c5;
 
+}
+
+.sampleData-btn{
+        border-radius: 10px;
+    background: transparent;
+    border: 1px solid rgb(55 33 76);
+    color: #dcceff;
+    width: 100%;
+    padding: 10px;
+    
+}
+.sampleData-btn:hover{
+    box-shadow: -2px -2px 12px rgb(55 33 76);
 }
 
 
