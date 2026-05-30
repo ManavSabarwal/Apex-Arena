@@ -35,7 +35,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     scenarioResults = '';
     recommendations = '';
     compilationStatus = '';
-
+    score = 0;
     submitting = false;
     isReadonly = true;
     savedId = '';
@@ -56,6 +56,14 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                     url: '/'
                 }
             });
+        }
+    }
+
+    renderedCallback() {
+        const logContainer = this.template.querySelector('.code');
+
+        if (logContainer) {
+            logContainer.scrollTop = logContainer.scrollHeight;
         }
     }
 
@@ -317,17 +325,15 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         this.submitting = true;
         this.loadingMessages = [];
         const timestamp = '[ ' + new Date(Date.now()).toLocaleTimeString('en-GB') + ' ]';
-
+        this.loadingMessages.push(timestamp + ' Initializing Apex Runtime...\n');
         const steps = [
             timestamp + ' Connecting to Challenge Engine...\n',
-            timestamp + ' Initializing Apex Runtime...\n',
             timestamp + ' Saving Solution...\n',
             timestamp + ' Executing Apex Tests...\n',
             timestamp + ' Validating Business Rules...\n',
             timestamp + ' Running Hidden Test Cases...\n',
             timestamp + ' Calculating Performance Score...\n',
-            timestamp + ' Creating Challenge Attempt...\n',
-            timestamp + ' Submission Complete'
+            timestamp + ' Creating Challenge Attempt...\n'
         ];
 
         let currentIndex = 0;
@@ -340,12 +346,12 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                 ];
                 currentIndex++;
             }
-        }, 3000);
+        }, Math.floor(Math.random() * 2001) + 2000);
         try {
             console.log('Submitting solution...');
 
             this.isReadonly = true;
-            const response = await invokeValidationPromptCoding({ scenario: this.scenario, solution: this.textAreacode, sampleData: this.sampleData, expectedOutput: this.expectedOutput, requirements: this.requirements });
+            const response = await invokeValidationPromptCoding({ scenario: this.scenario, solution: this.textAreacode, sampleData: this.sampleData, submissionType: 'Submit', requirements: this.requirements });
             console.log('Submission Response:', response);
 
             clearInterval(intervalId);
@@ -365,9 +371,10 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             this.thegood = response.goodCodeReview;
             this.recommendations = response.recommendedImprovements;
             this.scenarioResults = response.scenarioResults;
+            this.score = response.score;
             console.log(this.scenarioResults);
 
-
+            this.loadingMessages.push(timestamp + ' Submission Complete\n');
 
 
         } catch (error) {

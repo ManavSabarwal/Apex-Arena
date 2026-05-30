@@ -175,7 +175,14 @@
                 </div>
                 <div class="footer-console">
                     <span class="console-label-text">Console</span>
-                    <code>{loadingMessages}</code>
+                    <div class="code">
+                    <template for:each={loadingMessages} for:item="item">
+                        
+                            <code key={item}>{item}</code>
+                        
+                        
+                    </template>
+                    </div>
                 </div>
 
             </section>

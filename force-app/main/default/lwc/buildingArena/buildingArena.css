@@ -498,18 +498,6 @@
 
 /* EDITOR */
 
-.editor-panel {
-    display: grid;
-    align-content: start;
-}
-
-.editor-toolbar {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-
-    padding: 18px 24px;
-}
 
 .card-header{
     padding: 10px; 
@@ -565,12 +553,11 @@
     font-size: 12px;
     white-space: pre;
     font-family: Consolas, Monaco, monospace;
-    flex: 1;
-    margin: 10px;
+    margin: 10px 10px 5px 10px;
     overflow-y: auto;
     overflow-x: auto;
     background-color: #000025;
-    height: 55vh;
+    height: 60vh;
     resize: none;
     width: stretch;
 
@@ -613,7 +600,7 @@
 .editor-footer {
     display: grid;
     gap: 16px;
-    padding: 20px 10px;
+    padding: 0px 10px 10px;
     grid-template-columns: 1fr 1fr;
 }
 
@@ -669,14 +656,16 @@
     border-radius: 10px;
 }
 
-code{
+.code{
     font-family: monospace, monospace;
-    font-size: 1em;
+    font-size: 13px;
     height: 130px;
     overflow-y: auto;
     padding: 10px;
     background: linear-gradient(45deg, black, transparent);
     border-radius: 10px;
+    white-space: pre;
+    color:rgb(155,155,155);
 }
 .console-label-text{
     background: linear-gradient(135deg, rgb(7 16 40 / 70%), transparent);

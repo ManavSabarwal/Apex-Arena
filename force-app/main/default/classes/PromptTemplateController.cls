@@ -6,6 +6,7 @@ public with sharing class PromptTemplateController {
     public class ValidationResponseWrapper {
         @AuraEnabled public String overallVerdict;
         @AuraEnabled public String compilationStatus;
+        @AuraEnabled public Integer score;
 
         @AuraEnabled public List<String> badCodeReview;
         @AuraEnabled public List<String> goodCodeReview;
@@ -98,20 +99,16 @@ public with sharing class PromptTemplateController {
 }
 
         @AuraEnabled
-        public static ValidationResponseWrapper invokeValidationPromptCoding(String scenario,String solution,string sampleData,string expectedOutput,string requirements){
+        public static ValidationResponseWrapper invokeValidationPromptCoding(String scenario,String solution,string sampleData,string submissionType,string requirements){
             try {
-                    if(scenario.length()>=80)
-                    {
-                        scenario= scenario.substring(0, 76) + '...';
-                    }
                     ConnectApi.WrappedValue inputValueMapScenario = new ConnectApi.WrappedValue();
                     inputValueMapScenario.value = scenario;
                     ConnectApi.WrappedValue inputValueMapSolution = new ConnectApi.WrappedValue();
                     inputValueMapSolution.value = solution ;
                     ConnectApi.WrappedValue inputValueMapsampleData = new ConnectApi.WrappedValue();
                     inputValueMapsampleData.value = sampleData;
-                    ConnectApi.WrappedValue inputValueMapexpectedOutput = new ConnectApi.WrappedValue();
-                    inputValueMapexpectedOutput.value = expectedOutput;
+                    ConnectApi.WrappedValue inputValueMapsubmissionType = new ConnectApi.WrappedValue();
+                    inputValueMapsubmissionType.value = submissionType;
                     ConnectApi.WrappedValue inputValueMaprequirements = new ConnectApi.WrappedValue();
                     inputValueMaprequirements.value = requirements;
 
@@ -119,7 +116,7 @@ public with sharing class PromptTemplateController {
                     inputParams.put('Input:Scenario', inputValueMapScenario);
                     inputParams.put('Input:SolutionCode', inputValueMapSolution);
                     inputParams.put('Input:SampleData', inputValueMapsampleData);
-                    inputParams.put('Input:ExpectedOutput', inputValueMapexpectedOutput);
+                    inputParams.put('Input:SubmissionType', inputValueMapsubmissionType);
                     inputParams.put('Input:Requirements', inputValueMaprequirements);
                     
 
@@ -137,6 +134,7 @@ public with sharing class PromptTemplateController {
                     wrapper.recommendedImprovements = toStringList(mapResponse.get('recommendedImprovements'));
 
                     wrapper.scenarioResults = (List<Object>) mapResponse.get('scenarioResults');
+                    wrapper.score=(Integer) mapResponse.get('score');
 
                     return wrapper;
                     
