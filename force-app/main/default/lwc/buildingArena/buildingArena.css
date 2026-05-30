@@ -499,8 +499,8 @@
 /* EDITOR */
 
 .editor-panel {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    align-content: start;
 }
 
 .editor-toolbar {
@@ -519,38 +519,52 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    font-weight: 700;
+    justify-content: center;
+}
+.one,.two,.three,.four{
+    border-radius: 50%;
+    padding:2px 10px;
+    border:1px solid #434354;
+    background: transparent;
+}
+.generate{
+    font-size: 14px;
+}
+.line{
+    font-weight: 300;
+    color: #616171;
 }
 
-.editor-area {
-    flex: 1;
-    margin: 0 20px;
-
-    border-radius: 18px;
-
-    background: rgba(3, 7, 18, 0.7);
-    border: 1px solid rgba(255,255,255,0.05);
-
-    overflow: scroll;
+.highlighted{
+    background-color: #7603c2;
+    border:0px solid #000025;
 }
+
+.completed{
+    background-color: #22cd86;
+    border:0px solid #000025;
+}
+
 
 .code-editor{
     background: rgba(3, 7, 18, 0.7);
     color: #d6d6e9;
-    min-width: 100%;
     min-height: 100%;
     max-height: 100%;
     max-width: 100%;
-    border-radius: 18px;
+    border-radius: 5px;
     padding: 10px 10px 0px 10px;
     overflow: auto;
-    font-size: 13px;
+    font-size: 12px;
     white-space: pre;
-    font-family:
-        Consolas,
-        Monaco,
-        monospace;
+    font-family: Consolas, Monaco, monospace;
     flex: 1;
+    margin: 10px;
+    overflow-y: auto;
+    overflow-x: auto;
+    background-color: #000025;
+    height: 55vh;
+    resize: none;
 
 }
 
@@ -593,7 +607,34 @@
     opacity: 0.7;
 }
 
+.secondary-btn {
+    background: linear-gradient(
+        135deg,
+        #1da36b,
+        #009a4d
+    );
+    color: white;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
 
+    padding: 5px 10px;
+
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(69,29,163,0.35);
+}
+
+.secondary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(69,29,163,0.35);
+}
+
+.secondary-btn:disabled{
+    background-color: #d3d3d3;
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
 
 /* ACTIVITY */
 

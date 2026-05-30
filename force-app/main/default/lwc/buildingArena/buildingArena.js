@@ -43,6 +43,8 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
     isLoggedIn = false;
 
+    
+
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
         console.log(this.loginName);
@@ -79,6 +81,20 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         return this.isProblemHidden
             ? 'problemSection collapsed'
             : 'problemSection problemSectionexpanded';
+    }
+
+    get one()
+    {
+        return this.dataLoaded
+            ? 'one completed'
+            : 'one highlighted'
+    }
+
+    get two()
+    {
+        return this.dataLoaded
+            ? 'two highlighted'
+            : 'two'
     }
     hideProblemOptions() {
 

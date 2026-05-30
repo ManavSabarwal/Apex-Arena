@@ -139,19 +139,23 @@
             <section class="glass-card editor-panel">
 
                 <div class="card-header">
-                    <span class="header-main">Code Editor</span>
+                    <div class="header-main">
+                        <span class={one}>1</span><p class="generate">Generate</p><p class="line">─────</p>
+                        <span class={two}>2</span><p class="generate">Code</p><p class="line">─────</p>
+                        <span class="three">3</span><p class="generate">Test</p><p class="line">─────</p>
+                        <span class="four">4</span><p class="generate">Submit</p>
+                    </div>
                 </div>
 
-                <div class="editor-area">
                     <textarea class="code-editor"
                         placeholder="*Once the problem is generated, you'll be able to write your code here"
                         onkeyup={handleCodeChange} onkeydown={tabspacing}
                         readonly={isReadonly}>{textAreacode}</textarea>
 
-                </div>
 
                 <div class="editor-footer">
-                    <button class="primary-btn" onclick={submitSolution} disabled={isReadonly}>Submit Solution</button>
+                    <button class="primary-btn" onclick={submitSolution} disabled={isReadonly}>Run Code </button>
+                    <button class="secondary-btn" onclick={submitSolution} disabled={isReadonly}>Submit Solution</button>
                 </div>
 
             </section>
