@@ -42,8 +42,8 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     passed = false;
 
     isLoggedIn = false;
+    loadingMessages = ['Nothing yet'];
 
-    
 
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
@@ -83,18 +83,22 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             : 'problemSection problemSectionexpanded';
     }
 
-    get one()
-    {
+    get one() {
         return this.dataLoaded
             ? 'one completed'
-            : 'one highlighted'
+            : 'one highlighted';
     }
 
-    get two()
-    {
+    get two() {
         return this.dataLoaded
             ? 'two highlighted'
-            : 'two'
+            : 'two';
+    }
+
+    get cod() {
+        return this.dataLoaded
+            ? 'generetae gen-highlighted'
+            : 'generate';
     }
     hideProblemOptions() {
 
@@ -310,12 +314,51 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     }
 
     async submitSolution() {
+        this.submitting = true;
+        this.loadingMessages = [];
+        const timestamp = '[ ' + new Date(Date.now()).toLocaleTimeString('en-GB') + ' ]';
+
+        const steps = [
+            timestamp + ' Connecting to Challenge Engine...\n',
+            timestamp + ' Initializing Apex Runtime...\n',
+            timestamp + ' Saving Solution...\n',
+            timestamp + ' Executing Apex Tests...\n',
+            timestamp + ' Validating Business Rules...\n',
+            timestamp + ' Running Hidden Test Cases...\n',
+            timestamp + ' Calculating Performance Score...\n',
+            timestamp + ' Creating Challenge Attempt...\n',
+            timestamp + ' Submission Complete'
+        ];
+
+        let currentIndex = 0;
+
+        const intervalId = setInterval(() => {
+            if (currentIndex < steps.length) {
+                this.loadingMessages = [
+                    ...this.loadingMessages,
+                    steps[currentIndex]
+                ];
+                currentIndex++;
+            }
+        }, 3000);
         try {
             console.log('Submitting solution...');
-            this.submitting = true;
+
             this.isReadonly = true;
             const response = await invokeValidationPromptCoding({ scenario: this.scenario, solution: this.textAreacode, sampleData: this.sampleData, expectedOutput: this.expectedOutput, requirements: this.requirements });
             console.log('Submission Response:', response);
+
+            clearInterval(intervalId);
+            // Add all remaining messages immediately
+            if (currentIndex < steps.length) {
+                this.loadingMessages = [
+                    ...this.loadingMessages,
+                    ...steps.slice(currentIndex)
+                ];
+            }
+
+            // Small delay so user sees final messages
+            await new Promise(resolve => setTimeout(resolve, 500));
             this.result = response.overallVerdict;
             this.compilationStatus = response.compilationStatus;
             this.thebad = response.badCodeReview;

@@ -140,12 +140,14 @@
 
                 <div class="card-header">
                     <div class="header-main">
-                        <span class={one}>1</span><p class="generate">Generate</p><p class="line">─────</p>
-                        <span class={two}>2</span><p class="generate">Code</p><p class="line">─────</p>
+                        <span class={one}>1</span><p class="generetae gen-highlighted">Generate</p><p class="line">─────</p>
+                        <span class={two}>2</span><p class={cod}>Code</p><p class="line">─────</p>
                         <span class="three">3</span><p class="generate">Test</p><p class="line">─────</p>
                         <span class="four">4</span><p class="generate">Submit</p>
                     </div>
                 </div>
+                <div>
+                <template if:true={dataLoaded}>
 
                     <textarea class="code-editor"
                         placeholder="*Once the problem is generated, you'll be able to write your code here"
@@ -156,6 +158,24 @@
                 <div class="editor-footer">
                     <button class="primary-btn" onclick={submitSolution} disabled={isReadonly}>Run Code </button>
                     <button class="secondary-btn" onclick={submitSolution} disabled={isReadonly}>Submit Solution</button>
+                </div>
+                </template>
+                <template if:false={dataLoaded}>
+                        <div class="noData-class">
+                            
+                            <div class="no-data-icon">
+                                <span style="color:rgb(155 155 155);">&lt;/&gt;</span>
+                                <span class="cross">×</span>
+                            </div>
+
+                            <h1 style="color:rgb(155 155 155);">Generate New Problem</h1>
+
+                        </div>
+                </template>
+                </div>
+                <div class="footer-console">
+                    <span class="console-label-text">Console</span>
+                    <code>{loadingMessages}</code>
                 </div>
 
             </section>
