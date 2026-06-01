@@ -12,7 +12,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     isProblemOptionHidden = false;
     isProblemHidden = false;
     expReward = 0;
-    estimatedTime = '10:00'
+    estimatedTime = '10:00';
 
     loginName = '';
     problem;
@@ -27,10 +27,15 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     dataLoaded = false;
     difficultyfromPrompt = '';
     result = 'Pending';
+    resultIcon = '⏳';
+    testCaseCount=0;
+    passedTestCases=0;
+    testReadonly=true;
+    submitReadOnly=true;
+    testdone=false;
 
-
-    thegood = 'Submit your code for review...';
-    thebad = 'Submit your code for review...';
+    thegood = ['Submit your solution to see detailed feedback.'];
+    thebad = ['Submit your solution to see detailed feedback.'];
 
     scenarioResults = '';
     recommendations = '';
@@ -80,9 +85,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     }
 
     get arrowIcon() {
-        return this.isProblemOptionHidden
-            ? '⌄'
-            : '^';
+        return this.isProblemOptionHidden ? '▼' : '▲'
     }
 
     get problemSectionClass() {
@@ -99,15 +102,33 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
     get two() {
         return this.dataLoaded
-            ? 'two highlighted'
+            ? this.testdone==true? 'two completed' : 'two highlighted'
             : 'two';
     }
 
     get cod() {
         return this.dataLoaded
-            ? 'generetae gen-highlighted'
+            ? 'generate gen-highlighted'
             : 'generate';
     }
+
+    get three(){
+        return this.testdone==true? 'three completed' : 'three';
+    }
+
+    get test(){
+        return this.testdone==true? 'generate gen-highlighted' : 'generate';
+    }
+
+    get four(){
+        return this.result.toLowerCase().includes('pass')? 'four completed' : 'four';
+    }
+
+    get sub()
+    {
+        return this.result.toLowerCase().includes('pass')? 'generate gen-highlighted' : 'generate';
+    }
+
     hideProblemOptions() {
 
         this.isProblemOptionHidden = !this.isProblemOptionHidden;
@@ -172,12 +193,15 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         this.textAreacode = '';
         this.isReadonly = true;
         this.submitCount = 0;
+        this.testReadonly = true;
+        this.submitReadOnly=true;
+
 
 
         //reseting the results we get after submitting the solution
         this.result = 'Pending';
-        this.thebad = 'Submit your code for review...';
-        this.thegood = 'Submit your code for review...';
+        this.thebad = ['Submit your solution to see detailed feedback.'];
+        this.thegood = ['Submit your solution to see detailed feedback.'];
         this.scenarioResults = '';
         this.recommendations = '';
         this.compilationStatus = '';
@@ -228,6 +252,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         } finally {
             this.isLoading = false;
             this.isReadonly = false;
+            this.testReadonly = false;
             response = '';
             try {
 
@@ -321,9 +346,20 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         return `type-btn ${this.type === 'Test Class' ? 'active' : ''}`;
     }
 
-    async submitSolution() {
+    get progressStyle() {
+    return `--progress:${this.score * 3.6}deg`;
+}
+
+    async submitSolution(event) {
         this.submitting = true;
+        this.passedTestCases=0;
+        this.testCaseCount=0;
         this.loadingMessages = [];
+        const actionType = event.currentTarget.dataset.id;
+        if(actionType==='Test')
+        {
+            this.testdone = true;
+        }
         const timestamp = '[ ' + new Date(Date.now()).toLocaleTimeString('en-GB') + ' ]';
         this.loadingMessages.push(timestamp + ' Initializing Apex Runtime...\n');
         const steps = [
@@ -351,7 +387,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             console.log('Submitting solution...');
 
             this.isReadonly = true;
-            const response = await invokeValidationPromptCoding({ scenario: this.scenario, solution: this.textAreacode, sampleData: this.sampleData, submissionType: 'Submit', requirements: this.requirements });
+            const response = await invokeValidationPromptCoding({ scenario: this.scenario, solution: this.textAreacode, sampleData: this.sampleData, submissionType: actionType + ' ' + this.difficulty , requirements: this.requirements });
             console.log('Submission Response:', response);
 
             clearInterval(intervalId);
@@ -373,6 +409,14 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             this.scenarioResults = response.scenarioResults;
             this.score = response.score;
             console.log(this.scenarioResults);
+            this.scenarioResults.forEach(item=>{
+                if(item.status.toLowerCase().includes('pass'))
+                {
+                    this.passedTestCases++;
+                }
+                this.testCaseCount++;
+            });
+            this.resultIcon = response.overallVerdict.toLowerCase().includes('pass') ? '✔' : response.overallVerdict.toLowerCase().includes('fail') ? 'x' : '⚠';
 
             this.loadingMessages.push(timestamp + ' Submission Complete\n');
 
@@ -383,6 +427,9 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         finally {
             this.submitting = false;
             this.isReadonly = false;
+            this.testReadonly = false;
+            if(this.testdone==true)
+                this.submitReadOnly = false;
 
             try {
 
@@ -392,16 +439,17 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                         result: this.result,
                         solution: this.textAreacode,
                         thegood: this.thegood.join(',/n'),
-                        thebad: this.thebad.join(',/n')
+                        thebad: this.thebad.join(',/n'),
+                        score:this.score
 
                     }
                 );
 
-                if (saveRes && Object.keys(saveRes).length > 0) {
+                if (saveRes && Object.keys(saveRes).length > 0 && actionType==='Submit') {
                     console.log(saveRes);
                     let attemptId = saveRes.attemptId.toString();
                     if (this.result.toLowerCase().includes('pass')) {
-                        let exppoints = this.template.querySelector('c-modal-component').openModal(this.loginName, this.difficultyfromPrompt, saveRes.oldresult, saveRes.attempt, 'coding');
+                        let exppoints = this.template.querySelector('c-modal-component').openModal(this.loginName, this.difficultyfromPrompt, saveRes.oldresult, saveRes.attempt, 'coding',this.score);
                         if (exppoints != 0) {
                             let updateResponse = await updateExpPoints({
                                 expPoints: exppoints,

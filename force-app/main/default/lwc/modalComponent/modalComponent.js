@@ -9,8 +9,9 @@ export default class ModalComponent extends LightningElement {
     message=''
     updateResponse='';
 
-    @api openModal(username,level,oldresult,attempt,type) {
+    @api openModal(username,level,oldresult,attempt,type,score) {
         this.showModal = true;
+        const scoreValue = parseInt(score, 10);
         const diffLevel=level.toLowerCase();
         if(oldresult.toLowerCase().includes('pass'))
         {
@@ -18,13 +19,14 @@ export default class ModalComponent extends LightningElement {
             this.message='Challenge already completed successfully — XP reward unavailable for repeat clears.';
         }
         else{
-            if(attempt.includes('1'))
-                {
-                    this.multiplier=1.20;
-                    this.message='First Attempt - +20% EXP Points';
-                } 
+            
             if(type==='debug')
             {
+                if(attempt==1)
+                {
+                    this.multiplier=1.5;
+                    this.message='First attempt! 50% XP bonus awarded.';
+                }
                 switch (diffLevel)
                 {
                     case 'beginner': this.exppoints=(50*this.multiplier); break;
@@ -38,6 +40,11 @@ export default class ModalComponent extends LightningElement {
             }
             else if(type==='coding')
             {
+                if(scoreValue>=95)
+                {
+                    this.multiplier=1.20;
+                    this.message='Score of 95% or above achieved! 20% XP bonus awarded.';
+                } 
                 switch (diffLevel)
                 {
                     case 'beginner': this.exppoints=Math.round(80*this.multiplier); break;

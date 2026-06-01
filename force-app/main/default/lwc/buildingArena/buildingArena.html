@@ -83,10 +83,10 @@
                         </div>
                     </template>
                 </div>
-                
-                    <template if:false={isLoading}>
-                        <template if:true={dataLoaded}>
-                            <div class="scrollable-content glass-card">
+
+                <template if:false={isLoading}>
+                    <template if:true={dataLoaded}>
+                        <div class="scrollable-content glass-card">
 
                             <div class="problem-title-container" onclick={hideProblem}>
                                 <p class="problem-detail">Problem Details</p>
@@ -106,15 +106,17 @@
                                 </div>
 
                                 <div class="bottom-problem-details">
-                                    <div class="data-card estTime" >
-                                        <span style="color:#38bdf8;font-size:2.2rem;text-shadow:0 0 10px rgba(56, 189, 248, 0.7);">⏱</span>
+                                    <div class="data-card estTime">
+                                        <span
+                                            style="color:#38bdf8;font-size:2.2rem;text-shadow:0 0 10px rgba(56, 189, 248, 0.7);">⏱</span>
                                         <div style="display:grid">
                                             <p>Estimated Time</p>
                                             <p>{estimatedTime}</p>
                                         </div>
                                     </div>
                                     <div class="data-card expRew">
-                                        <span style="color:#facc15;font-size:2.2rem;text-shadow:0 0 10px rgba(250, 204, 21, 0.7);">☆</span>
+                                        <span
+                                            style="color:#facc15;font-size:2.2rem;text-shadow:0 0 10px rgba(250, 204, 21, 0.7);">☆</span>
                                         <div style="display:grid">
                                             <p>Exp Reward</p>
                                             <p>{expReward}</p>
@@ -122,17 +124,17 @@
                                     </div>
                                 </div>
                             </div>
-                            </div>
+                        </div>
 
-                            <button class="sampleData-btn" onclick={showSampleData}>Sample Data and Expected
-                                Output</button>
+                        <button class="sampleData-btn" onclick={showSampleData}>Sample Data and Expected
+                            Output</button>
 
-                        </template>
                     </template>
+                </template>
 
 
 
-                
+
             </section>
 
             <!-- CODE EDITOR -->
@@ -140,29 +142,38 @@
 
                 <div class="card-header">
                     <div class="header-main">
-                        <span class={one}>1</span><p class="generetae gen-highlighted">Generate</p><p class="line">─────</p>
-                        <span class={two}>2</span><p class={cod}>Code</p><p class="line">─────</p>
-                        <span class="three">3</span><p class="generate">Test</p><p class="line">─────</p>
-                        <span class="four">4</span><p class="generate">Submit</p>
+                        <span class={one}>1</span>
+                        <p class="generate gen-highlighted">Generate</p>
+                        <p class="line">─────</p>
+                        <span class={two}>2</span>
+                        <p class={cod}>Code</p>
+                        <p class="line">─────</p>
+                        <span class={three}>3</span>
+                        <p class={test}>Test</p>
+                        <p class="line">─────</p>
+                        <span class={four}>4</span>
+                        <p class={sub}>Submit</p>
                     </div>
                 </div>
                 <div>
-                <template if:true={dataLoaded}>
+                    <template if:true={dataLoaded}>
 
-                    <textarea class="code-editor"
-                        placeholder="*Once the problem is generated, you'll be able to write your code here"
-                        onkeyup={handleCodeChange} onkeydown={tabspacing}
-                        readonly={isReadonly}>{textAreacode}</textarea>
+                        <textarea class="code-editor"
+                            placeholder="*Once the problem is generated, you'll be able to write your code here"
+                            onkeyup={handleCodeChange} onkeydown={tabspacing}
+                            readonly={isReadonly}>{textAreacode}</textarea>
 
 
-                <div class="editor-footer">
-                    <button class="primary-btn" onclick={submitSolution} disabled={isReadonly}>Run Code </button>
-                    <button class="secondary-btn" onclick={submitSolution} disabled={isReadonly}>Submit Solution</button>
-                </div>
-                </template>
-                <template if:false={dataLoaded}>
+                        <div class="editor-footer">
+                            <button class="primary-btn" onclick={submitSolution} disabled={testReadonly} data-id="Test">Run Code (Test)
+                            </button>
+                            <button class="secondary-btn" onclick={submitSolution} disabled={submitReadOnly} data-id="Submit">Submit
+                                Solution</button>
+                        </div>
+                    </template>
+                    <template if:false={dataLoaded}>
                         <div class="noData-class">
-                            
+
                             <div class="no-data-icon">
                                 <span style="color:rgb(155 155 155);">&lt;/&gt;</span>
                                 <span class="cross">×</span>
@@ -171,17 +182,17 @@
                             <h1 style="color:rgb(155 155 155);">Generate New Problem</h1>
 
                         </div>
-                </template>
+                    </template>
                 </div>
                 <div class="footer-console">
                     <span class="console-label-text">Console</span>
                     <div class="code">
-                    <template for:each={loadingMessages} for:item="item">
-                        
+                        <template for:each={loadingMessages} for:item="item">
+
                             <code key={item}>{item}</code>
-                        
-                        
-                    </template>
+
+
+                        </template>
                     </div>
                 </div>
 
@@ -198,23 +209,43 @@
                 <template if:false={submitting}>
                     <div class="glass-card results-panel">
                         <p class="result-label">Result</p>
-                        <span class={resultClass}>{result}</span>
-                    </div>
+                        <span class={resultClass}><span class={resultIcon}>{resultIcon}</span>{result}</span>
 
-                    <button class="primary-btn" onclick={showResults} disabled={isReadonly}>Show Scenario
-                        Results</button>
+                        <div class="compile-panel">
+                            <p class="compile-label">Compilation Status</p>
+                            <p class="compile-text">{compilationStatus}</p>
+                        </div>
 
-                    <div class="glass-card compile-panel">
-                        <p class="compile-label">Compilation Status</p>
-                        <p class="compile-text">{compilationStatus}</p>
+                        <div class="compile-panel">
+                            <p class="compile-label">Test Cases Passed</p>
+                            <p class="test-text">{passedTestCases} / {testCaseCount}</p>
+                        </div>
+                        <div class="score-card">
+                            <p class="compile-label">Score</p>
+                            <div class="score-circle" style={progressStyle}>
+                                <div class="score-inner">
+                                    <div class="score-value">{score}%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="primary-btn" onclick={showResults} disabled={isReadonly}>Show Scenario Results</button>
                     </div>
 
                     <div class="glass-card codeReview-panel">
-                        <p class="compile-label">Code Review</p>
-                        <p class="codereview-label">The Good</p>
-                        <p class="compile-text thegood">{thegood}</p>
-                        <p class="codereview-label">The Bad</p>
-                        <p class="compile-text thebad ">{thebad}</p>
+                        <p class="compile-label">Code Review (AI)</p>
+                        <p class="codereview-label">Strengths</p>
+                        <div class="compile-text thegood ">
+                        <template for:each={thegood} for:item="item">
+                            <p key={item} >✔{item}</p>
+                        </template>
+                        </div>
+                        <p class="codereview-label">Areas for Improvement</p>
+                        <div class="compile-text thebad ">
+                        <template for:each={thebad} for:item="item">
+                            <p key={item} >⚠{item}</p>
+                        </template>
+                        </div>
                     </div>
                 </template>
             </section>

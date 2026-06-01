@@ -6,62 +6,71 @@
         <!-- HEADER -->
         <div class="navbar">
 
-                <div class="logo-section">
-                    <div class="logo-icon">AA</div>
-                    <div class="logo-text">Apex Arena</div>
-                </div>
-
-                <div class="nav-links">
-                    <a class="active-link">Homepage</a>
-                    <a>Contact</a>
-                </div>
-
-                <div class="nav-right">
-
-                    <div class="user-box" >
-                        <span onclick={choosePath}>Choose Path</span>
-                    </div>
-
-                    <div class="user-box" title="Click to open profile" onclick={openProfile}>
-                        <div class="avatar"></div>
-                        <span>{loginName}</span>
-                    </div>
-                </div>
-
+            <div class="logo-section">
+                <div class="logo-icon">AA</div>
+                <div class="logo-text">Apex Arena</div>
             </div>
+
+            <div class="nav-links">
+                <a class="active-link">Homepage</a>
+                <a>Contact</a>
+            </div>
+
+            <div class="nav-right">
+
+                <div class="user-box">
+                    <span onclick={choosePath}>Choose Path</span>
+                </div>
+
+                <div class="user-box" title="Click to open profile" onclick={openProfile}>
+                    <div class="avatar"></div>
+                    <span>{loginName}</span>
+                </div>
+            </div>
+
+        </div>
 
         <!-- MAIN CONTENT -->
         <div class="main-layout">
 
             <!-- PROBLEM PANEL -->
-            <section class="glass-card problem-panel">
+            <section class="problem">
 
-                <div class="problem-header" >
-                    <p>Problem</p>
+                <div class="glass-card problem-panel">
 
-                </div>
-
-                <div class="difficulty-container">
-                    <span class="difficultylabel">Difficulty</span>
-                    <div class="difficulty-options">
-                    <button class={easyClass} data-value="Easy" onclick={handleDifficulty}>Easy</button>
-                    <button class={mediumClass} data-value="Medium" onclick={handleDifficulty}>Medium</button>
-                    <button class={hardClass} data-value="Hard" onclick={handleDifficulty}>Hard</button>
+                    <div class="problem-header" onclick={hideProblemOptions}>
+                        <p>Problem Options</p>
+                        <p id="chevronIcon" class={arrowClass}>{arrowIcon}</p>
                     </div>
-                </div>
 
-                <div class="type-container">
-                    <span class="typelabel">Type</span>
-                    <div class="type-options">
-                    <button class={SynchronousApex} data-value="Sync Apex" onclick={handleType}>Synchronous Apex</button>
-                    <button class={AsynchronousApex} data-value="Async Apex" onclick={handleType}>Asynchronous Apex</button>
-                    <button class={Trigger} data-value="Trigger" onclick={handleType}>Trigger</button>
-                    <button class={TestClass} data-value="Test Class" onclick={handleType}>Test Class</button>
-                    </div>
-                </div>
-                <button class="generateProblem-btn" onclick={generateProblem}> Generate New Problem</button>
+                    <section class={sectionClass}>
 
-                <div class="scrollable-content">
+                        <div class="difficulty-container">
+                            <span class="difficultylabel">Difficulty</span>
+                            <div class="difficulty-options">
+                                <button class={easyClass} data-value="Easy" onclick={handleDifficulty}>Easy</button>
+                                <button class={mediumClass} data-value="Medium"
+                                    onclick={handleDifficulty}>Medium</button>
+                                <button class={hardClass} data-value="Hard" onclick={handleDifficulty}>Hard</button>
+                            </div>
+                        </div>
+
+                        <div class="type-container">
+                            <span class="typelabel">Type</span>
+                            <div class="type-options">
+                                <button class={SynchronousApex} data-value="Sync Apex" onclick={handleType}>Synchronous
+                                    Apex</button>
+                                <button class={AsynchronousApex} data-value="Async Apex"
+                                    onclick={handleType}>Asynchronous Apex</button>
+                                <button class={Trigger} data-value="Trigger" onclick={handleType}>Trigger</button>
+                                <button class={TestClass} data-value="Test Class" onclick={handleType}>Test
+                                    Class</button>
+                            </div>
+                        </div>
+                        <button class="generateProblem-btn" onclick={generateProblem}> Generate New Problem</button>
+                    </section>
+                </div>
+                <div class="scrollable-content glass-card">
 
                     <template if:true={isLoading}>
                         <div class="loading-state">
@@ -69,36 +78,57 @@
                             <span>Loading problem...</span>
                         </div>
                     </template>
+
                     <template if:false={isLoading}>
                         <template if:true={dataLoaded}>
-                            <div class="problem-title-container">
+                            <div class="problem-title-container" onclick={hideProblem}>
                                 <p class="problem-detail">Problem Details</p>
                                 <p class="problem-title">{problemTitle}</p>
                                 <span class="problemLevel">{difficultyfromPrompt}</span>
                             </div>
-                        
 
-                        <div>
-                            <p class ="scenario-label">Scenario</p>
-                            <p class="scenario-text">{scenario}</p>
-                        </div> 
-                        <div class="error-code-label">
-                                <p>Erroneous Code</p>
-                        </div>
-                        <div class="error-code-container">
-                            
-                            <pre class="error-code-text">
+                            <div class={problemSectionClass}>
+                                <div>
+                                    <p class="scenario-label">Scenario</p>
+                                    <p class="scenario-text">{scenario}</p>
+                                </div>
+                                <div class="error-code-label">
+                                    <p>Erroneous Code</p>
+                                </div>
+                                <div class="error-code-container">
+
+                                    <pre class="error-code-text">
                                 {code}
                             </pre>
-                        </div>
-                        <div class="symptoms">
-                            <p class="symptoms-label">The Symptoms</p>
-                            <p class="symptoms-text">{symptoms}</p>
-                        </div>
+                                </div>
+                                <div class="symptoms">
+                                    <p class="symptoms-label">The Symptoms</p>
+                                    <p class="symptoms-text">{symptoms}</p>
+                                </div>
+
+                                <div class="bottom-problem-details">
+                                    <div class="data-card estTime">
+                                        <span
+                                            style="color:#38bdf8;font-size:2.2rem;text-shadow:0 0 10px rgba(56, 189, 248, 0.7);">⏱</span>
+                                        <div style="display:grid">
+                                            <p>Estimated Time</p>
+                                            <p>{estimatedTime}</p>
+                                        </div>
+                                    </div>
+                                    <div class="data-card expRew">
+                                        <span
+                                            style="color:#facc15;font-size:2.2rem;text-shadow:0 0 10px rgba(250, 204, 21, 0.7);">☆</span>
+                                        <div style="display:grid">
+                                            <p>Exp Reward</p>
+                                            <p>{expReward}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </template>
                     </template>
 
-                    
+
 
                 </div>
             </section>
@@ -109,18 +139,33 @@
                 <div class="card-header">
                     <span class="header-main">Code Editor</span>
                 </div>
+                <div>
+                    <template if:true={dataLoaded}>
 
-                <div class="editor-area">
-                    <textarea class="code-editor"
-                        placeholder="*Once the problem is generated, the erroneous code will be displayed in this section for you to review and modify.
-*Carefully analyze the provided symptoms and identify the sections of code responsible for the issue.
-*Resolve the errors by eliminating or correcting the problematic logic to successfully complete the challenge."
-                    onkeyup={handleCodeChange} onkeydown={tabspacing} readonly={isReadonly}>{textAreacode}</textarea>
+                        <textarea class="code-editor"
+                            placeholder="*Once the problem is generated, you'll be able to write your code here"
+                            onkeyup={handleCodeChange} onkeydown={tabspacing}
+                            readonly={isReadonly}>{textAreacode}</textarea>
 
-                </div>
 
-                <div class="editor-footer">
-                    <button class="primary-btn" onclick={submitSolution} disabled={isReadonly}>Submit Solution</button>
+                        <div class="editor-footer">
+                            <button class="primary-btn" onclick={submitSolution} disabled={isReadonly}
+                                data-id="Submit">Submit
+                                Solution</button>
+                        </div>
+                    </template>
+                    <template if:false={dataLoaded}>
+                        <div class="noData-class">
+
+                            <div class="no-data-icon">
+                                <span style="color:rgb(155 155 155);">&lt;/&gt;</span>
+                                <span class="cross">×</span>
+                            </div>
+
+                            <h1 style="color:rgb(155 155 155);">Generate New Problem</h1>
+
+                        </div>
+                    </template>
                 </div>
 
             </section>
@@ -134,23 +179,32 @@
                     </div>
                 </template>
                 <template if:false={submitting}>
-                <div class="glass-card results-panel">
-                    <p class="result-label">Result</p>
-                    <span class={resultClass}>{result}</span>
-                </div>
+                    <div class="glass-card results-panel">
+                        <p class="result-label">Result</p>
+                        <span class={resultClass}>{result}</span>
+                    </div>
 
-                <div class="glass-card reason-panel">
-                    <p class="reason-label">Reasoning</p>
-                    <p class="reason-text">{reason}</p>
-                </div> 
+                    <div class="glass-card reason-panel">
+                        <p class="reason-label">Reasoning</p>
+                        <p class="reason-text">{reason}</p>
+                    </div>
 
-                <div class="glass-card codeReview-panel">
-                    <p class="reason-label">Code Review</p>
-                    <p class="codereview-label">The Good</p>
-                    <p class="reason-text thegood">{thegood}</p>
-                    <p class="codereview-label">The Bad</p>
-                    <p class="reason-text thebad ">{thebad}</p>
-                </div> 
+                    <div class="glass-card codeReview-panel">
+                        <p class="reason-label">Code Review (AI)</p>
+                        <p class="codereview-label">Strengths</p>
+                        <div class="reason-text thegood">
+                            <template for:each={thegood} for:item="strength">
+                                <p key={strength}>✔{strength}</p>
+                            </template>
+                        </div>
+                        <p class="codereview-label">Areas For Improvement</p>
+
+                        <div class="reason-text thebad ">
+                            <template for:each={thebad} for:item="area">
+                                <p key={area}>⚠{area}</p>
+                            </template>
+                        </div>
+                    </div>
                 </template>
             </section>
 

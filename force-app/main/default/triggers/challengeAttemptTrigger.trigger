@@ -42,12 +42,13 @@ trigger challengeAttemptTrigger on Challenge_Attempt__C (after insert) {
         if (
             parentChallenge.Result__c != null &&
             parentChallenge.Result__c.toLowerCase() == 'pass'
+            
         ) {
             continue;
         }
 
         // Update parent result
-        if (attempt.Result__c != null) {
+        if (attempt.Result__c != null && attempt.Action_Type__c=='Submit') {
 
             parentChallenge.Result__c = attempt.Result__c.toLowerCase();
             recordsToUpdate.add(parentChallenge);

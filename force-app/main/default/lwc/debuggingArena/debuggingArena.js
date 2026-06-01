@@ -9,156 +9,192 @@ import { NavigationMixin } from 'lightning/navigation';
 
 export default class DebuggingArena extends NavigationMixin(LightningElement) {
 
-    loginName='';
+    loginName = '';
     problem;
-    scenario='';
-    code='';
-    textAreacode='';
-    symptoms='';
-    problemTitle='';
-    difficulty='Easy';
-    type='Sync Apex';
-    isLoading=false;
-    dataLoaded=false;
-    difficultyfromPrompt='';
-    result='Pending';
-    reason='No Reasoning Yet';
-    thegood='Submit your code for review...';
-    thebad='Submit your code for review...';
-    optimizedCode='Submit your code for review...';
-    submitting=false;
-    isReadonly=true;
-    savedId='';
-    passed=false;
+    scenario = '';
+    code = '';
+    textAreacode = '';
+    symptoms = '';
+    problemTitle = '';
+    difficulty = 'Easy';
+    type = 'Sync Apex';
+    isLoading = false;
+    dataLoaded = false;
+    difficultyfromPrompt = '';
+    result = 'Pending';
+    reason = 'No Reasoning Yet';
+    thegood = ['Submit your code for review...'];
+    thebad = ['Submit your code for review...'];
+    optimizedCode = 'Submit your code for review...';
+    submitting = false;
+    isReadonly = true;
+    savedId = '';
+    passed = false;
 
-    isLoggedIn=false;
+    isLoggedIn = false;
+    isProblemOptionHidden = false;
+    isProblemHidden = false;
+    expReward = 0;
+    estimatedTime = '10:00';
 
-    connectedCallback()
-    {
-        this.loginName=window.sessionStorage.getItem('loginName');
+    get sectionClass() {
+        return this.isProblemOptionHidden
+            ? 'selectOptions collapsed'
+            : 'selectOptions expanded';
+    }
+
+    get arrowClass() {
+        return this.isProblemOptionHidden
+            ? 'down-arrow'
+            : 'up-arrow';
+    }
+
+    get arrowIcon() {
+        return this.isProblemOptionHidden ? '▼' : '▲';
+    }
+
+    get problemSectionClass() {
+        return this.isProblemHidden
+            ? 'problemSection collapsed'
+            : 'problemSection problemSectionexpanded';
+    }
+
+    connectedCallback() {
+        this.loginName = window.sessionStorage.getItem('loginName');
         console.log(this.loginName);
-        this.isLoggedIn=window.sessionStorage.getItem('isLoggedIn');
-        if(this.loginName ==null || this.isLoggedIn ==null ||this.isLoggedIn ==false)
-        {
+        this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/'
+                }
+            });
+        }
+    }
+
+    openProfile() {
+        window.sessionStorage.setItem('isLoggedIn', true);
+        window.sessionStorage.setItem('loginName', this.loginName);
+        this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
-                url: '/'
+                url: '/userProfile'
             }
         });
-        }
     }
 
-    openProfile()
-    {
-        window.sessionStorage.setItem('isLoggedIn',true);
-        window.sessionStorage.setItem('loginName',this.loginName);
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/userProfile'
-                }
-            });
+    choosePath() {
+        window.sessionStorage.setItem('isLoggedIn', true);
+        window.sessionStorage.setItem('loginName', this.loginName);
+
+
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/choosepath'
+            }
+        });
     }
 
-    choosePath()
-    {
-        window.sessionStorage.setItem('isLoggedIn',true);
-        window.sessionStorage.setItem('loginName',this.loginName);
-        
-        
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/choosepath'
-                }
-            });
-    }
+    hideProblemOptions() {
 
-    get resultClass()
-    {
-        if(this.result==='Pending')
-        {
+        this.isProblemOptionHidden = !this.isProblemOptionHidden;
+    }
+    hideProblem() {
+        this.isProblemHidden = !this.isProblemHidden;
+    }
+    get resultClass() {
+        if (this.result === 'Pending') {
             return 'result-pending';
         }
-        else if(this.result==='Pass' || this.result==='PASS' || this.result.toUpperCase().includes('PASS'))
-        {
+        else if (this.result === 'Pass' || this.result === 'PASS' || this.result.toUpperCase().includes('PASS')) {
             return 'result-passed';
         }
-        else if(this.result==='FAIL' || this.result==='Fail' || this.result.toUpperCase().includes('FAIL'))
-        {
+        else if (this.result === 'FAIL' || this.result === 'Fail' || this.result.toUpperCase().includes('FAIL')) {
             return 'result-failed';
         }
     }
 
-    async generateProblem(event){
-        let response='';
-        let parsedData='';
-        this.textAreacode='';
-        this.isReadonly=true;
-        this.submitCount=0;
+    async generateProblem(event) {
+        let response = '';
+        let parsedData = '';
+        this.textAreacode = '';
+        this.isReadonly = true;
+        this.submitCount = 0;
 
 
         //reseting the results we get after submitting the solution
-        this.result='Pending';
-        this.reason='No Reasoning Yet';
-        this.thebad='Submit your code for review...';
-        this.thegood='Submit your code for review...';
-        this.optimizedCode='Submit your code for review...';
+        this.result = 'Pending';
+        this.reason = 'No Reasoning Yet';
+        this.thebad = ['Submit your code for review...'];
+        this.thegood = ['Submit your code for review...'];
+        this.optimizedCode = 'Submit your code for review...';
 
 
-        try{
-        this.isLoading = true;
-        console.log('Generating problem...');
-        response = await invokePrompt(
-            { 
-                difficulty: this.difficulty, 
-                type: this.type, 
-                UserName: this.loginName,
-                path:'debug'
-            });
+        try {
+            this.isLoading = true;
+            console.log('Generating problem...');
+            response = await invokePrompt(
+                {
+                    difficulty: this.difficulty,
+                    type: this.type,
+                    UserName: this.loginName,
+                    path: 'debug'
+                });
 
-        this.dataLoaded=true;
-        this.problem=response;
-        parsedData = JSON.parse(response);
-        this.scenario=parsedData.Scenario;
-        this.code=parsedData.ErrorCode.replace('```apex','').replace('```','');
-        this.textAreacode=this.code;
-        this.symptoms=parsedData.Requirements;
-        this.problemTitle=parsedData.ProblemTitle;
-        this.difficultyfromPrompt=parsedData.DifficultyMatrixLevel;
-        } catch(error){
+            this.dataLoaded = true;
+            this.problem = response;
+            parsedData = JSON.parse(response);
+            this.scenario = parsedData.Scenario;
+            this.code = parsedData.ErrorCode.replace('```apex', '').replace('```', '');
+            this.textAreacode = this.code;
+            this.symptoms = parsedData.Requirements;
+            this.problemTitle = parsedData.ProblemTitle;
+            this.difficultyfromPrompt = parsedData.DifficultyMatrixLevel;
+
+            switch (this.difficultyfromPrompt) {
+                case 'Beginner': this.estimatedTime = '20:00'; this.expReward = '50 XP'; break;
+                case 'Apprentice': this.estimatedTime = '30:00'; this.expReward = '100 XP'; break;
+                case 'Skilled Developer': this.estimatedTime = '45:00'; this.expReward = '200 XP'; break;
+                case 'Expert Architect': this.estimatedTime = '1:00:00'; this.expReward = '400 XP'; break;
+                case 'Legendary Salesforce Hero': this.estimatedTime = '1:30:00'; this.expReward = '800 XP'; break;
+            }
+
+            if (!this.isProblemOptionHidden) {
+                this.isProblemOptionHidden = !this.isProblemOptionHidden;
+            }
+        } catch (error) {
             console.error('Error generating problem:', error);
-            this.dataLoaded=false;
+            this.dataLoaded = false;
         } finally {
             this.isLoading = false;
-            this.isReadonly=false;
-            response='';
-            try{
+            this.isReadonly = false;
+            response = '';
+            try {
 
-                    this.savedId=await saveAttemptedChallenge({
-                    problemTitle:this.problemTitle,
-                    scenario:this.scenario,
-                    errorcode:this.code,
-                    symptoms:this.symptoms,
-                    type:this.type,
-                    difficultylevel:this.difficulty,
-                    username:this.loginName,
-                    path:'Debugging',
-                    sampledata:'',
-                    expectedOutput:'',
-                    constraints:''
+                this.savedId = await saveAttemptedChallenge({
+                    problemTitle: this.problemTitle,
+                    scenario: this.scenario,
+                    errorcode: this.code,
+                    symptoms: this.symptoms,
+                    type: this.type,
+                    difficultylevel: this.difficulty,
+                    username: this.loginName,
+                    path: 'Debugging',
+                    sampledata: '',
+                    expectedOutput: '',
+                    constraints: ''
                 })
                 console.log('Challenge Saved');
                 console.log(this.savedId);
 
             }
-            catch(error)
-            {
+            catch (error) {
                 console.error('Error generating problem:', error);
             }
 
-            
+
         }
     }
 
@@ -167,27 +203,27 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         console.log('Code updated:', this.textAreacode);
     }
 
-    tabspacing(event){
-       if (event.key === 'Tab') {
+    tabspacing(event) {
+        if (event.key === 'Tab') {
 
-        event.preventDefault();
+            event.preventDefault();
 
-        const textarea = event.target;
+            const textarea = event.target;
 
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
 
-        const spaces = '\t';
+            const spaces = '\t';
 
-        textarea.value =
-            textarea.value.substring(0, start) +
-            spaces +
-            textarea.value.substring(end);
+            textarea.value =
+                textarea.value.substring(0, start) +
+                spaces +
+                textarea.value.substring(end);
 
-        textarea.selectionStart =
-            textarea.selectionEnd =
-            start + spaces.length;
-    }
+            textarea.selectionStart =
+                textarea.selectionEnd =
+                start + spaces.length;
+        }
     }
 
     handleDifficulty(event) {
@@ -199,7 +235,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         this.type = event.currentTarget.dataset.value;
     }
 
-     get easyClass() {
+    get easyClass() {
         return `difficulty-btn ${this.difficulty === 'Easy' ? 'active easy' : ''}`;
     }
 
@@ -211,7 +247,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         return `difficulty-btn ${this.difficulty === 'Hard' ? 'active hard' : ''}`;
     }
 
-     get SynchronousApex() {
+    get SynchronousApex() {
         return `type-btn ${this.type === 'Sync Apex' ? 'active' : ''}`;
     }
 
@@ -227,68 +263,63 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         return `type-btn ${this.type === 'Test Class' ? 'active' : ''}`;
     }
 
-    async submitSolution(){
-        try{
+    async submitSolution() {
+        try {
             console.log('Submitting solution...');
-            this.submitting=true;
-            this.isReadonly=true;
-            const response = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode});
+            this.submitting = true;
+            this.isReadonly = true;
+            const response = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode });
             console.log('Submission Response:', response);
             const parsedResponse = JSON.parse(response);
-            this.result=parsedResponse.Result;
-            this.reason=parsedResponse.Reasoning;
-            this.thebad=parsedResponse.CodeReviewBad;
-            this.thegood=parsedResponse.CodeReviewGood;
-            this.optimizedCode=parsedResponse.ArchitectOptimization;
+            this.result = parsedResponse.Result;
+            this.reason = parsedResponse.Reasoning;
+            this.thebad = parsedResponse.CodeReviewBad;
+            this.thegood = parsedResponse.CodeReviewGood;
+            this.optimizedCode = parsedResponse.ArchitectOptimization;
 
-        }catch(error){
+        } catch (error) {
             console.error('Error submitting solution:', error);
         }
-        finally{
-            this.submitting=false;
-            this.isReadonly=false;
+        finally {
+            this.submitting = false;
+            this.isReadonly = false;
 
-            try{
+            try {
 
-                let saveRes=await createChallengeAttempt(
+                let saveRes = await createChallengeAttempt(
                     {
-                        id:this.savedId,
-                        result:this.result,
-                        solution:this.textAreacode ,
-                        thegood:this.thegood,
-                        thebad:this.thebad
+                        id: this.savedId,
+                        result: this.result,
+                        solution: this.textAreacode,
+                        thegood: this.thegood,
+                        thebad: this.thebad
 
                     }
                 );
 
-                if(saveRes && Object.keys(saveRes).length > 0)
-                {
+                if (saveRes && Object.keys(saveRes).length > 0) {
                     console.log(saveRes);
-                    let attemptId=saveRes.attemptId.toString();
-                    if(this.result.toLowerCase().includes('pass'))
-                    {
-                       let exppoints= this.template.querySelector('c-modal-component').openModal(this.loginName,this.difficultyfromPrompt,saveRes.oldresult,saveRes.attempt,'debug');
-                       if(exppoints!=0)
-                       {
-                            let updateResponse=await updateExpPoints({
-                                    expPoints:exppoints,
-                                    attemptId:attemptId
+                    let attemptId = saveRes.attemptId.toString();
+                    if (this.result.toLowerCase().includes('pass')) {
+                        let exppoints = this.template.querySelector('c-modal-component').openModal(this.loginName, this.difficultyfromPrompt, saveRes.oldresult, saveRes.attempt, 'debug', { score: 0 });
+                        if (exppoints != 0) {
+                            let updateResponse = await updateExpPoints({
+                                expPoints: exppoints,
+                                attemptId: attemptId
 
                             });
-                            console.log(updateResponse + ' - '+ exppoints);
+                            console.log(updateResponse + ' - ' + exppoints);
                         }
                     }
 
                 }
-                else
-                {
+                else {
                     console.log(saveRes);
                     console.log('Error in creating attempt. Check logs');
                 }
 
             }
-            catch(error)
-            {
+            catch (error) {
                 console.log('Error in Creating Attempt');
                 console.log(error);
             }

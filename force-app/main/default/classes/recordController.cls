@@ -70,7 +70,7 @@ public with sharing class recordController {
     }
 
     @AuraEnabled
-    public static Map<String,String> createChallengeAttempt(String id, String result,String solution,string thegood,string thebad){
+    public static Map<String,String> createChallengeAttempt(String id, String result,String solution,string thegood,string thebad,string score){
         try {
 
             List<Attempted_challenge__C> ac=[Select id, attempts__C,result__c from Attempted_challenge__C where id=:id];
@@ -86,6 +86,7 @@ public with sharing class recordController {
                 ca.Solution_Provided__c=solution;
                 ca.Code_Review_Good__c=thegood;
                 ca.Code_Review_Bad__c=thebad;
+                ca.score__c=score;
 
                 res.put('oldresult',ac[0].result__C);
                 res.put('attempt',attempt.toString());
