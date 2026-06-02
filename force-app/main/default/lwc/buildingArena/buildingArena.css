@@ -557,14 +557,14 @@
     overflow-y: auto;
     overflow-x: auto;
     background-color: #000025;
-    height: 60vh;
+    height: 57vh;
     resize: none;
     width: stretch;
 
 }
 .noData-class{
     display: grid;
-    height: 60vh;
+    height: 62vh;
     /* align-items: center; */
     justify-items: center;
     align-content: center;
@@ -818,7 +818,8 @@
 }
 
 .thegood{
-    border-color: rgb(0, 210, 106);
+    border:1px solid rgb(0, 210, 106);
+    border-radius: 10px;
     box-shadow: 0 0 15px rgba(0,210,106,0.35);
     color: #00ff84;
     background-color: rgba(0, 210, 106, 0.2);
@@ -826,7 +827,8 @@
     overflow-y: auto;
 }
 .thebad{
-    border-color: #ff5c7a;
+    border:1px solid #ff5c7a;
+    border-radius: 10px;
     box-shadow: 0 0 15px rgba(255,92,122,0.35);
     color: #ff8ea3;
     background-color: rgba(255,92,122,0.2);

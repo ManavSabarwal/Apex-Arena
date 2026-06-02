@@ -147,10 +147,16 @@ public with sharing class recordController {
     public static List<Challenge_Attempt__C> getUserandChalengeDetails(String username){
         try {
 
-            string queryText='select id,Result__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = \'' + username + '\' ' ;
+            string queryText='select id,Result__c,Name,score__c,Solution_Provided__c,Exp_gained__c,Code_Review_Good__c,Code_Review_Bad__c,Action_Type__c,Attempted_Challenge__r.Scenario__c,Attempted_Challenge__r.Path__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = :username' ;
             List<Challenge_Attempt__C> ca=Database.query(queryText);
-
+            if(ca.size()==0)
+            {
+                 system.debug('No Challenge_Attempt__c records found for the given criteria.');
+            } else {
+                system.debug('Challenge_Attempt__c records retrieved: ' + ca.size());
+            }
             return ca;
+            
 
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
@@ -162,7 +168,7 @@ public with sharing class recordController {
         String searchKey,
         String categoryFilter,
         String difficultyFilter,
-        String pathFilter,String username)
+        String pathFilter,String resultFilter,String username)
       {
 
         if(pageNumber == null || pageNumber <= 0){
@@ -191,6 +197,10 @@ public with sharing class recordController {
 
         if(String.isNotBlank(pathFilter) && pathFilter != 'All Paths'){
             baseQuery += ' AND Path__c = :pathFilter ';
+        }
+
+        if(String.isNotBlank(resultFilter) && resultFilter != 'All Results'){
+            baseQuery += ' AND Result__c = :resultFilter ';
         }
 
         system.debug(baseQuery);
@@ -235,5 +245,117 @@ public with sharing class recordController {
 
         @AuraEnabled
         public Integer totalPages;
+    }
+
+    @AuraEnabled
+    public static List<Map<String,Object>> getHeatmapData(string username){
+        try {
+            List<Challenge_Attempt__c> attempts = [SELECT Id,Attempted_Challenge__r.Name, CreatedDate FROM Challenge_Attempt__c WHERE Attempted_Challenge__r.Apex_Arena_User__r.Name = :username];
+            
+            Map<Date, Integer> activityMap = new Map<Date, Integer>();
+            for(Challenge_Attempt__c attempt : attempts) {
+                Date attemptDate = attempt.CreatedDate.date();
+
+                if(activityMap.containsKey(attemptDate)) {
+                    activityMap.put(attemptDate, activityMap.get(attemptDate) + 1);
+                } else {
+                    activityMap.put(attemptDate, 1);
+                }
+            }
+
+            List<Map<String,Object>> heatmap = new List<Map<String,Object>>();
+
+        for(Integer i = 364; i >= 0; i--) {
+            Date d = Date.today().addDays(-i);
+
+            Integer count = activityMap.containsKey(d)
+                    ? activityMap.get(d)
+                    : 0;
+
+            String level = 'level-0';
+
+            if(count > 0 && count <= 2) {
+                level = 'level-1';
+            } else if(count <= 5) {
+                level = 'level-2';
+            } else if(count <= 10) {
+                level = 'level-3';
+            } else if(count > 10) {
+                level = 'level-4';
+            }
+
+            heatmap.add(new Map<String,Object>{
+                'date' => String.valueOf(d),
+                'count' => count,
+                'cssClass' => 'day ' + level,
+                'tooltip' => String.valueOf(d) + ' - Submitted ' + count + ' challenges'
+            });
+        }
+
+        return heatmap;
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+
+    @AuraEnabled
+    public static List<Map<String, Object>> getAttemptDetails(String challengeId) {
+        try {
+
+            List<Challenge_Attempt__c> attempts = [SELECT Id, Name, Result__c, score__c, Solution_Provided__c, Exp_gained__c, Code_Review_Good__c, Code_Review_Bad__c, Action_Type__c,Attempted_Challenge__r.Name, Attempted_Challenge__r.Scenario__c, Attempted_Challenge__r.Path__c, Attempted_Challenge__r.DifficultyLevel__c, Attempted_Challenge__r.Type__c, Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c WHERE Attempted_Challenge__r.Id = :challengeId];
+            List<Attempted_Challenge__c> ac=[Select id,Name,Result__c,Scenario__C,DifficultyLevel__c,Type__c,Path__c,LastModifiedDate from Attempted_Challenge__c where id=:challengeId];
+            List<Map<String, Object>> attemptDetails = new List<Map<String, Object>>();
+            if(attempts.size()==0){
+                Map<String, Object> details = new Map<String, Object>{
+                    'Id' => null,
+                    'Name' => null,
+                    'Result' => null,
+                    'Score' => null,
+                    'SolutionProvided' => null,
+                    'ExpGained' => null,
+                    'CodeReviewGood' => null,
+                    'CodeReviewBad' => null,
+                    'ActionType' => null,
+                    'ChallengeName'=> ac[0].Name,
+                    'Scenario' => ac[0].Scenario__C,
+                    'Path' => ac[0].Path__c,
+                    'DifficultyLevel' => ac[0].DifficultyLevel__c,
+                    'Type' => ac[0].Type__c,
+                    'TotalExpPoints' => null,
+                    'UserLevel' => null,
+                    'AttemptDate' => null
+                };
+                attemptDetails.add(details);
+            } 
+            else{
+            for(Challenge_Attempt__c attempt : attempts) {
+                Map<String, Object> details = new Map<String, Object>{
+                    'Id' => attempt.Id,
+                    'Name' => attempt.Name,
+                    'Result' => attempt.Result__c,
+                    'Score' => attempt.score__c,
+                    'SolutionProvided' => attempt.Solution_Provided__c,
+                    'ExpGained' => attempt.Exp_gained__c,
+                    'CodeReviewGood' => attempt.Code_Review_Good__c,
+                    'CodeReviewBad' => attempt.Code_Review_Bad__c,
+                    'ActionType' => attempt.Action_Type__c,
+                    'ChallengeName'=> attempt.Attempted_Challenge__r.Name,
+                    'Scenario' => attempt.Attempted_Challenge__r.Scenario__c,
+                    'Path' => attempt.Attempted_Challenge__r.Path__c,
+                    'DifficultyLevel' => attempt.Attempted_Challenge__r.DifficultyLevel__c,
+                    'Type' => attempt.Attempted_Challenge__r.Type__c,
+                    'TotalExpPoints' => attempt.Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c,
+                    'UserLevel' => attempt.Attempted_Challenge__r.Apex_Arena_User__r.Level__c,
+                    'AttemptDate' => attempt.Attempted_Challenge__r.Apex_Arena_User__r.createddate
+                };
+                attemptDetails.add(details);
+            }
+        }
+
+            return attemptDetails;
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
     }
 }

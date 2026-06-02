@@ -5,58 +5,81 @@ import getUserandChalengeDetails from '@salesforce/apex/recordController.getUser
 import getSolvedChallenges from '@salesforce/apex/recordController.getSolvedChallenges';
 
 
+
 export default class UserProfile extends NavigationMixin(LightningElement) {
-    loginName='';
-    limitSize='3';
-    isLoggedIn=false;
-    userLevel='Beginner';
-    userAbout='Code. Compete. Conquer. Forge your legacy in the Apex Arena.';
-    joinDate='May 25, 2026';
-    expPoints='899';
-    submissions=0;
-    solved=0;
-    easy=0;
-    medium=0;
-    hard=0;
-    wrong=0;
-    acceptanceRate=0;
-    recent4problems=[];
-    challengeData=[];
-    pageSize = 6;
+    loginName = '';
+    limitSize = '4';
+    isLoggedIn = false;
+    userLevel = 'Beginner';
+    userAbout = 'Code. Compete. Conquer. Forge your legacy in the Apex Arena.';
+    joinDate = 'May 25, 2026';
+    expPoints = '899';
+    submissions = 0;
+    solved = 0;
+    easy = 0;
+    medium = 0;
+    hard = 0;
+    wrong = 0;
+    acceptanceRate = 0;
+    recent4problems = [];
+    challengeData = [];
+    pageSize = 9;
     currentPage = 1;
 
     totalPages = 0;
     totalRecords = 0;
-    searchKey='';
-    showProfile=true;
-    selectedCategory='All Categories';
-    selectedDifficulty='All Difficulties';
-    selectedPath='All Paths'
-    categoryOptions=[
-                {
-                    label: "All Categories",
-                    value: "All Categories"
-                },
-                {
-                    label: "Synchronous Apex",
-                    value: "Sync Apex"
-                },
-                {
-                    label: "Asynchronous Apex",
-                    value: "Async Apex"
-                },
-                {
-                    label: "Trigger",
-                    value: "Trigger"
-                },
-                {
-                    label: "Test Class",
-                    value: "Test Class"
-                }
-                
-            ];
-        difficultyOptions=[
-            
+    searchKey = '';
+    showProfile = true;
+    selectedCategory = 'All Categories';
+    selectedDifficulty = 'All Difficulties';
+    selectedPath = 'All Paths';
+    selectedResultFilter = 'All Results';
+
+    heatmapData = [];
+
+    resultOptions = [
+        {
+            label: "All Results",
+            value: "All Results"
+        },
+        {
+            label: "Pass",
+            value: "pass"
+        },
+        {
+            label: "Fail",
+            value: "fail"
+        },
+        {
+            label: "Pending",
+            value: "Pending"
+        }
+    ]
+    categoryOptions = [
+        {
+            label: "All Categories",
+            value: "All Categories"
+        },
+        {
+            label: "Synchronous Apex",
+            value: "Sync Apex"
+        },
+        {
+            label: "Asynchronous Apex",
+            value: "Async Apex"
+        },
+        {
+            label: "Trigger",
+            value: "Trigger"
+        },
+        {
+            label: "Test Class",
+            value: "Test Class"
+        }
+
+    ];
+    difficultyOptions = [
+
         {
             label: "All Difficulties",
             value: "All Difficulties"
@@ -73,163 +96,156 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
             label: "Hard",
             value: "Hard"
         }];
-        pathOptions=[{
-            label:"All Paths",
-            value:"All Paths"
-            },
-        {
-            label:"Debugging",
-            value:"Debugging"
-        },
-        {
-            label:"Coding",
-            value:"Coding"
-        }
+    pathOptions = [{
+        label: "All Paths",
+        value: "All Paths"
+    },
+    {
+        label: "Debugging",
+        value: "Debugging"
+    },
+    {
+        label: "Coding",
+        value: "Coding"
+    }
     ]
 
-    connectedCallback()
-        {
-            this.loginName=window.sessionStorage.getItem('loginName');
-            console.log(this.loginName);
-            this.isLoggedIn=window.sessionStorage.getItem('isLoggedIn');
-            if(this.loginName ==null || this.isLoggedIn ==null ||this.isLoggedIn ==false)
-            {
-                this[NavigationMixin.Navigate]({
+
+    connectedCallback() {
+        this.loginName = window.sessionStorage.getItem('loginName');
+        console.log(this.loginName);
+        this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
+            this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
                 attributes: {
                     url: '/'
                 }
             });
-            }
-            else{
-                getUserandChalengeDetails({
-                                username: this.loginName
-                        })
+        }
+        else {
+            getUserandChalengeDetails({
+                username: this.loginName
+            })
 
                 .then(result => {
 
-                        console.log(result);
-                        this.bifData(result);
+                    console.log(result);
+                    this.bifData(result);
                 })
 
                 .catch(error => {
 
-                        console.log(error);
-                });
-            }
-            
-        }
-
-        bifData(result)
-        {
-            console.log('In Function');
-            try{
-                        this.submissions = result.length;
-                        for(let res of result)
-                        {
-                            if(res.Result__c=='Pass')
-                            {
-                                this.solved++;
-                                if(res.Attempted_Challenge__r.DifficultyLevel__c=='Easy' )
-                                {
-                                    this.easy++;
-                                }
-                                else if(res.Attempted_Challenge__r.DifficultyLevel__c=='Medium')
-                                {
-                                    this.medium++;
-                                }
-                                else if(res.Attempted_Challenge__r.DifficultyLevel__c=='Hard')
-                                {
-                                    this.hard++;
-                                }
-                            }
-                            
-                            
-                        }
-                        this.wrong=this.submissions-this.solved;
-                        this.acceptanceRate=((this.solved/this.submissions)*100).toFixed(2);
-                        this.expPoints=result[0].Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c;
-                        this.joinDate= new Date(result[0].Attempted_Challenge__r.Apex_Arena_User__r.CreatedDate)
-                                        .toLocaleDateString('en-US', {
-                                                    month: 'long',
-                                                    day: '2-digit',
-                                                    year: 'numeric'
-                                        });
-                        this.userLevel=result[0].Attempted_Challenge__r.Apex_Arena_User__r.Level__c;
-
-                    }
-                    catch(error)
-                    {
-                        console.log(error);
-                    }
-        }
-
-        @wire (getAttemptedChallenges,
-            {username:'$loginName' , recordLimit: '$limitSize'}
-        )
-        wiredChallenges({ data, error }) {
-
-             if(data) 
-                {
-
-                    console.log(data);
-
-                    this.recent4problems = data.map(record => {
-
-                                                    const modifiedDate =
-                                                    new Date(record.LastModifiedDate);
-
-                                                    const now = new Date();
-
-                                                    const diffMs = now - modifiedDate;
-
-                                                    const diffMinutes =
-                                                    Math.floor(diffMs / (1000 * 60));
-
-                                                    const diffHours =
-                                                    Math.floor(diffMinutes / 60);
-
-                                                    const diffDays =
-                                                    Math.floor(diffHours / 24);
-
-                                                    let timeAgo = '';
-
-                                                    if(diffMinutes < 60){
-
-                                                            timeAgo = diffMinutes + ' min ago';
-                                                    }
-                                                    else if(diffHours < 24){
-
-                                                            timeAgo = diffHours + ' hr ago';
-                                                    }
-                                                    else{
-
-                                                            timeAgo = diffDays + ' day ago';
-                                                    }
-
-                                                    return {
-                                                            ...record,
-                                                            timeAgo: timeAgo,
-                                                        
-                                                            };
-                            });
-
-                    this.recent4problems.forEach(item => {item.Result__c=item.Result__c.charAt(0).toUpperCase()+item.Result__c.substring(1)});
-                    console.log(this.recent4problems);
-                }
-
-            else if(error) 
-                {
-
                     console.log(error);
-                }
+                });
+
+
         }
 
-        async viewAllProblems()
-        {
-            this.showProfile=false;
-            console.log('In View All Problems');
-            try{
+    }
+
+    
+
+    bifData(result) {
+        console.log('In Function');
+        try {
+            this.submissions = result.length;
+            for (let res of result) {
+                if (res.Result__c == 'Pass') {
+                    this.solved++;
+                    if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Easy') {
+                        this.easy++;
+                    }
+                    else if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Medium') {
+                        this.medium++;
+                    }
+                    else if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Hard') {
+                        this.hard++;
+                    }
+                }
+
+
+            }
+            this.wrong = this.submissions - this.solved;
+            this.acceptanceRate = ((this.solved / this.submissions) * 100).toFixed(2);
+            this.expPoints = result[0].Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c;
+            this.joinDate = new Date(result[0].Attempted_Challenge__r.Apex_Arena_User__r.CreatedDate)
+                .toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: '2-digit',
+                    year: 'numeric'
+                });
+            this.userLevel = result[0].Attempted_Challenge__r.Apex_Arena_User__r.Level__c;
+
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
+    @wire(getAttemptedChallenges,
+        { username: '$loginName', recordLimit: '$limitSize' }
+    )
+    wiredChallenges({ data, error }) {
+
+        if (data) {
+
+            console.log(data);
+
+            this.recent4problems = data.map(record => {
+
+                const modifiedDate =
+                    new Date(record.LastModifiedDate);
+
+                const now = new Date();
+
+                const diffMs = now - modifiedDate;
+
+                const diffMinutes =
+                    Math.floor(diffMs / (1000 * 60));
+
+                const diffHours =
+                    Math.floor(diffMinutes / 60);
+
+                const diffDays =
+                    Math.floor(diffHours / 24);
+
+                let timeAgo = '';
+
+                if (diffMinutes < 60) {
+
+                    timeAgo = diffMinutes + ' min ago';
+                }
+                else if (diffHours < 24) {
+
+                    timeAgo = diffHours + ' hr ago';
+                }
+                else {
+
+                    timeAgo = diffDays + ' day ago';
+                }
+
+                return {
+                    ...record,
+                    timeAgo: timeAgo,
+
+                };
+            });
+
+            this.recent4problems.forEach(item => { item.Result__c = item.Result__c.charAt(0).toUpperCase() + item.Result__c.substring(1) });
+            console.log(this.recent4problems);
+        }
+
+        else if (error) {
+
+            console.log(error);
+        }
+    }
+
+    async viewAllProblems() {
+        this.showProfile = false;
+        console.log('In View All Problems');
+        try {
             const result = await getSolvedChallenges({
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
@@ -237,138 +253,146 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 categoryFilter: this.selectedCategory,
                 difficultyFilter: this.selectedDifficulty,
                 pathFilter: this.selectedPath,
-                username:this.loginName
+                resultFilter: this.selectedResultFilter,
+                username: this.loginName
             });
             console.log(result);
-            this.challengeData=result.records;
-            this.challengeData=this.challengeData.map(item => ({
-                                ...item,
-                                Result__c: item.Result__c?.toUpperCase()
-                            }));
+            this.challengeData = result.records;
+            this.challengeData = this.challengeData.map(item => ({
+                ...item,
+                Result__c: item.Result__c?.toUpperCase()
+            }));
             this.challengeData = this.challengeData.map(item => ({
 
-                                ...item,
+                ...item,
 
-                                statusIcon:
-                                item.Result__c === 'PASS'
-                                ? 'utility:success'
-                                : item.Result__c === 'FAIL'
-                                ? 'utility:error'
-                                : 'utility:clock',
+                statusIcon:
+                    item.Result__c === 'PASS'
+                        ? 'utility:success'
+                        : item.Result__c === 'FAIL'
+                            ? 'utility:error'
+                            : 'utility:clock',
 
-                                statusClass:
-                                item.Result__c === 'PASS'
-                                ? 'pass-icon'
-                                : item.Result__c === 'FAIL'
-                                ? 'fail-icon'
-                                : 'pending-icon'
+                statusClass:
+                    item.Result__c === 'PASS'
+                        ? 'pass-icon'
+                        : item.Result__c === 'FAIL'
+                            ? 'fail-icon'
+                            : 'pending-icon'
 
-                    }));
-            this.challengeData.forEach(item =>
-                                    {
-                                        item.LastModifiedDate= new Date(item.LastModifiedDate).toLocaleDateString('en-US', 
-                                            {
-                                                    month: 'long',
-                                                    day: '2-digit',
-                                                    year: 'numeric'
-                                        });
-                                    });
+            }));
+            this.challengeData.forEach(item => {
+                item.LastModifiedDate = new Date(item.LastModifiedDate).toLocaleDateString('en-US',
+                    {
+                        month: 'long',
+                        day: '2-digit',
+                        year: 'numeric'
+                    });
+            });
 
             this.totalPages = result.totalPages;
             this.totalRecords = result.totalRecords;
-                                }
-                                catch(error)
-                                {
-                                    console.log(error);
-                                }
-
+        }
+        catch (error) {
+            console.log(error);
         }
 
-        async handleNext() {
+    }
 
-            if(this.currentPage < this.totalPages){
+    async handleNext() {
 
-                this.currentPage++;
+        if (this.currentPage < this.totalPages) {
 
-                this.viewAllProblems();
+            this.currentPage++;
+
+            this.viewAllProblems();
+        }
+    }
+
+    async handlePrevious() {
+
+        if (this.currentPage > 1) {
+
+            this.currentPage--;
+
+            this.viewAllProblems();
+        }
+    }
+
+    async handlePageClick(event) {
+
+        this.currentPage =
+            Number(event.target.dataset.page);
+
+        this.viewAllProblems();
+    }
+
+    async viewDetails(event) {
+        const recordId = event.target.dataset.id;
+        console.log(recordId);
+        window.sessionStorage.setItem('isLoggedIn', true);
+        window.sessionStorage.setItem('loginName', this.loginName);
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: {
+            name: 'viewDetails__c'
+            },
+            state: {
+                recordId: recordId
             }
+        });
+    }
+
+    get pageNumbers() {
+
+        let pages = [];
+
+        for (let i = 1; i <= this.totalPages; i++) {
+
+            pages.push({
+                number: i,
+                className:
+                    i === this.currentPage
+                        ? 'page-btn active'
+                        : 'page-btn'
+            });
         }
 
-        async handlePrevious() {
+        return pages;
+    }
 
-            if(this.currentPage > 1){
+    get showingText() {
 
-                this.currentPage--;
+        let start =
+            ((this.currentPage - 1) * this.pageSize) + 1;
 
-                this.viewAllProblems();
+        let end =
+            Math.min(
+                this.currentPage * this.pageSize,
+                this.totalRecords
+            );
+
+        return `Showing ${start} to ${end} of ${this.totalRecords} results`;
+    }
+
+    backToProfile() {
+        this.showProfile = true;
+    }
+
+    choosePath() {
+        window.sessionStorage.setItem('isLoggedIn', true);
+        window.sessionStorage.setItem('loginName', this.loginName);
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/choosepath'
             }
-        }
+        });
 
-        async handlePageClick(event){
-
-                this.currentPage =
-                    Number(event.target.dataset.page);
-
-                this.viewAllProblems();
-            }
-
-        async viewDetails(event)
-        {
-            const recordId=event.currenttarget.dataset.id;
-            console.log(recordId);
-        }
-
-        get pageNumbers(){
-
-                let pages = [];
-
-                for(let i = 1; i <= this.totalPages; i++){
-
-                    pages.push({
-                        number: i,
-                        className:
-                            i === this.currentPage
-                            ? 'page-btn active'
-                            : 'page-btn'
-                    });
-                }
-
-                return pages;
-            }
-
-        get showingText(){
-
-                let start =
-                    ((this.currentPage - 1) * this.pageSize) + 1;
-
-                let end =
-                    Math.min(
-                        this.currentPage * this.pageSize,
-                        this.totalRecords
-                    );
-
-                return `Showing ${start} to ${end} of ${this.totalRecords} results`;
-            }
-
-        backToProfile()
-        {
-            this.showProfile=true;
-        }
-
-        choosePath(){
-            window.sessionStorage.setItem('isLoggedIn',true);
-            window.sessionStorage.setItem('loginName',this.loginName);
-            this[NavigationMixin.Navigate]({
-                            type: 'standard__webPage',
-                            attributes: {
-                                        url: '/choosepath'
-                                        }
-                        });
-
-        }
+    }
 
 
-        handleSearch(event){
+    handleSearch(event) {
 
         this.searchKey = event.target.value;
 
@@ -377,7 +401,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         this.viewAllProblems();
     }
 
-    handleCategoryChange(event){
+    handleCategoryChange(event) {
 
         this.selectedCategory = event.target.value;
 
@@ -386,7 +410,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         this.viewAllProblems();
     }
 
-    handleDifficultyChange(event){
+    handleDifficultyChange(event) {
 
         this.selectedDifficulty = event.target.value;
 
@@ -395,7 +419,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         this.viewAllProblems();
     }
 
-    handlePathChange(event){
+    handlePathChange(event) {
 
         this.selectedPath = event.target.value;
 
@@ -404,18 +428,26 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         this.viewAllProblems();
     }
 
+    handleResultFilterChange(event) {
+
+        this.selectedResultFilter = event.target.value;
+
+        this.pageNumber = 1;
+
+        this.viewAllProblems();
+    }
 
 
-        logoutFunc()
-        {
-            window.sessionStorage.removeItem('loginName');
-            window.sessionStorage.removeItem('isLoggedIn');
-            this[NavigationMixin.Navigate]({
-                type: 'standard__webPage',
-                attributes: {
-                    url: '/'
-                }
-            });
-        }
+
+    logoutFunc() {
+        window.sessionStorage.removeItem('loginName');
+        window.sessionStorage.removeItem('isLoggedIn');
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/'
+            }
+        });
+    }
 
 }

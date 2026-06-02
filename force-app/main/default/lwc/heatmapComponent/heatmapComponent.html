@@ -1,0 +1,36 @@
+<template>
+
+    <!-- Month Labels -->
+    <div class="month-row">
+        <template for:each={monthLabels} for:item="label">
+            <div
+                key={label.monthKey}
+                class="month-label"
+                style={label.style}>
+                {label.month}
+            </div>
+        </template>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="heatmap-container">
+
+        <div class="heatmap">
+
+            <template for:each={heatmapData} for:item="day">
+
+                <div
+                    key={day.date}
+                    class={day.cssClass}
+                    title={day.tooltip}
+                    data-date={day.date}
+                    data-count={day.count}>
+                </div>
+
+            </template>
+
+        </div>
+
+    </div>
+
+</template>

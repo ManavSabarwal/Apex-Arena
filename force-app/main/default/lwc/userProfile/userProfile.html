@@ -167,30 +167,31 @@
 
                 </div>
 
-                <div class="recent-problems">
-                    <div class="recent-title">
-                        <span class="recent-title-label">Recent Activity</span>
-                        <span class="activity-link" onclick={viewAllProblems}>View All</span>
-                    </div>
+                    <div class="recent-problems">
+                        <div class="recent-title">
+                            <span class="recent-title-label">Recent Activity</span>
+                            <span class="activity-link" onclick={viewAllProblems}>View All</span>
+                        </div>
 
-                    <div class="recent-problem-details-container">
-                        <template for:each={recent4problems} for:item="recentProblem">
-                            <div key={recentProblem.Id} class="recent-problem-cont">
-                                <div class="recent-problem-details">
-                                    <span class="detail-label">{recentProblem.Name}</span>
-                                    <div class="capsules">
-                                        <span class={recentProblem.Result__c}>{recentProblem.Result__c}</span>
-                                        <span class="path-details">{recentProblem.Path__c}</span>
+                        <div class="recent-problem-details-container">
+                            <template for:each={recent4problems} for:item="recentProblem">
+                                <div key={recentProblem.Id} class="recent-problem-cont">
+                                    <div class="recent-problem-details">
+                                        <span class="detail-label">{recentProblem.Name}</span>
+                                        <div class="capsules">
+                                            <span class={recentProblem.Result__c}>{recentProblem.Result__c}</span>
+                                            <span class="path-details">{recentProblem.Path__c}</span>
+                                        </div>
+                                    </div>
+                                    <div class="activity-time">
+                                        <span>{recentProblem.timeAgo} ></span>
                                     </div>
                                 </div>
-                                <div class="activity-time">
-                                    <span>{recentProblem.timeAgo} ></span>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
+                            </template>
+                        </div>
 
-                </div>
+                    </div>
+                
             </div>
         </template>
         <!--Problem List-->
@@ -260,6 +261,11 @@
 
                     <input type="text" placeholder="🔍 Search by problem name or path" class="search-input"
                         onkeyup={handleSearch} />
+                    <select id="result" onchange={handleResultFilterChange} class="category-dropdown">
+                        <template for:each={resultOptions} for:item="result">
+                            <option key={result.value} value={result.value}>{result.label}</option>
+                        </template>
+                    </select>
                     <select id="category" onchange={handleCategoryChange} class="category-dropdown">
                         <template for:each={categoryOptions} for:item="category">
                             <option key={category.value} value={category.value}>{category.label}</option>
@@ -299,7 +305,7 @@
                     <!-- Rows -->
                     <template for:each={challengeData} for:item="item">
 
-                        <div key={item.id} data-id={item.id} class="table-row">
+                        <div key={item.Id} data-id={item.Id} class="table-row">
 
                             <!-- Challenge -->
                             <div class="challenge-section">
@@ -343,7 +349,7 @@
 
                             <!-- Action -->
                             <div class="btn-container">
-                                <button class="details-btn" onclick={viewDetails}>
+                                <button data-id={item.Id} class="details-btn" onclick={viewDetails}>
                                     View Details
                                 </button>
                             </div>
