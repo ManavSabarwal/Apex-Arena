@@ -47,7 +47,7 @@
                             </svg>
                         </div>
 
-                        <div style="display:grid;">
+                        <div style="display:grid;gap:10px;">
                             <span class="header">{challengeName}</span>
                             <p class="exp-label">{scenario}</p>
                             <div style="display:flex;gap:10px;align-items:center;padding-top:10px;">
@@ -79,10 +79,10 @@
                         </div>
 
                         <div class="total-attempts-cont">
-                            <div class="passed-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64"
-                                    fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
-                                    stroke-linejoin="round">
+                            <div>
+                                <svg class="passed-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                    width="64" height="64" fill="none" stroke="currentColor" stroke-width="1"
+                                    stroke-linecap="round" stroke-linejoin="round">
 
                                     <circle cx="12" cy="12" r="9" />
                                     <path d="M8 12l3 3 5-6" />
@@ -97,10 +97,10 @@
                         </div>
 
                         <div class="total-attempts-cont">
-                            <div class="failed-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64"
-                                    fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
-                                    stroke-linejoin="round">
+                            <div>
+                                <svg class="failed-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                    width="64" height="64" fill="none" stroke="currentColor" stroke-width="1"
+                                    stroke-linecap="round" stroke-linejoin="round">
 
                                     <circle cx="12" cy="12" r="9" />
                                     <path d="M9 9l6 6" />
@@ -116,18 +116,18 @@
                         </div>
 
                         <div class="total-attempts-cont">
-                                <svg class="successRate-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64"
-                                    fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
-                                    stroke-linejoin="round">
+                            <svg class="successRate-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                width="64" height="64" fill="none" stroke="currentColor" stroke-width="1"
+                                stroke-linecap="round" stroke-linejoin="round">
 
-                                    <circle cx="12" cy="12" r="8" />
-                                    <circle cx="12" cy="12" r="4" />
-                                    <path d="M12 2v3" />
-                                    <path d="M12 19v3" />
-                                    <path d="M2 12h3" />
-                                    <path d="M19 12h3" />
+                                <circle cx="12" cy="12" r="8" />
+                                <circle cx="12" cy="12" r="4" />
+                                <path d="M12 2v3" />
+                                <path d="M12 19v3" />
+                                <path d="M2 12h3" />
+                                <path d="M19 12h3" />
 
-                                </svg>
+                            </svg>
                             <div class="total-attempts-info">
                                 <span style="font-size:12px">Success Rate</span>
                                 <span class="successRate">{successRate}%</span>
@@ -138,6 +138,217 @@
                     </div>
                 </div>
 
+            </div>
+
+            <div class="details-container">
+                <template if:false={display}>
+                    <div class="noData">
+                        <svg class="noData-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="180"
+                            height="180" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                            stroke-linejoin="round">
+
+                            <!-- Code Window -->
+                            <rect x="10" y="12" width="44" height="36" rx="4" />
+
+                            <!-- Window Header -->
+                            <line x1="10" y1="20" x2="54" y2="20" />
+
+                            <!-- Code Symbol -->
+                            <path d="M24 28l-6 6 6 6" />
+                            <path d="M40 28l6 6-6 6" />
+                            <line x1="34" y1="25" x2="30" y2="43" />
+
+                            <!-- Empty State Badge -->
+                            <circle cx="46" cy="48" r="8" />
+
+                            <!-- X Mark -->
+                            <line x1="42" y1="44" x2="50" y2="52" />
+                            <line x1="50" y1="44" x2="42" y2="52" />
+
+                        </svg>
+                        <div style="display: grid;gap: 20px;">
+                            <span style="font-size: 20px;font-weight: 700;"> No Attempts Yet</span>
+                            <span style="font-size: 15px;color: rgb(125, 125, 125);">You haven't submitted any attempt
+                                for this challenge yet.<br>
+                                Take the first step and start coding now!!</span>
+
+                            <button class="primary-btn">Give it a Try Now!</button>
+                        </div>
+                    </div>
+                </template>
+                <template if:true={display}>
+                    <div class="activity-history-container">
+                        <span style="font-size: 16px;font-weight: 700;">Activity History</span>
+                        <span style="font-size: 13px;color: rgb(155, 155, 155);">All of your attempts for this
+                            challenge</span>
+                        <div class="attempts-container">
+
+                            <template for:each={challengeAttempts} for:item="attempt">
+
+                                <div key={attempt.Id} class="attempt-row">
+
+                                    <!-- Timeline -->
+                                    <div class="timeline">
+
+                                        <div class={attempt.icon}>
+                                            {attempt.icon}
+                                        </div>
+
+                                        <div class="timeline-line"></div>
+
+                                    </div>
+
+                                    <!-- Card -->
+                                    <div class={attempt.cardClass} data-value={attempt.Id} onclick={handleCardClick}>
+
+                                        <div class="attempt-header">
+
+                                            <div class="attempt-info">
+
+                                                <div class="attempt-title">
+                                                    {attempt.Name}
+                                                </div>
+
+                                                <span class={attempt.badgeClass}>
+                                                    {attempt.Result}
+                                                </span>
+
+                                            </div>
+                                            <div class="attempt-meta">
+
+                                                <div class="meta-item">
+                                                    📅 {attempt.attemptDate}
+                                                </div>
+
+                                                <div class="meta-item">
+                                                    •
+                                                </div>
+
+                                                <div class="meta-item">
+                                                    {attempt.attemptTime}
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+
+
+                                        <div style="display: flex;gap: 10px;">
+
+                                            
+
+                                            <div class="stat">
+                                                <span class="label">Score</span>
+                                                <span class={attempt.scoreClass}>
+                                                    {attempt.Score}%
+                                                </span>
+                                            </div>
+
+                                            <div class="stat">
+                                                <span class="label">Exp Gained</span>
+                                                <span class={attempt.ExpGained}>
+                                                    {attempt.ExpGained} XP
+                                                </span>
+                                            </div>
+
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </template>
+
+                        </div>
+
+                    </div>
+
+                    <div class="activity-details-container">
+                        <template if:true={loading}>
+                            <div class="loading-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </template>
+                        <template if:false={loading}>
+                        <div style="display: flex;border-bottom: 1px solid rgba(85, 85, 85, 0.5);padding-bottom: 10px;">
+                            <div>
+                                <span style="font-size: 16px; font-weight: 700;">{selectedChallenge.Name} Details</span>
+                                <div class="attempt-meta">
+
+                                    <div class="meta-item">
+                                        📅 {selectedChallenge.attemptDate}
+                                    </div>
+
+                                    <div class="meta-item">
+                                        •
+                                    </div>
+
+                                    <div class="meta-item">
+                                        {selectedChallenge.attemptTime}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="metadata">
+                                <span class={selectedChallenge.badgeClass}>
+                                    {selectedChallenge.Result}
+                                </span>
+                                <div style="justify-content: flex-end;flex: 1;display: flex;">
+                                    <span class={selectedChallenge.scoreClass}>Score {selectedChallenge.Score}%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="attempt-details-container">
+                            <div class="optionsMenu">
+                                <span class={codemenuItem} data-menu="Code" onclick={handleMenuClick}>Code</span>
+                                <span class={sampleMenuItem} data-menu="Sample" onclick={handleMenuClick}>Sample
+                                    Data</span>
+                                <span class={aiMenuItem} data-menu="AI" onclick={handleMenuClick}>AI Code Review</span>
+                            </div>
+                            <div class="data-cont">
+                                <template if:true={isCodeSelected}>
+                                    <div class="actual-data">
+                                        <code style="font-size: 13px;">
+                                            {selectedChallenge.SolutionProvided}
+                                        </code>
+                                    </div>
+                                </template>
+                                <template if:true={isSampleSelected}>
+                                    <div class="actual-data">
+                                        <template for:each={selectedChallenge.sampleData} for:item="item">
+                                            <div style="display:flex;" key={item.scenario}>
+                                                <div>
+                                                    {item.scenario}
+                                                </div>
+                                                <div>
+                                                    {item.expectedOutput}
+                                                </div>
+                                            </div>
+                                        </template>
+
+
+                                    </div>
+                                </template>
+                                <template if:true={isAiReviewSelected}>
+                                    <div class="actual-data">
+                                        <code>
+                                            {selectedChallenge.CodeReviewGood}
+                                        </code>
+                                        <code>
+                                            {selectedChallenge.CodeReviewBad}
+                                        </code>
+                                    </div>
+                                </template>
+
+                            </div>
+                        </div>
+                        </template>
+                    </div>
+                </template>
             </div>
 
         </div>

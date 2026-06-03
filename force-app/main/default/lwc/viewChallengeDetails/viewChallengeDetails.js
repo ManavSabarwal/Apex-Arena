@@ -6,6 +6,7 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
 
     recordId = '';
     challengeAttempts = [];
+    display = false;
     loginName = '';
     isLoggedIn = false;
     challengeName = '';
@@ -17,6 +18,42 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     difficulty = '';
     type = '';
     path = '';
+    selectedMenu = 'Code';
+    selectedChallenge = [];
+    loading=false;
+    get codemenuItem() {
+        return this.selectedMenu === 'Code'
+            ? 'menu-item selected'
+            : 'menu-item';
+    }
+
+    get sampleMenuItem() {
+        return this.selectedMenu === 'Sample'
+            ? 'menu-item selected'
+            : 'menu-item';
+    }
+    get aiMenuItem() {
+        return this.selectedMenu === 'AI'
+            ? 'menu-item selected'
+            : 'menu-item';
+    }
+
+    get isCodeSelected() {
+        return this.selectedMenu === 'Code';
+    }
+
+    get isSampleSelected() {
+        return this.selectedMenu === 'Sample';
+    }
+
+    get isAiReviewSelected() {
+        return this.selectedMenu === 'AI';
+    }
+
+
+    handleMenuClick(event) {
+        this.selectedMenu = event.target.dataset.menu;
+    }
 
 
     @wire(CurrentPageReference)
@@ -25,6 +62,12 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
             this.recordId = pageRef.state?.recordId;
 
         }
+    }
+
+    decodeHtmlEntities(encodedString) {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = encodedString;
+        return textarea.value;
     }
 
 
@@ -44,6 +87,30 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
         this.loadData();
 
     }
+    handleCardClick(event) {
+        const recId = event.currentTarget.dataset.value;
+        this.loading = true;
+        setTimeout(() => {
+            this.loading = false;
+            this.selectedChallenge = this.challengeAttempts.find(
+                item => item.Id === recId
+            );
+
+            this.selectedChallenge.SolutionProvided = this.decodeHtmlEntities(this.selectedChallenge.SolutionProvided);
+
+            this.challengeAttempts = this.challengeAttempts.map(attempt => ({
+                ...attempt,
+                cardClass:
+                    attempt.Id === recId
+                        ? 'attempt-card selected'
+                        : 'attempt-card'
+            }));
+            this.loading=false;
+        }, 2000);
+
+
+    }
+
 
     async loadData() {
         const response = await getAttemptDetails({
@@ -53,32 +120,82 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
         const firstAttempt = this.challengeAttempts?.[0];
 
         if (firstAttempt) {
-
+            this.firstAttemptId = firstAttempt.Id;
             this.challengeName = firstAttempt.ChallengeName;
             this.scenario = firstAttempt.Scenario;
             this.difficulty = firstAttempt.DifficultyLevel;
             this.type = firstAttempt.Type;
             this.path = firstAttempt.Path;
 
-            if(this.challengeAttempts.length==1){
-               this.totalAttempts=0;
-               this.successfulAttempts=0;
-               this.failedAttempts=0;
-               this.successRate='0.00';
-               return; 
+            if (this.challengeAttempts.length == 1) {
+                this.totalAttempts = 0;
+                this.successfulAttempts = 0;
+                this.failedAttempts = 0;
+                this.successRate = '0.00';
+                this.display = false;
+                return;
+            }
+            else {
+                this.display = true;
+                this.totalAttempts = this.challengeAttempts.length;
+
+                this.successfulAttempts = this.challengeAttempts.filter(
+                    a => a.Result?.toLowerCase().includes('pass')
+                ).length;
+
+                this.failedAttempts =
+                    this.totalAttempts - this.successfulAttempts;
+
+                this.successRate =
+                    ((this.successfulAttempts / this.totalAttempts) * 100).toFixed(2);
+
+                this.challengeAttempts = this.challengeAttempts.map((attempt, index) => {
+
+                    const passed =
+                        attempt.Result?.toLowerCase().includes('pass');
+
+                    return {
+                        ...attempt,
+
+                        icon: passed ? '✓' : '✕',
+
+                        badgeClass: passed
+                            ? 'status-badge pass-badge'
+                            : 'status-badge fail-badge',
+
+                        scoreClass: passed
+                            ? 'score pass-text'
+                            : 'score fail-text',
+
+                        cardClass:
+                            index === 0
+                                ? 'attempt-card selected'
+                                : 'attempt-card'
+                    };
+                });
+                this.challengeAttempts = this.challengeAttempts.map(attempt => {
+                    const dateTime = new Date(attempt.AttemptDate);
+
+                    return {
+                        ...attempt,
+                        attemptDate: dateTime.toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: '2-digit',
+                            year: 'numeric'
+                        }),
+                        attemptTime: dateTime.toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })
+                    };
+                });
+
+                this.selectedChallenge = this.challengeAttempts[0];
+                this.selectedChallenge.SolutionProvided = this.decodeHtmlEntities(this.selectedChallenge.SolutionProvided);
+
             }
 
-            this.totalAttempts = this.challengeAttempts.length;
 
-            this.successfulAttempts = this.challengeAttempts.filter(
-                a => a.Result?.toLowerCase().includes('pass')
-            ).length;
-
-            this.failedAttempts =
-                this.totalAttempts - this.successfulAttempts;
-
-            this.successRate =
-                ((this.successfulAttempts / this.totalAttempts) * 100).toFixed(2);
         }
     }
 

@@ -303,7 +303,7 @@ public with sharing class recordController {
     public static List<Map<String, Object>> getAttemptDetails(String challengeId) {
         try {
 
-            List<Challenge_Attempt__c> attempts = [SELECT Id, Name, Result__c, score__c, Solution_Provided__c, Exp_gained__c, Code_Review_Good__c, Code_Review_Bad__c, Action_Type__c,Attempted_Challenge__r.Name, Attempted_Challenge__r.Scenario__c, Attempted_Challenge__r.Path__c, Attempted_Challenge__r.DifficultyLevel__c, Attempted_Challenge__r.Type__c, Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c WHERE Attempted_Challenge__r.Id = :challengeId];
+            List<Challenge_Attempt__c> attempts = [SELECT Id, Name, Result__c, score__c, Solution_Provided__c, Exp_gained__c, Code_Review_Good__c, Code_Review_Bad__c, Action_Type__c,CreatedDate,Attempted_Challenge__r.Name, Attempted_Challenge__r.sampleData__c,Attempted_Challenge__r.Scenario__c, Attempted_Challenge__r.Path__c, Attempted_Challenge__r.DifficultyLevel__c, Attempted_Challenge__r.Type__c, Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c WHERE Attempted_Challenge__r.Id = :challengeId order by CreatedDate desc];
             List<Attempted_Challenge__c> ac=[Select id,Name,Result__c,Scenario__C,DifficultyLevel__c,Type__c,Path__c,LastModifiedDate from Attempted_Challenge__c where id=:challengeId];
             List<Map<String, Object>> attemptDetails = new List<Map<String, Object>>();
             if(attempts.size()==0){
@@ -324,7 +324,8 @@ public with sharing class recordController {
                     'Type' => ac[0].Type__c,
                     'TotalExpPoints' => null,
                     'UserLevel' => null,
-                    'AttemptDate' => null
+                    'AttemptDate' => null,
+                    'sampleData'=>null
                 };
                 attemptDetails.add(details);
             } 
@@ -347,7 +348,8 @@ public with sharing class recordController {
                     'Type' => attempt.Attempted_Challenge__r.Type__c,
                     'TotalExpPoints' => attempt.Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c,
                     'UserLevel' => attempt.Attempted_Challenge__r.Apex_Arena_User__r.Level__c,
-                    'AttemptDate' => attempt.Attempted_Challenge__r.Apex_Arena_User__r.createddate
+                    'AttemptDate' => attempt.CreatedDate,
+                    'sampleData'=>attempt.Attempted_Challenge__r.sampleData__c
                 };
                 attemptDetails.add(details);
             }
