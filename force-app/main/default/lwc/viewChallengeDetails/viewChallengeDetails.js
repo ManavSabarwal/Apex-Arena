@@ -108,6 +108,8 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
             this.loading=false;
         }, 2000);
 
+        console.log(this.selectedChallenge.sampleData);
+
 
     }
 
@@ -192,7 +194,12 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
 
                 this.selectedChallenge = this.challengeAttempts[0];
                 this.selectedChallenge.SolutionProvided = this.decodeHtmlEntities(this.selectedChallenge.SolutionProvided);
-
+                this.selectedChallenge.sampleData=JSON.stringify(this.selectedChallenge.sampleData) ;
+                this.selectedChallenge.sampleData=this.decodeHtmlEntities(this.selectedChallenge.sampleData);
+                const cleaned = this.selectedChallenge.sampleData.substring(1, this.selectedChallenge.sampleData.length - 1);
+                console.log(cleaned);
+                this.selectedChallenge.sampleData=JSON.parse(cleaned);
+                console.log(typeof this.selectedChallenge.sampleData);
             }
 
 

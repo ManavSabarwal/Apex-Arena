@@ -322,10 +322,16 @@
                                         <template for:each={selectedChallenge.sampleData} for:item="item">
                                             <div style="display:flex;" key={item.scenario}>
                                                 <div>
+                                                    <Span>Scenario</Span><br>
+                                                <code>
                                                     {item.scenario}
+                                                </code><br>
                                                 </div>
                                                 <div>
+                                                    <Span>Expected Output</Span><br>
+                                                <code>
                                                     {item.expectedOutput}
+                                                </code><br>
                                                 </div>
                                             </div>
                                         </template>
