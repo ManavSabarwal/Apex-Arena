@@ -370,7 +370,7 @@
                                                     <template for:each={selectedChallenge.CodeReviewGood}
                                                         for:item="reviewPoint">
                                                         <code key={reviewPoint}>
-                                                {reviewPoint}
+                                               ✓ {reviewPoint}
                                             </code>
                                                     </template>
                                                 </div>
@@ -381,7 +381,7 @@
                                                     <template for:each={selectedChallenge.CodeReviewBad}
                                                         for:item="reviewPoint">
                                                         <code key={reviewPoint}>
-                                                {reviewPoint}
+                                                ⚠ {reviewPoint}
                                             </code>
                                                     </template>
                                                 </div>
