@@ -292,7 +292,8 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                         result: this.result,
                         solution: this.textAreacode,
                         thegood: this.thegood,
-                        thebad: this.thebad
+                        thebad: this.thebad,
+                        actionType:'Submit'
 
                     }
                 );

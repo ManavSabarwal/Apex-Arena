@@ -21,6 +21,9 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     selectedMenu = 'Code';
     selectedChallenge = [];
     loading=false;
+    showSampleData=true;
+    sampleData=null;
+    challengeExp=0;
     get codemenuItem() {
         return this.selectedMenu === 'Code'
             ? 'menu-item selected'
@@ -60,7 +63,7 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     getPageReference(pageRef) {
         if (pageRef) {
             this.recordId = pageRef.state?.recordId;
-
+            
         }
     }
 
@@ -85,9 +88,11 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
             });
         }
         this.loadData();
+        
 
     }
     handleCardClick(event) {
+        try{
         const recId = event.currentTarget.dataset.value;
         this.loading = true;
         setTimeout(() => {
@@ -97,6 +102,9 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
             );
 
             this.selectedChallenge.SolutionProvided = this.decodeHtmlEntities(this.selectedChallenge.SolutionProvided);
+            this.selectedChallenge.CodeReviewGood=this.selectedChallenge.CodeReviewGood.split(',/n');
+  
+            this.selectedChallenge.CodeReviewBad=this.selectedChallenge.CodeReviewBad.split(',/n');
 
             this.challengeAttempts = this.challengeAttempts.map(attempt => ({
                 ...attempt,
@@ -107,19 +115,24 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
             }));
             this.loading=false;
         }, 2000);
-
-        console.log(this.selectedChallenge.sampleData);
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
 
 
     }
 
 
     async loadData() {
+
+        try{
         const response = await getAttemptDetails({
             challengeId: this.recordId
         });
         this.challengeAttempts = response;
-        const firstAttempt = this.challengeAttempts?.[0];
+        const firstAttempt = this.challengeAttempts[0];
 
         if (firstAttempt) {
             this.firstAttemptId = firstAttempt.Id;
@@ -128,13 +141,14 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
             this.difficulty = firstAttempt.DifficultyLevel;
             this.type = firstAttempt.Type;
             this.path = firstAttempt.Path;
-
-            if (this.challengeAttempts.length == 1) {
+            console.log(firstAttempt);
+            if (this.challengeAttempts.length == 1 && firstAttempt.Id==null) {
                 this.totalAttempts = 0;
                 this.successfulAttempts = 0;
                 this.failedAttempts = 0;
                 this.successRate = '0.00';
                 this.display = false;
+                this.challengeExp=0;
                 return;
             }
             else {
@@ -191,19 +205,40 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
                         })
                     };
                 });
-
+                this.challengeExp=this.challengeAttempts[0].TotalExpPoints;
                 this.selectedChallenge = this.challengeAttempts[0];
                 this.selectedChallenge.SolutionProvided = this.decodeHtmlEntities(this.selectedChallenge.SolutionProvided);
-                this.selectedChallenge.sampleData=JSON.stringify(this.selectedChallenge.sampleData) ;
-                this.selectedChallenge.sampleData=this.decodeHtmlEntities(this.selectedChallenge.sampleData);
-                const cleaned = this.selectedChallenge.sampleData.substring(1, this.selectedChallenge.sampleData.length - 1);
-                console.log(cleaned);
-                this.selectedChallenge.sampleData=JSON.parse(cleaned);
-                console.log(typeof this.selectedChallenge.sampleData);
+                console.log(this.selectedChallenge.CodeReviewGood);
+                this.selectedChallenge.CodeReviewGood=this.selectedChallenge.CodeReviewGood.split(',/n');
+                this.selectedChallenge.CodeReviewBad=this.selectedChallenge.CodeReviewBad.split(',/n');
+                if(this.selectedChallenge.sampleData!=undefined)
+                {
+                    
+                    this.selectedChallenge.sampleData=JSON.stringify(this.selectedChallenge.sampleData) ;
+                    this.selectedChallenge.sampleData=this.decodeHtmlEntities(this.selectedChallenge.sampleData);
+                    const cleaned = this.selectedChallenge.sampleData.substring(1, this.selectedChallenge.sampleData.length - 1);
+                    this.selectedChallenge.sampleData=JSON.parse(cleaned);
+                    this.sampleData=this.selectedChallenge.sampleData;
+
+                    this.sampleData = this.sampleData.map((item, index) => ({
+                            ...item,
+                            scenarioNumber: index + 1
+                    }));
+
+                    
+                }
+                else{
+                    this.showSampleData=false;
+                }
             }
 
 
         }
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
     }
 
     backToProfile() {

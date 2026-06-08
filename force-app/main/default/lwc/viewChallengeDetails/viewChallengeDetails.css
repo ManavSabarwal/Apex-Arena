@@ -236,7 +236,19 @@
 .header-right{
     display: grid;
     align-content: center;
-    grid-auto-flow: column;
+    gap: 10px;
+}
+.expcont{
+        display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ef7c30;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #17173e, transparent);
+    font-size: 16px;
+    font-weight: 700;
+    gap: 10px;
+    padding: 10px;
 }
 
 .total-attempts-cont{
@@ -352,6 +364,26 @@
     min-height:0;
 }
 
+.attempts-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.attempts-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+}
+
+.attempts-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        180deg,
+        rgba(139, 92, 246, 0.8),
+        rgba(99, 102, 241, 0.8)
+    );
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
 .attempt-row {
     display: flex;
     gap: 16px;
@@ -422,6 +454,7 @@
     background: linear-gradient(180deg, rgba(16, 25, 65, .95), rgba(8, 15, 45, .95));
     border: 1px solid rgba(255, 255, 255, .08);
     display: flex;
+    cursor: pointer;
 }
 
 .attempt-card.selected {
@@ -514,11 +547,6 @@
     cursor: pointer;
 }
 
-.activity-datails-container
-{
-        padding: 0px 10px;
-}
-
 .metadata{
     display: flex;
     /* grid-auto-flow: column; */
@@ -567,6 +595,7 @@
     padding: 10px;
     white-space: pre;
     background: linear-gradient(57deg, #4242614a, transparent);
+    text-wrap: auto;
 
 }
 
@@ -605,12 +634,41 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    font-size: 13px;
+    display: grid;
+    gap: 10px;
 }
-
+.scenario-cont
+{
+    display: grid;
+    grid-template-columns: 0.7fr 0.3fr;
+    margin-bottom: 10px;
+    border: 1px solid rgb(95, 95, 95);
+    border-radius: 10px;
+    padding: 10px;
+    background: linear-gradient(45deg, #161636, transparent);
+}
 .activity-details-container{
         display: flex;
     flex-direction: column;
     min-height: 0;
+    min-width: 0;
+}
+
+.reviewPoints{
+    background: linear-gradient(45deg, #20683f, transparent);
+    display: grid;
+    border: 1px solid rgb(108, 108, 108);
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.reviewPointsBad{
+    border: 1px solid rgb(108, 108, 108);
+    border-radius: 10px;
+    padding: 10px;
+    background: linear-gradient(45deg, #86423d, transparent);
+    display: grid;
 }
 
 .loading-dots {

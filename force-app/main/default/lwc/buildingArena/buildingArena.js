@@ -440,7 +440,8 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                         solution: this.textAreacode,
                         thegood: this.thegood.join(',/n'),
                         thebad: this.thebad.join(',/n'),
-                        score:this.score
+                        score:this.score,
+                        actionType:actionType
 
                     }
                 );
