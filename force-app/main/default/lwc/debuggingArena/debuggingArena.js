@@ -30,6 +30,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
     isReadonly = true;
     savedId = '';
     passed = false;
+    score ='0';
 
     isLoggedIn = false;
     isProblemOptionHidden = false;
@@ -269,13 +270,14 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             this.submitting = true;
             this.isReadonly = true;
             const response = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode });
-            console.log('Submission Response:', response);
             const parsedResponse = JSON.parse(response);
             this.result = parsedResponse.Result;
             this.reason = parsedResponse.Reasoning;
-            this.thebad = parsedResponse.CodeReviewBad;
-            this.thegood = parsedResponse.CodeReviewGood;
+            this.thebad = JSON.parse(parsedResponse.CodeReviewBad);
+            this.thegood = JSON.parse(parsedResponse.CodeReviewGood);
+            console.log(this.thegood);
             this.optimizedCode = parsedResponse.ArchitectOptimization;
+            this.score=parsedResponse.Score;
 
         } catch (error) {
             console.error('Error submitting solution:', error);
@@ -291,8 +293,8 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                         id: this.savedId,
                         result: this.result,
                         solution: this.textAreacode,
-                        thegood: this.thegood,
-                        thebad: this.thebad,
+                        thegood: this.thegood.toString(),
+                        thebad: this.thebad.toString(),
                         actionType:'Submit'
 
                     }

@@ -89,11 +89,45 @@
 
                             <div class={problemSectionClass}>
                                 <div>
-                                    <p class="scenario-label">Scenario</p>
+                                    <div class="svgDiv">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                            stroke-linecap="round" stroke-linejoin="round">
+
+                                            <path d="M8 9h8" />
+                                            <path d="M9 3l1 2" />
+                                            <path d="M15 3l-1 2" />
+                                            <rect x="7" y="5" width="10" height="12" rx="5" />
+                                            <path d="M3 13h4" />
+                                            <path d="M17 13h4" />
+                                            <path d="M5 7l2 2" />
+                                            <path d="M19 7l-2 2" />
+                                            <path d="M5 19l2-2" />
+                                            <path d="M19 19l-2-2" />
+                                        </svg>
+                                        <p class="scenario-label">Scenario</p>
+
+                                    </div>
                                     <p class="scenario-text">{scenario}</p>
                                 </div>
-                                <div class="error-code-label">
-                                    <p>Erroneous Code</p>
+                                <div style="margin-top:5px">
+                                    <div class="svgDiv">
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                            stroke-linecap="round" stroke-linejoin="round">
+
+                                            <path d="M7 8l-4 4 4 4" />
+                                            <path d="M17 8l4 4-4 4" />
+
+                                            <rect x="9" y="7" width="6" height="10" rx="3" />
+                                            <path d="M10 5l1 2" />
+                                            <path d="M14 5l-1 2" />
+                                        </svg>
+
+                                        <p class="scenario-label">Erroneous Code</p>
+                                    </div>
+
                                 </div>
                                 <div class="error-code-container">
 
@@ -102,7 +136,17 @@
                             </pre>
                                 </div>
                                 <div class="symptoms">
-                                    <p class="symptoms-label">The Symptoms</p>
+                                    <div class="svgDiv">
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                            stroke-linecap="round" stroke-linejoin="round">
+
+                                            <path d="M22 12h-4l-3 6-4-12-3 6H2" />
+                                        </svg>
+                                        <p class="scenario-label">The Symptoms</p>
+                                    </div>
+
                                     <p class="symptoms-text">{symptoms}</p>
                                 </div>
 
@@ -149,8 +193,17 @@
 
 
                         <div class="editor-footer">
-                            <button class="primary-btn" onclick={submitSolution} disabled={isReadonly}
-                                data-id="Submit">Submit
+                            <button class="primary-btn" onclick={submitSolution} disabled={isReadonly} data-id="Submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round">
+
+                                    <path d="M22 2L11 13" />
+                                    <path d="M22 2L15 22L11 13L2 9L22 2Z" 
+                                    
+                                    style="width: 20px;margin-right: 10px;"/>
+
+                                </svg>Submit
                                 Solution</button>
                         </div>
                     </template>
@@ -180,29 +233,95 @@
                 </template>
                 <template if:false={submitting}>
                     <div class="glass-card results-panel">
-                        <p class="result-label">Result</p>
-                        <span class={resultClass}>{result}</span>
+                        <div style="padding-bottom: 10px;border-bottom: 1px solid rgb(75, 75, 75);">
+
+                            <div style="display:flex;gap:5px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z" />
+                                    <path d="M9 12l2 2 4-4" />
+                                </svg>
+
+                                <p class="result-label">Result</p>
+                            </div>
+                            <span class={resultClass}>{result}</span>
+
+                        </div>
+                        <div style="padding-bottom: 10px;border-bottom: 1px solid rgb(75, 75, 75);margin-top: 10px;">
+                            <div style="display:flex;gap:5px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M12 3a9 9 0 0 0-9 9" />
+                                    <path d="M21 12a9 9 0 0 0-9-9" />
+                                    <path d="M5.5 18A9 9 0 0 0 18.5 18" />
+                                    <path d="M12 12l4-4" />
+                                    <circle cx="12" cy="12" r="1" />
+                                </svg>
+
+                                <p class="result-label">Score</p>
+                            </div>
+                            <span class="score">{score}%</span>
+                        </div>
+
+                        <div style="margin-top: 15px;">
+                            <div style="display:flex;gap:5px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M9 18h6" />
+                                    <path d="M10 22h4" />
+                                    <path d="M12 2a7 7 0 0 0-4 12c1 1 1.5 2 1.5 4h5c0-2 .5-3 1.5-4A7 7 0 0 0 12 2z" />
+                                </svg>
+
+                                <p class="result-label">Reasoning</p>
+                            </div>
+                            <p class="reason-text">{reason}</p>
+                        </div>
                     </div>
 
-                    <div class="glass-card reason-panel">
-                        <p class="reason-label">Reasoning</p>
-                        <p class="reason-text">{reason}</p>
-                    </div>
+
 
                     <div class="glass-card codeReview-panel">
-                        <p class="reason-label">Code Review (AI)</p>
-                        <p class="codereview-label">Strengths</p>
-                        <div class="reason-text thegood">
-                            <template for:each={thegood} for:item="strength">
-                                <p key={strength}>✔{strength}</p>
-                            </template>
-                        </div>
-                        <p class="codereview-label">Areas For Improvement</p>
+                        <div style="display:flex;gap:5px;padding-bottom: 10px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <rect x="5" y="8" width="14" height="10" rx="2" />
+                                <path d="M12 4v4" />
+                                <path d="M9 2h6" />
+                                <circle cx="9" cy="13" r="1" />
+                                <circle cx="15" cy="13" r="1" />
+                                <path d="M9 16h6" />
+                            </svg>
 
-                        <div class="reason-text thebad ">
-                            <template for:each={thebad} for:item="area">
-                                <p key={area}>⚠{area}</p>
-                            </template>
+                            <p class="reason-label">Code Review (AI)</p>
+                        </div>
+
+                        <div
+                            style="display: grid;gap: 10px;min-height: 0px;flex: 0 0 90%;overflow: hidden;grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);height: 100%;">
+                            <div style="display: flex;flex-direction: column;">
+                                <p class="codereview-label">Strengths</p>
+                                <div class="thegood">
+                                    <template for:each={thegood} for:item="strength">
+                                        <div style="display: flex;gap: 5px" key={strength}>
+                                            <p>✔</p>{strength}
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                            <div style="display: flex;flex-direction: column;">
+                                <p class="codereview-label">Areas For Improvement</p>
+
+                                <div class="thebad">
+                                    <template for:each={thebad} for:item="area">
+                                        <div style="display: flex;gap: 5px" key={area}>
+                                            <p>⚠</p>{area}
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </template>

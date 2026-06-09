@@ -102,8 +102,12 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
             );
 
             this.selectedChallenge.SolutionProvided = this.decodeHtmlEntities(this.selectedChallenge.SolutionProvided);
-            this.selectedChallenge.CodeReviewGood=this.selectedChallenge.CodeReviewGood.split(',/n');
-  
+            const typeGood=typeof this.selectedChallenge.CodeReviewGood;
+            const typeBad=typeof this.selectedChallenge.CodeReviewBad;
+            if(typeGood=='string')
+                this.selectedChallenge.CodeReviewGood=this.selectedChallenge.CodeReviewGood.split(',/n');
+        
+            if(typeBad=='string')
             this.selectedChallenge.CodeReviewBad=this.selectedChallenge.CodeReviewBad.split(',/n');
 
             this.challengeAttempts = this.challengeAttempts.map(attempt => ({
