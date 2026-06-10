@@ -1,4 +1,4 @@
-public with sharing class recordController {
+public without sharing class recordController {
     public recordController() {
 
     }
@@ -41,7 +41,7 @@ public with sharing class recordController {
             if(problemTitle.length() > 80){
                     problemTitle = problemTitle.substring(0, 75)+'...';
             }
-
+            system.debug('Username : '+ username);
             List<Apex_Arena_User__C> aau=[Select id from Apex_Arena_User__C where name=:username];
             String aauId=aau[0].ID;
             system.debug(aauId);
@@ -70,11 +70,12 @@ public with sharing class recordController {
     }
 
     @AuraEnabled
-    public static Map<String,String> createChallengeAttempt(String id, String result,String solution,string thegood,string thebad,string score,string actionType){
+    public static Map<String,String> createChallengeAttempt(String id, String result,String solution,string thegood,string thebad,string score,string actionType,string testCaseResults){
         try {
 
             List<Attempted_challenge__C> ac=[Select id, attempts__C,result__c from Attempted_challenge__C where id=:id];
             Map<String,String> res=new Map<String,String>();
+            system.debug('Result============-----------------'+result);
 
             Challenge_Attempt__C ca=new Challenge_Attempt__c();
                 ca.result__c=result;
@@ -88,6 +89,7 @@ public with sharing class recordController {
                 ca.Code_Review_Bad__c=thebad;
                 ca.score__c=score;
                 ca.Action_Type__c=actionType;
+                ca.Test_Case_Results__c=testCaseResults;
                 res.put('oldresult',ac[0].result__C);
                 res.put('attempt',attempt.toString());
                 insert(ca);
@@ -303,7 +305,7 @@ public with sharing class recordController {
     public static List<Map<String, Object>> getAttemptDetails(String challengeId) {
         try {
 
-            List<Challenge_Attempt__c> attempts = [SELECT Id, Name, Result__c, score__c, Solution_Provided__c, Exp_gained__c, Code_Review_Good__c, Code_Review_Bad__c, Action_Type__c,CreatedDate,Attempted_Challenge__r.Exp_Gained__c,Attempted_Challenge__r.Name, Attempted_Challenge__r.sampleData__c,Attempted_Challenge__r.Scenario__c, Attempted_Challenge__r.Path__c, Attempted_Challenge__r.DifficultyLevel__c, Attempted_Challenge__r.Type__c, Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c WHERE Attempted_Challenge__r.Id = :challengeId order by CreatedDate desc];
+            List<Challenge_Attempt__c> attempts = [SELECT Id, Name, Result__c, score__c, Solution_Provided__c, Exp_gained__c, Code_Review_Good__c, Code_Review_Bad__c, Action_Type__c,Test_Case_Results__C,CreatedDate,Attempted_Challenge__r.Exp_Gained__c,Attempted_Challenge__r.Name, Attempted_Challenge__r.sampleData__c,Attempted_Challenge__r.Scenario__c, Attempted_Challenge__r.Path__c, Attempted_Challenge__r.DifficultyLevel__c, Attempted_Challenge__r.Type__c, Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c WHERE Attempted_Challenge__r.Id = :challengeId order by CreatedDate desc];
             List<Attempted_Challenge__c> ac=[Select id,Name,Result__c,Scenario__C,DifficultyLevel__c,Type__c,Path__c,LastModifiedDate from Attempted_Challenge__c where id=:challengeId];
             List<Map<String, Object>> attemptDetails = new List<Map<String, Object>>();
             if(attempts.size()==0)
@@ -326,7 +328,8 @@ public with sharing class recordController {
                     'TotalExpPoints' => 0,
                     'UserLevel' => null,
                     'AttemptDate' => null,
-                    'sampleData'=>null
+                    'sampleData'=>null,
+                    'testCaseResults'=>null
                 };
                 attemptDetails.add(details);
             } 
@@ -352,14 +355,48 @@ public with sharing class recordController {
                     'TotalExpPoints' => attempt.Attempted_Challenge__r.Exp_Gained__c,
                     'UserLevel' => attempt.Attempted_Challenge__r.Apex_Arena_User__r.Level__c,
                     'AttemptDate' => attempt.CreatedDate,
-                    'sampleData'=>attempt.Attempted_Challenge__r.sampleData__c
+                    'sampleData'=>attempt.Attempted_Challenge__r.sampleData__c,
+                    'testCaseResults'=>attempt.Test_Case_Results__c
+                    
                 };
                 attemptDetails.add(details);
             }
         }
-        system.debug(attemptDetails);
 
         return attemptDetails;
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static Map<String, Object> getChallengeDetails(string challengeId){
+        try {
+
+            List<Attempted_Challenge__c> ac=[Select id,Apex_Arena_User__c,Name,DifficultyLevel__c,ErrorCode__c,constraints__c,Exp_Gained__c,Path__c,Result__c,sampleData__c,Scenario__c,Symptoms__c,Type__c from Attempted_Challenge__C where id=:challengeId limit 1];
+            Map<String, Object> result=new Map<String, Object>();
+            if(ac.size()==1)
+            {
+                Map<String, Object> response=new Map<String, Object>{
+                    'Id'=>ac[0].id,
+                    'ProblemTitle'=>ac[0].Name,
+                    'DifficultyLevel'=>ac[0].DifficultyLevel__c,
+                    'ErrorCode'=>ac[0].ErrorCode__c,
+                    'constraints'=>ac[0].constraints__c,
+                    'Exp_Gained'=>ac[0].Exp_Gained__c,
+                    'Path'=>ac[0].Path__c,
+                    'Result'=>ac[0].Result__c,
+                    'SampleData'=>ac[0].sampleData__c,
+                    'Scenario'=>ac[0].Scenario__c,
+                    'BusinessRequirements'=>ac[0].Symptoms__c,
+                    'Type'=>ac[0].Type__c,
+                    'UserId'=>ac[0].Apex_Arena_User__c
+                };
+                result= response;
+                
+            }
+            return result;
+
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }

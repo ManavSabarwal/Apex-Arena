@@ -1,4 +1,4 @@
-public with sharing class ApexArenaTriggerHelper {
+public without sharing class ApexArenaTriggerHelper {
     public ApexArenaTriggerHelper() {
 
     }

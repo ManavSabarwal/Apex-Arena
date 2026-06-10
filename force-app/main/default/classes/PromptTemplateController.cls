@@ -1,4 +1,4 @@
-public with sharing class PromptTemplateController {
+public without sharing class PromptTemplateController {
     public PromptTemplateController() {
 
     }
@@ -16,75 +16,69 @@ public with sharing class PromptTemplateController {
     }
 
         @AuraEnabled
-        public static String invokePrompt(String difficulty, String type,String UserName,string path)
-        {
-            recordController rc=new recordController();
-            String response='';
-            try{
-                
-                String prev=rc.getPreviousScenarios(UserName,type,path);
-                ConnectApi.WrappedValue inputValueMapdifficulty = new ConnectApi.WrappedValue();
-                inputValueMapdifficulty.value = difficulty;
-                ConnectApi.WrappedValue inputValueMapType = new ConnectApi.WrappedValue();
-                inputValueMapType.value = type ;
+public static String invokePrompt(
+    String difficulty,
+    String type,
+    String UserName,
+    String path
+) {
 
-                ConnectApi.WrappedValue inputValueMapPrev = new ConnectApi.WrappedValue();
-                inputValueMapPrev.value = prev ;
+    try {
+        recordController rc = new recordController();
 
-                if(path=='debug')
-                {
-            
-                    //Add Prompt input variables to a Map
-                    Map<String, ConnectApi.WrappedValue> inputParams = new Map<String, ConnectApi.WrappedValue>();        
-                    inputParams.put('Input:Difficulty_Level', inputValueMapdifficulty);
-                    inputParams.put('Input:Type', inputValueMapType);
-                    inputParams.put('Input:AttemptedChallenge_c', inputValueMapPrev);
+        String normalizedPath = path != null ? path.toLowerCase() : '';
+        String previousScenarios = rc.getPreviousScenarios(
+            UserName,
+            type,
+            normalizedPath
+        );
 
-                    response = PromptTemplateService.invokePrompt('Challenge_Generator', inputParams);
-                    return response;
-                }
-                else if(path=='build')
-                {
+        Map<String, Object> inputParams = new Map<String, Object>{
+            'Input:Difficulty_Level' => difficulty,
+            'Input:Type' => type,
+            'Input:AttemptedChallenge_c' => previousScenarios
+        };
 
-                    //Add Prompt input variables to a Map
-                    Map<String, ConnectApi.WrappedValue> inputParams = new Map<String, ConnectApi.WrappedValue>();        
-                    inputParams.put('Input:Difficulty_Level', inputValueMapdifficulty);
-                    inputParams.put('Input:Type', inputValueMapType);
-                    inputParams.put('Input:AttemptedChallenge_c', inputValueMapPrev);
-
-                    response = PromptTemplateService.invokePrompt('Challenge_Generator_Coding', inputParams);
-                    return response;
-
-                }
-
-            }catch (Exception e) {
-                throw new AuraHandledException(e.getMessage());
-            }
-            return response;
+        if (normalizedPath == 'debug') {
+            return PromptTemplateRestService.invokePrompt(
+                'Challenge_Generator',
+                inputParams
+            );
         }
+
+        if (normalizedPath == 'build') {
+            return PromptTemplateRestService.invokePrompt(
+                'Challenge_Generator_Coding',
+                inputParams
+            );
+        }
+
+        throw new AuraHandledException('Invalid path: ' + path);
+
+    } catch (Exception e) {
+        throw new AuraHandledException(e.getMessage());
+    }
+}
 
         @AuraEnabled
-        public static string invokeValidationPrompt(String scenario,String solution){
-            try {
+public static String invokeValidationPrompt(String scenario, String solution) {
+    try {
+        Map<String, Object> inputParams = new Map<String, Object>{
+            'Input:Scenario' => scenario,
+            'Input:Solution' => solution
+        };
 
-                
-                    ConnectApi.WrappedValue inputValueMapScenario = new ConnectApi.WrappedValue();
-                    inputValueMapScenario.value = scenario;
-                    ConnectApi.WrappedValue inputValueMapSolution = new ConnectApi.WrappedValue();
-                    inputValueMapSolution.value = solution ;
-                
-                    //Add Prompt input variables to a Map
-                    Map<String, ConnectApi.WrappedValue> inputParams = new Map<String, ConnectApi.WrappedValue>();        
-                    inputParams.put('Input:Scenario', inputValueMapScenario);
-                    inputParams.put('Input:Solution', inputValueMapSolution);
+        String response = PromptTemplateRestService.invokePrompt(
+            'Coding_Challenge_Resolution',
+            inputParams
+        );
 
-                    String response = PromptTemplateService.invokePrompt('Coding_Challenge_Resolution', inputParams);
-                    return response;
-                
-            } catch (Exception e) {
-                throw new AuraHandledException(e.getMessage());
-            }
-        }
+        return response;
+
+    } catch (Exception e) {
+        throw new AuraHandledException(e.getMessage());
+    }
+}
 
         private static List<String> toStringList(Object input) 
         {
@@ -99,50 +93,52 @@ public with sharing class PromptTemplateController {
 }
 
         @AuraEnabled
-        public static ValidationResponseWrapper invokeValidationPromptCoding(String scenario,String solution,string sampleData,string submissionType,string requirements){
-            try {
-                    ConnectApi.WrappedValue inputValueMapScenario = new ConnectApi.WrappedValue();
-                    inputValueMapScenario.value = scenario;
-                    ConnectApi.WrappedValue inputValueMapSolution = new ConnectApi.WrappedValue();
-                    inputValueMapSolution.value = solution ;
-                    ConnectApi.WrappedValue inputValueMapsampleData = new ConnectApi.WrappedValue();
-                    inputValueMapsampleData.value = sampleData;
-                    ConnectApi.WrappedValue inputValueMapsubmissionType = new ConnectApi.WrappedValue();
-                    inputValueMapsubmissionType.value = submissionType;
-                    ConnectApi.WrappedValue inputValueMaprequirements = new ConnectApi.WrappedValue();
-                    inputValueMaprequirements.value = requirements;
+public static ValidationResponseWrapper invokeValidationPromptCoding(
+    String scenario,
+    String solution,
+    String sampleData,
+    String submissionType,
+    String requirements
+) {
 
-                    Map<String, ConnectApi.WrappedValue> inputParams = new Map<String, ConnectApi.WrappedValue>();        
-                    inputParams.put('Input:Scenario', inputValueMapScenario);
-                    inputParams.put('Input:SolutionCode', inputValueMapSolution);
-                    inputParams.put('Input:SampleData', inputValueMapsampleData);
-                    inputParams.put('Input:SubmissionType', inputValueMapsubmissionType);
-                    inputParams.put('Input:Requirements', inputValueMaprequirements);
-                    
+    try {
+        Map<String, Object> inputParams = new Map<String, Object>{
+            'Input:Scenario' => scenario,
+            'Input:SolutionCode' => solution,
+            'Input:SampleData' => sampleData,
+            'Input:SubmissionType' => submissionType,
+            'Input:Requirements' => requirements
+        };
 
+        String response = PromptTemplateRestService.invokePrompt(
+            'Challenge_Validation_Coding',
+            inputParams
+        );
 
-                    String response = PromptTemplateService.invokePrompt('Challenge_Validation_Coding', inputParams);
+        Map<String, Object> mapResponse =
+            (Map<String, Object>) JSON.deserializeUntyped(response);
 
-                    Map<String, Object> mapResponse =(Map<String, Object>) JSON.deserializeUntyped(response);
+        ValidationResponseWrapper wrapper = new ValidationResponseWrapper();
 
-                    ValidationResponseWrapper wrapper = new ValidationResponseWrapper();
+        wrapper.overallVerdict = (String) mapResponse.get('overallVerdict');
+        wrapper.compilationStatus = (String) mapResponse.get('compilationStatus');
+        wrapper.badCodeReview = toStringList(mapResponse.get('badCodeReview'));
+        wrapper.goodCodeReview = toStringList(mapResponse.get('goodCodeReview'));
+        wrapper.recommendedImprovements = toStringList(mapResponse.get('recommendedImprovements'));
+        wrapper.scenarioResults = (List<Object>) mapResponse.get('scenarioResults');
 
-                    wrapper.overallVerdict = (String) mapResponse.get('overallVerdict');
-                    wrapper.compilationStatus = (String) mapResponse.get('compilationStatus');
-                    wrapper.badCodeReview = toStringList(mapResponse.get('badCodeReview'));
-                    wrapper.goodCodeReview = toStringList(mapResponse.get('goodCodeReview'));
-                    wrapper.recommendedImprovements = toStringList(mapResponse.get('recommendedImprovements'));
-
-                    wrapper.scenarioResults = (List<Object>) mapResponse.get('scenarioResults');
-                    wrapper.score=(Integer) mapResponse.get('score');
-
-                    return wrapper;
-                    
-
-                
-            } catch (Exception e) {
-                throw new AuraHandledException(e.getMessage());
-            }
+        Object scoreValue = mapResponse.get('score');
+        if (scoreValue instanceof Integer) {
+            wrapper.score = (Integer) scoreValue;
+        } else if (scoreValue != null) {
+            wrapper.score = Integer.valueOf(String.valueOf(scoreValue));
         }
+
+        return wrapper;
+
+    } catch (Exception e) {
+        throw new AuraHandledException(e.getMessage());
+    }
+}
 
 }

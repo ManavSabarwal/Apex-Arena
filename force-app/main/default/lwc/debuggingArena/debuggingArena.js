@@ -4,6 +4,7 @@ import invokeValidationPrompt from '@salesforce/apex/PromptTemplateController.in
 import saveAttemptedChallenge from '@salesforce/apex/recordController.saveAttemptedChallenge';
 import createChallengeAttempt from '@salesforce/apex/recordController.createChallengeAttempt';
 import updateExpPoints from '@salesforce/apex/recordController.updateExpPoints';
+import getChallengeDetails from '@salesforce/apex/recordController.getChallengeDetails';
 import { NavigationMixin } from 'lightning/navigation';
 
 
@@ -72,8 +73,68 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                 }
             });
         }
+        const challengeId=window.sessionStorage.getItem('challengeId');
+        if(challengeId)
+            this.loadChallenge(challengeId);
     }
 
+    async loadChallenge(challengeId)
+        {
+            console.log("loadChallenge "+challengeId);
+            try{
+    
+                const result=await getChallengeDetails(
+                    {
+                        challengeId:challengeId
+                    }
+                )
+                this.savedId=challengeId;
+                console.log("load "+this.savedId);
+    
+                this.populateData(result);
+    
+            }
+            catch(error)
+            {
+                console.log(error);
+            }
+        }
+
+
+    populateData(response)
+    {
+        try{
+        this.dataLoaded = true;
+            this.problem = response;
+            const parsedData = response;
+            this.scenario = parsedData.Scenario;
+            this.code = parsedData.ErrorCode.replace('```apex', '').replace('```', '');
+            this.textAreacode = this.code;
+            this.symptoms = parsedData.BusinessRequirements;
+            this.problemTitle = parsedData.ProblemTitle;
+            this.difficultyfromPrompt = parsedData.DifficultyLevel;
+
+            switch (this.difficultyfromPrompt) {
+                case 'Beginner': this.estimatedTime = '20:00'; this.expReward = '50 XP'; break;
+                case 'Apprentice': this.estimatedTime = '30:00'; this.expReward = '100 XP'; break;
+                case 'Skilled Developer': this.estimatedTime = '45:00'; this.expReward = '200 XP'; break;
+                case 'Expert Architect': this.estimatedTime = '1:00:00'; this.expReward = '400 XP'; break;
+                case 'Legendary Salesforce Hero': this.estimatedTime = '1:30:00'; this.expReward = '800 XP'; break;
+            }
+
+            if (!this.isProblemOptionHidden) {
+                this.isProblemOptionHidden = !this.isProblemOptionHidden;
+            }
+        }
+        catch(error)
+        {
+            console.log(error);
+        }
+        finally{
+            this.isLoading = false;
+            this.isReadonly = false;
+        }
+    }
     openProfile() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
@@ -119,7 +180,6 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
 
     async generateProblem(event) {
         let response = '';
-        let parsedData = '';
         this.textAreacode = '';
         this.isReadonly = true;
         this.submitCount = 0;
@@ -144,27 +204,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                     path: 'debug'
                 });
 
-            this.dataLoaded = true;
-            this.problem = response;
-            parsedData = JSON.parse(response);
-            this.scenario = parsedData.Scenario;
-            this.code = parsedData.ErrorCode.replace('```apex', '').replace('```', '');
-            this.textAreacode = this.code;
-            this.symptoms = parsedData.Requirements;
-            this.problemTitle = parsedData.ProblemTitle;
-            this.difficultyfromPrompt = parsedData.DifficultyMatrixLevel;
-
-            switch (this.difficultyfromPrompt) {
-                case 'Beginner': this.estimatedTime = '20:00'; this.expReward = '50 XP'; break;
-                case 'Apprentice': this.estimatedTime = '30:00'; this.expReward = '100 XP'; break;
-                case 'Skilled Developer': this.estimatedTime = '45:00'; this.expReward = '200 XP'; break;
-                case 'Expert Architect': this.estimatedTime = '1:00:00'; this.expReward = '400 XP'; break;
-                case 'Legendary Salesforce Hero': this.estimatedTime = '1:30:00'; this.expReward = '800 XP'; break;
-            }
-
-            if (!this.isProblemOptionHidden) {
-                this.isProblemOptionHidden = !this.isProblemOptionHidden;
-            }
+            this.populateData(JSON.parse(response));
         } catch (error) {
             console.error('Error generating problem:', error);
             this.dataLoaded = false;
@@ -173,6 +213,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             this.isReadonly = false;
             response = '';
             try {
+                console.log('DebuggingArena -- -- -- -- -- Before saveAttemptedChallenge'+this.loginName)
 
                 this.savedId = await saveAttemptedChallenge({
                     problemTitle: this.problemTitle,
@@ -279,16 +320,9 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             this.optimizedCode = parsedResponse.ArchitectOptimization;
             this.score=parsedResponse.Score;
 
-        } catch (error) {
-            console.error('Error submitting solution:', error);
-        }
-        finally {
-            this.submitting = false;
-            this.isReadonly = false;
+            //creating Challenge Attempt
 
-            try {
-
-                let saveRes = await createChallengeAttempt(
+            let saveRes = await createChallengeAttempt(
                     {
                         id: this.savedId,
                         result: this.result,
@@ -321,11 +355,13 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                     console.log('Error in creating attempt. Check logs');
                 }
 
-            }
-            catch (error) {
-                console.log('Error in Creating Attempt');
-                console.log(error);
-            }
+        } catch (error) {
+            console.error('Error submitting solution:', error);
+        }
+        finally {
+            this.submitting = false;
+            this.isReadonly = false;
+
         }
     }
 

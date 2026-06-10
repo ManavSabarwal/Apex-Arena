@@ -1,4 +1,4 @@
-public with sharing class ApeArenaUserTriggerHandler extends TriggerHandler{
+public without sharing class ApeArenaUserTriggerHandler extends TriggerHandler{
     public ApeArenaUserTriggerHandler() {
 
     }

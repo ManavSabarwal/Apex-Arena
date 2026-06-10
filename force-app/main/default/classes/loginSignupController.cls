@@ -1,10 +1,10 @@
-public with sharing class loginSignupController {
+public without sharing class loginSignupController {
     public loginSignupController() {
 
     }
 
     @AuraEnabled
-    public static string loginHelper(String Username,String Password)
+    public static String loginHelper(String Username,String Password)
     {
         string result=null;
         try{
@@ -30,6 +30,7 @@ public with sharing class loginSignupController {
             Apex_Arena_User__C user=new Apex_Arena_User__C();
             user.name=Username.toLowerCase();
             user.password__c=Password;
+            user.OwnerId='005gK00003wUk0F';
 
             insert user;
             return 'SignUp Successful';

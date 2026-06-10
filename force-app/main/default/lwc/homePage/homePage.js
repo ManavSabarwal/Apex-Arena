@@ -13,6 +13,7 @@ export default class HomePage extends NavigationMixin(LightningElement) {
     connectedCallback()
     {
         this.loginName=window.sessionStorage.getItem('loginName');
+        console.log('HomePage CC: '+this.loginName);
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
         if(this.loginName ==null || this.isLoggedIn ==null ||this.isLoggedIn ==false)
         {
@@ -54,6 +55,7 @@ export default class HomePage extends NavigationMixin(LightningElement) {
         console.log('Navigating to Debugging Arena...');
         window.sessionStorage.setItem('isLoggedIn',true);
         window.sessionStorage.setItem('loginName',this.loginName);
+        console.log('HomePage : '+this.loginName);
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {

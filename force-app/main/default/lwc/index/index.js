@@ -78,7 +78,8 @@ export default class Index extends NavigationMixin(LightningElement) {
 
     async login()
     {
-
+        alert('LOGIN METHOD CALLED');
+        console.log('LOGIN METHOD CALLED');
         if(this.username=='' || this.password=='')
         {
             this.showError('Please enter your Username and Password.');
@@ -98,6 +99,7 @@ export default class Index extends NavigationMixin(LightningElement) {
             else{
                 this.isLoggedIn=true;
                 this.loginName=result;
+
                 this.isLoading=true;
                 console.log('Loading...');
                 console.log(result);

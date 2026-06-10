@@ -362,6 +362,7 @@
     flex: 1;
     overflow-y: auto;
     min-height:0;
+    margin-bottom: 10px;
 }
 
 .attempts-container::-webkit-scrollbar {
@@ -395,6 +396,7 @@
     position: relative;
     display: flex;
     justify-content: center;
+    margin-top:10px;
 }
 
 .timeline-line {
@@ -404,6 +406,27 @@
     width: 2px;
     background: rgba(255,255,255,.2);
 }
+.Test{
+    border:1px solid #00BFFF;
+    color:#00BFFF;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 5px;
+    display:flex;
+    gap:5px;
+    background-color: #00bfff2e;
+}
+.Submit{
+    border: 1px solid #8B5CF6;
+    color: #8B5CF6;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 5px;
+    display:flex;
+    gap:5px;
+    background-color: #8B5CF62e;
+}
+
 
 .✓ {
      width: 32px;
@@ -704,4 +727,160 @@
         transform: scale(1);
         opacity: 1;
     }
+}
+
+/*Test Data*/
+
+
+.modal-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    overflow-y: auto;
+}
+
+.scenario-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.card {
+    padding: 16px;
+    border-radius: 14px;
+    background: rgba(20, 25, 45, 0.6);
+    border: 1px solid rgba(120, 120, 255, 0.15);
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+.left-card {
+    border-left: 2px solid #7c4dff;
+    border-bottom: 2px solid #7c4dff;
+}
+
+.right-card {
+    border-left: 2px solid #00bcd4;
+    border-bottom: 2px solid #00bcd4;
+}
+
+.card-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #ffffff;
+}
+
+.section {
+    margin-bottom: 12px;
+}
+
+.label {
+    font-size: 11px;
+    color: #9aa4c7;
+    margin-bottom: 4px;
+}
+
+.box {
+    font-size: 12px;
+    color: #d6dcff;
+    background: rgba(255,255,255,0.04);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.error-box {
+    border-left: 3px solid #ff4d6d;
+}
+
+.status-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    align-items: center;
+}
+
+.status-label {
+    font-size: 12px;
+    color: #9aa4c7;
+}
+
+/* STATUS BADGES */
+.pass {
+    background: rgba(0, 255, 140, 0.15);
+    color: #00ff9d;
+    padding: 4px 25px;
+    border-radius: 20px;
+    font-size: 11px;
+    border: 1px solid rgba(0, 255, 140, 0.3);
+}
+
+.fail {
+    background: rgba(255, 70, 90, 0.15);
+    color: #ff5c7a;
+    padding: 4px 25px;
+    border-radius: 20px;
+    font-size: 11px;
+    border: 1px solid rgba(255, 70, 90, 0.3);
+}
+
+.modal-grid::-webkit-scrollbar{
+
+    width: 8px;
+}
+
+.modal-grid::-webkit-scrollbar-thumb {
+
+    background: #5c5867;
+
+    border-radius: 10px;
+}
+
+
+
+.tryAgainButton{
+    padding: 5px 10px;
+    position: relative;
+    bottom: px;
+    background: linear-gradient(45deg, #80c4f8, #003a6c);
+    border-radius: 5px;
+    border: 1px solid #003a6c;
+    z-index: 10;
+    width: stretch;
+    margin-right: 15px;
+    transition: all 0.3s ease;
+}
+
+.tryAgainButton:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 0 10px rgba(128, 196, 248, 0.4),
+        0 0 20px rgba(128, 196, 248, 0.3),
+        0 0 30px rgba(128, 196, 248, 0.2);
+
+    border-color: #80c4f8;
+}
+
+.tryAgainButton:active {
+    transform: translateY(0px) scale(0.98);
+}
+
+.tryAgainButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.3),
+        transparent
+    );
+    transition: left 0.6s ease;
+}
+
+.tryAgainButton:hover::before {
+    left: 15%;
 }

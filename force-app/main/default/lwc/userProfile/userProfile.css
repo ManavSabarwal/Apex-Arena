@@ -391,6 +391,11 @@
 .recent-problem-cont{
     display:flex;
     border-bottom: 1px solid rgba(196, 196, 196, 0.14);
+    cursor:pointer
+}
+
+.recent-problem-cont:hover {
+    background: rgba(130, 85, 255, 0.05);
 }
 .recent-problem-details{
     padding: 10px 0px;

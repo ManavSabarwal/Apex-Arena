@@ -4,6 +4,7 @@ import invokeValidationPromptCoding from '@salesforce/apex/PromptTemplateControl
 import saveAttemptedChallenge from '@salesforce/apex/recordController.saveAttemptedChallenge';
 import createChallengeAttempt from '@salesforce/apex/recordController.createChallengeAttempt';
 import updateExpPoints from '@salesforce/apex/recordController.updateExpPoints';
+import getChallengeDetails from '@salesforce/apex/recordController.getChallengeDetails';
 import { NavigationMixin } from 'lightning/navigation';
 
 
@@ -49,6 +50,8 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     isLoggedIn = false;
     loadingMessages = ['Nothing yet'];
 
+    sessionToken=''
+
 
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
@@ -61,6 +64,31 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                     url: '/'
                 }
             });
+        }
+        const challengeId=window.sessionStorage.getItem('challengeId');
+        if(challengeId)
+        {
+           this.loadChallenge(challengeId);
+        }
+    }
+
+    async loadChallenge(challengeId)
+    {
+        try{
+
+            const result=await getChallengeDetails(
+                {
+                    challengeId:challengeId
+                }
+            )
+            this.savedId=challengeId;
+
+            this.populateData(result);
+
+        }
+        catch(error)
+        {
+            console.log(error);
         }
     }
 
@@ -187,9 +215,54 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         }
     }
 
+    populateData(response)
+    {
+        
+        try{
+            this.dataLoaded=true;
+            const parsedData = response;
+            console.log(parsedData);
+            this.scenario = parsedData.Scenario;
+            console.log(this.scenario);
+            this.requirements = parsedData.BusinessRequirements;
+            this.problemTitle = parsedData.ProblemTitle;
+            this.difficultyfromPrompt = parsedData.DifficultyLevel;
+            console.log(this.difficultyfromPrompt);
+            const sampData = parsedData.SampleData;
+            console.log(sampData);
+            this.sampleData = sampData;
+
+            console.log('Sample Data =============');
+
+            console.log(typeof this.sampleData);
+
+            switch (this.difficultyfromPrompt) {
+                case 'Beginner': this.estimatedTime = '20:00'; this.expReward = '80 XP'; break;
+                case 'Apprentice': this.estimatedTime = '30:00'; this.expReward = '160 XP'; break;
+                case 'Skilled Developer': this.estimatedTime = '45:00'; this.expReward = '320 XP'; break;
+                case 'Expert Architect': this.estimatedTime = '1:00:00'; this.expReward = '640 XP'; break;
+                case 'Legendary Salesforce Hero': this.estimatedTime = '1:30:00'; this.expReward = '1280 XP'; break;
+            }
+
+            if (!this.isProblemOptionHidden) {
+                this.isProblemOptionHidden = !this.isProblemOptionHidden;
+            }
+        }
+        catch(error)
+        {
+            console.log('Error in populateData method');
+            console.log(error);
+        }
+        finally
+        {
+            this.isLoading = false;
+            this.isReadonly = false;
+            this.testReadonly = false;
+        }
+    }
+
     async generateProblem(event) {
         let response = '';
-        let parsedData = '';
         this.textAreacode = '';
         this.isReadonly = true;
         this.submitCount = 0;
@@ -218,31 +291,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                 });
 
             this.dataLoaded = true;
-            this.problem = response;
-            parsedData = JSON.parse(response);
-            this.scenario = parsedData.Scenario;
-            this.requirements = parsedData.BusinessRequirements;
-            this.problemTitle = parsedData.ProblemTitle;
-            this.difficultyfromPrompt = parsedData.DifficultyLevel;
-            const sampData = parsedData.SampleData;
-            console.log(sampData);
-            this.sampleData = sampData;
-
-            console.log('Sample Data =============');
-
-            console.log(typeof this.sampleData);
-
-            switch (this.difficultyfromPrompt) {
-                case 'Beginner': this.estimatedTime = '20:00'; this.expReward = '80 XP'; break;
-                case 'Apprentice': this.estimatedTime = '30:00'; this.expReward = '160 XP'; break;
-                case 'Skilled Developer': this.estimatedTime = '45:00'; this.expReward = '320 XP'; break;
-                case 'Expert Architect': this.estimatedTime = '1:00:00'; this.expReward = '640 XP'; break;
-                case 'Legendary Salesforce Hero': this.estimatedTime = '1:30:00'; this.expReward = '1280 XP'; break;
-            }
-
-            if (!this.isProblemOptionHidden) {
-                this.isProblemOptionHidden = !this.isProblemOptionHidden;
-            }
+            this.populateData(JSON.parse(response));
 
 
 
@@ -420,20 +469,12 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
             this.loadingMessages.push(timestamp + ' Submission Complete\n');
 
+            // creating challenge Attempt
 
-        } catch (error) {
-            console.error('Error submitting solution:', error);
-        }
-        finally {
-            this.submitting = false;
-            this.isReadonly = false;
-            this.testReadonly = false;
             if(this.testdone==true)
                 this.submitReadOnly = false;
 
-            try {
-
-                let saveRes = await createChallengeAttempt(
+            let saveRes = await createChallengeAttempt(
                     {
                         id: this.savedId,
                         result: this.result,
@@ -441,7 +482,8 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                         thegood: this.thegood.join(',/n'),
                         thebad: this.thebad.join(',/n'),
                         score:this.score,
-                        actionType:actionType
+                        actionType:actionType,
+                        testCaseResults:JSON.stringify(this.scenarioResults)
 
                     }
                 );
@@ -467,11 +509,16 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                     console.log('Error in updating EXP Points. Check logs');
                 }
 
-            }
-            catch (error) {
-                console.log('Error in Creating Attempt');
-                console.log(error);
-            }
+
+        } catch (error) {
+            console.error('Error submitting solution/Creating Attempt:', error);
+        }
+        finally {
+            this.submitting = false;
+            this.isReadonly = false;
+            this.testReadonly = false;
+            
+
         }
     }
 

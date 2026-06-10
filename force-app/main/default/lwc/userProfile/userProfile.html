@@ -175,15 +175,15 @@
 
                         <div class="recent-problem-details-container">
                             <template for:each={recent4problems} for:item="recentProblem">
-                                <div key={recentProblem.Id} class="recent-problem-cont">
-                                    <div class="recent-problem-details">
-                                        <span class="detail-label">{recentProblem.Name}</span>
-                                        <div class="capsules">
-                                            <span class={recentProblem.Result__c}>{recentProblem.Result__c}</span>
-                                            <span class="path-details">{recentProblem.Path__c}</span>
+                                <div data-id={recentProblem.Id} key={recentProblem.Id} class="recent-problem-cont" onclick={viewDetails}>
+                                    <div data-id={recentProblem.Id} class="recent-problem-details">
+                                        <span data-id={recentProblem.Id} class="detail-label">{recentProblem.Name}</span>
+                                        <div data-id={recentProblem.Id} class="capsules">
+                                            <span data-id={recentProblem.Id} class={recentProblem.Result__c}>{recentProblem.Result__c}</span>
+                                            <span data-id={recentProblem.Id} class="path-details">{recentProblem.Path__c}</span>
                                         </div>
                                     </div>
-                                    <div class="activity-time">
+                                    <div data-id={recentProblem.Id} class="activity-time">
                                         <span>{recentProblem.timeAgo} ></span>
                                     </div>
                                 </div>
@@ -305,7 +305,7 @@
                     <!-- Rows -->
                     <template for:each={challengeData} for:item="item">
 
-                        <div key={item.Id} data-id={item.Id} class="table-row">
+                        <div key={item.Id} data-id={item.Id} class="table-row" >
 
                             <!-- Challenge -->
                             <div class="challenge-section">

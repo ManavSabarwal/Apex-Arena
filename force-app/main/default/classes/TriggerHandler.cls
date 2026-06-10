@@ -1,4 +1,4 @@
-public virtual class TriggerHandler {
+public without sharing virtual class TriggerHandler {
     public TriggerHandler() {
 
     }
