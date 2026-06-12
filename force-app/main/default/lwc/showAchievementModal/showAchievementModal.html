@@ -1,0 +1,39 @@
+<template>
+
+    <template if:true={showModal}>
+        <div class="achievement-overlay">
+            <div class="achievement-modal">
+
+
+                <button class="close-btn" onclick={closeModal}>
+                    ×
+                </button>
+
+                <div class="popup-header">
+                    <img src={trophy} style="width:120px"/>
+                    <div class="popup-title">New Achievement(s)</div>
+                    <div class="popup-subtitle">Hurray!! You have unlocked {count} new Achievement(s)</div>
+                </div>
+                <div class="achContainer">
+                    <template for:each={achievement} for:item="item">
+                        <div key={item.name} class="achRowDiv">
+                        <div>
+                            <img class="badgeClass" src={item.iconUrl}/>
+                        </div>
+                        <div style="display:grid;gap: 10px;">
+                            <p class={item.rarity}>{item.rarity}</p>
+                            <div>
+                            <p class="achName">{item.name}</p>
+                            <p class="achDesc">{item.description}</p>
+                            </div>
+                            <p class="achCategory">Category : {item.category}</p>
+                            
+                        </div>
+                        </div>
+                    </template>
+                    </div>
+                
+            </div>
+        </div>
+
+    </template>

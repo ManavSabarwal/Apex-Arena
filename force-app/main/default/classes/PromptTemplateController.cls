@@ -15,6 +15,8 @@ public without sharing class PromptTemplateController {
         @AuraEnabled public List<Object> scenarioResults;
         @AuraEnabled public String message;
         @AuraEnabled public String expPoints;
+
+        @AuraEnabled public List<AchievementEngine.UnlockedAchievementDTO> unlockedAchievements;
     }
 
     public class ProblemResponseWrapper {
@@ -26,6 +28,7 @@ public without sharing class PromptTemplateController {
         @AuraEnabled public Integer Score;
         @AuraEnabled public String message;
         @AuraEnabled public String expPoints;
+        @AuraEnabled public List<AchievementEngine.UnlockedAchievementDTO> unlockedAchievements;
     }
 
         @AuraEnabled
@@ -107,7 +110,11 @@ public static ProblemResponseWrapper invokeValidationPrompt(String scenario, Str
         List<String> response=recordController.createChallengeAttempt(challengeId,wrapper.Result,solution,wrapper.CodeReviewGood,wrapper.CodeReviewBad,String.valueOf(wrapper.Score),'Submit','');
         wrapper.message=response[0];
         wrapper.expPoints=response[1];
+        String challengeAttemptId=response[2];
+        String userId=response[3];
 
+        List<AchievementEngine.UnlockedAchievementDTO> unlockedAchievements =AchievementEngine.evaluateAndAssign(userId,challengeAttemptId);
+        wrapper.unlockedAchievements=unlockedAchievements;
         return wrapper;
 
 
@@ -175,6 +182,11 @@ public static ValidationResponseWrapper invokeValidationPromptCoding(
         List<String> response= recordController.createChallengeAttempt(challengeId, wrapper.overallVerdict, solution, String.join(wrapper.goodCodeReview, '\n') , String.join(wrapper.badCodeReview, '\n'), String.valueOf(wrapper.score), submissionType.split(' ')[0], JSON.serialize(wrapper.scenarioResults));
         wrapper.message=response[0];
         wrapper.expPoints=response[1];
+        String challengeAttemptId=response[2];
+        String userId=response[3];
+
+        List<AchievementEngine.UnlockedAchievementDTO> unlockedAchievements =AchievementEngine.evaluateAndAssign(userId,challengeAttemptId);
+        wrapper.unlockedAchievements=unlockedAchievements;
 
         return wrapper;
 

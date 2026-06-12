@@ -31,13 +31,15 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
     isReadonly = true;
     savedId = '';
     passed = false;
-    score ='0';
+    score = '0';
 
     isLoggedIn = false;
     isProblemOptionHidden = false;
     isProblemHidden = false;
     expReward = 0;
     estimatedTime = '10:00';
+
+    unlockedAchievements = [];
 
     get sectionClass() {
         return this.isProblemOptionHidden
@@ -73,38 +75,35 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                 }
             });
         }
-        const challengeId=window.sessionStorage.getItem('challengeId');
-        if(challengeId)
+        const challengeId = window.sessionStorage.getItem('challengeId');
+        if (challengeId)
             this.loadChallenge(challengeId);
     }
 
-    async loadChallenge(challengeId)
-        {
-            console.log("loadChallenge "+challengeId);
-            try{
-    
-                const result=await getChallengeDetails(
-                    {
-                        challengeId:challengeId
-                    }
-                )
-                this.savedId=challengeId;
-                console.log("load "+this.savedId);
-    
-                this.populateData(result);
-    
-            }
-            catch(error)
-            {
-                console.log(error);
-            }
+    async loadChallenge(challengeId) {
+        console.log("loadChallenge " + challengeId);
+        try {
+
+            const result = await getChallengeDetails(
+                {
+                    challengeId: challengeId
+                }
+            )
+            this.savedId = challengeId;
+            console.log("load " + this.savedId);
+
+            this.populateData(result);
+
         }
+        catch (error) {
+            console.log(error);
+        }
+    }
 
 
-    populateData(response)
-    {
-        try{
-        this.dataLoaded = true;
+    populateData(response) {
+        try {
+            this.dataLoaded = true;
             this.problem = response;
             const parsedData = response;
             this.scenario = parsedData.Scenario;
@@ -126,11 +125,10 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                 this.isProblemOptionHidden = !this.isProblemOptionHidden;
             }
         }
-        catch(error)
-        {
+        catch (error) {
             console.log(error);
         }
-        finally{
+        finally {
             this.isLoading = false;
             this.isReadonly = false;
         }
@@ -213,7 +211,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             this.isReadonly = false;
             response = '';
             try {
-                console.log('DebuggingArena -- -- -- -- -- Before saveAttemptedChallenge'+this.loginName)
+                console.log('DebuggingArena -- -- -- -- -- Before saveAttemptedChallenge' + this.loginName)
 
                 this.savedId = await saveAttemptedChallenge({
                     problemTitle: this.problemTitle,
@@ -310,18 +308,22 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             console.log('Submitting solution...');
             this.submitting = true;
             this.isReadonly = true;
-            const parsedResponse = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode,challengeId: this.savedId });
+            const parsedResponse = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode, challengeId: this.savedId });
             this.result = parsedResponse.Result;
             this.reason = parsedResponse.Reasoning;
             this.thebad = JSON.parse(parsedResponse.CodeReviewBad);
             this.thegood = JSON.parse(parsedResponse.CodeReviewGood);
             console.log(this.thegood);
             this.optimizedCode = parsedResponse.ArchitectOptimization;
-            this.score=parsedResponse.Score;
-            let message=parsedResponse.message;
-            let expPoints=parsedResponse.expPoints;
+            this.score = parsedResponse.Score;
+            let message = parsedResponse.message;
+            let expPoints = parsedResponse.expPoints;
+            this.unlockedAchievements = parsedResponse.unlockedAchievements;
             if (this.result.toLowerCase().includes('pass')) {
-                    this.template.querySelector('c-modal-component').openModal(message,expPoints);
+                this.template.querySelector('c-modal-component').openModal(message, expPoints);
+            }
+            if (this.unlockedAchievements.length > 0) {
+                this.template.querySelector('c-show-achievement-modal').openModal(this.unlockedAchievements);
             }
 
         } catch (error) {
@@ -332,6 +334,11 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             this.isReadonly = false;
 
         }
+    }
+
+    showNewAchievements() {
+        console.log(this.unlockedAchievements.length);
+        
     }
 
 }

@@ -73,8 +73,9 @@ public without sharing class recordController {
     public static List<String> createChallengeAttempt(String id, String result,String solution,string thegood,string thebad,string score,string actionType,string testCaseResults){
         try {
 
-            List<Attempted_challenge__C> ac=[Select id, attempts__C,result__c,path__c,DifficultyLevel__c from Attempted_challenge__C where id=:id];
+            List<Attempted_challenge__C> ac=[Select id,Apex_Arena_User__r.Id ,attempts__C,result__c,path__c,DifficultyLevel__c from Attempted_challenge__C where id=:id];
             List<String> response=new List<String>();
+            String userId=ac[0].Apex_Arena_User__r.Id;
             String res='';
             if(!ac.isEmpty())
             {
@@ -151,6 +152,8 @@ public without sharing class recordController {
                 }
                 response.add(res);
                 response.add(String.valueOf(exppoints));
+                response.add(ca.Id);
+                response.add(userId);
 
                 
             }

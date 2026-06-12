@@ -18,5 +18,10 @@ export default class ModalComponent extends LightningElement {
     @api closeModal() {
         this.exppoints=0;
         this.showModal = false;
+        const customEvent = new CustomEvent('closemodal', {
+            detail: 'closed'
+        });
+
+        this.dispatchEvent(customEvent);
     }
 }
