@@ -13,6 +13,19 @@ public without sharing class PromptTemplateController {
         @AuraEnabled public List<String> recommendedImprovements;
 
         @AuraEnabled public List<Object> scenarioResults;
+        @AuraEnabled public String message;
+        @AuraEnabled public String expPoints;
+    }
+
+    public class ProblemResponseWrapper {
+        @AuraEnabled public String Result;
+        @AuraEnabled public String Reasoning;
+        @AuraEnabled public String ArchitectOptimization;
+        @AuraEnabled public String CodeReviewGood;
+        @AuraEnabled public String CodeReviewBad;
+        @AuraEnabled public Integer Score;
+        @AuraEnabled public String message;
+        @AuraEnabled public String expPoints;
     }
 
         @AuraEnabled
@@ -61,19 +74,43 @@ public static String invokePrompt(
 }
 
         @AuraEnabled
-public static String invokeValidationPrompt(String scenario, String solution) {
+public static ProblemResponseWrapper invokeValidationPrompt(String scenario, String solution,String challengeId) {
+    List<String> responses=new List<String>();
     try {
         Map<String, Object> inputParams = new Map<String, Object>{
             'Input:Scenario' => scenario,
             'Input:Solution' => solution
         };
 
-        String response = PromptTemplateRestService.invokePrompt(
+        String promptresponse = PromptTemplateRestService.invokePrompt(
             'Coding_Challenge_Resolution',
             inputParams
         );
 
-        return response;
+        Map<String, Object> mapResponse =
+            (Map<String, Object>) JSON.deserializeUntyped(promptresponse);
+
+        ProblemResponseWrapper wrapper=new ProblemResponseWrapper();
+        wrapper.Result=(String) mapResponse.get('Result');
+        wrapper.Reasoning=(String) mapResponse.get('Reasoning');
+        wrapper.ArchitectOptimization=(String) mapResponse.get('ArchitectOptimization');
+        wrapper.CodeReviewGood=(String) mapResponse.get('CodeReviewGood');
+        wrapper.CodeReviewBad=(String) mapResponse.get('CodeReviewBad');
+
+        Object scoreValue = mapResponse.get('Score');
+        if (scoreValue instanceof Integer) {
+            wrapper.Score = (Integer) scoreValue;
+        } else if (scoreValue != null) {
+            wrapper.Score = Integer.valueOf(String.valueOf(scoreValue));
+        }
+        
+        List<String> response=recordController.createChallengeAttempt(challengeId,wrapper.Result,solution,wrapper.CodeReviewGood,wrapper.CodeReviewBad,String.valueOf(wrapper.Score),'Submit','');
+        wrapper.message=response[0];
+        wrapper.expPoints=response[1];
+
+        return wrapper;
+
+
 
     } catch (Exception e) {
         throw new AuraHandledException(e.getMessage());
@@ -98,7 +135,8 @@ public static ValidationResponseWrapper invokeValidationPromptCoding(
     String solution,
     String sampleData,
     String submissionType,
-    String requirements
+    String requirements,
+    String challengeId
 ) {
 
     try {
@@ -110,13 +148,13 @@ public static ValidationResponseWrapper invokeValidationPromptCoding(
             'Input:Requirements' => requirements
         };
 
-        String response = PromptTemplateRestService.invokePrompt(
+        String promptresponse = PromptTemplateRestService.invokePrompt(
             'Challenge_Validation_Coding',
             inputParams
         );
 
         Map<String, Object> mapResponse =
-            (Map<String, Object>) JSON.deserializeUntyped(response);
+            (Map<String, Object>) JSON.deserializeUntyped(promptresponse);
 
         ValidationResponseWrapper wrapper = new ValidationResponseWrapper();
 
@@ -133,6 +171,10 @@ public static ValidationResponseWrapper invokeValidationPromptCoding(
         } else if (scoreValue != null) {
             wrapper.score = Integer.valueOf(String.valueOf(scoreValue));
         }
+
+        List<String> response= recordController.createChallengeAttempt(challengeId, wrapper.overallVerdict, solution, String.join(wrapper.goodCodeReview, '\n') , String.join(wrapper.badCodeReview, '\n'), String.valueOf(wrapper.score), submissionType.split(' ')[0], JSON.serialize(wrapper.scenarioResults));
+        wrapper.message=response[0];
+        wrapper.expPoints=response[1];
 
         return wrapper;
 

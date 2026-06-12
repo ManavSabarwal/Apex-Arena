@@ -70,18 +70,17 @@ public without sharing class recordController {
     }
 
     @AuraEnabled
-    public static Map<String,String> createChallengeAttempt(String id, String result,String solution,string thegood,string thebad,string score,string actionType,string testCaseResults){
+    public static List<String> createChallengeAttempt(String id, String result,String solution,string thegood,string thebad,string score,string actionType,string testCaseResults){
         try {
 
-            List<Attempted_challenge__C> ac=[Select id, attempts__C,result__c from Attempted_challenge__C where id=:id];
-            Map<String,String> res=new Map<String,String>();
-            system.debug('Result============-----------------'+result);
-
-            Challenge_Attempt__C ca=new Challenge_Attempt__c();
+            List<Attempted_challenge__C> ac=[Select id, attempts__C,result__c,path__c,DifficultyLevel__c from Attempted_challenge__C where id=:id];
+            List<String> response=new List<String>();
+            String res='';
+            if(!ac.isEmpty())
+            {
+                Challenge_Attempt__C ca=new Challenge_Attempt__c();
                 ca.result__c=result;
-                system.debug(result);
                 ca.Attempted_Challenge__c=(ID)id;
-                system.debug('ID Parameter-------------'+id);
                 Integer attempt=(Integer)ac[0].attempts__c+1;
                 ca.name='Attempt '+attempt;
                 ca.Solution_Provided__c=solution;
@@ -90,33 +89,116 @@ public without sharing class recordController {
                 ca.score__c=score;
                 ca.Action_Type__c=actionType;
                 ca.Test_Case_Results__c=testCaseResults;
-                res.put('oldresult',ac[0].result__C);
-                res.put('attempt',attempt.toString());
+                string challengeResult=ac[0].result__C;
+                string path=ac[0].path__c;
+                string difficulty=ac[0].DifficultyLevel__c.toLowerCase();
                 insert(ca);
-                res.put('attemptId',ca.Id);
-                return res;
+                system.debug('Challenege Attempt Created with id: '+ca.Id);
+                string attemptId=ca.Id;
+                Decimal exppoints=0;
+
+                //to update expPoints
+                if(String.isNotBlank(result) && result.toLowerCase().contains('pass'))
+                {
+                    if(challengeResult.toLowerCase().contains('pass'))
+                    {
+                        exppoints=0;
+                        res='Challenge already completed successfully — XP reward unavailable for repeat clears.';
+                    }
+                    else
+                    {
+                        Decimal multiplier=1;
+                        if(path=='Debugging')
+                        {
+                            if(attempt==1)
+                            {
+                                multiplier=1.5;
+                                res='First attempt! 50% XP bonus awarded.';
+                               
+                            }
+                            switch on difficulty {
+                                when  'beginner'{ exppoints=(50*multiplier);}
+                                when 'apprentice'{exppoints=(100*multiplier); }
+                                when 'skilled developer'{exppoints=(200*multiplier); }
+                                when 'expert architect'{exppoints=(400*multiplier); }
+                                when 'Legendary Salesforce Hero'{exppoints=(800*multiplier); }
+                                when else {exppoints=0;}
+                            }
+                        }
+
+                        if(path=='Coding' && actionType=='Submit')
+                        {
+                            if(Integer.valueOf(score)>=95)
+                            {
+                                multiplier=1.2;
+                                res='Score of 95% or above achieved! 20% XP bonus awarded.';
+                            }
+                            switch on difficulty {
+                                when  'beginner'{ exppoints=(80*multiplier);}
+                                when 'apprentice'{exppoints=(160*multiplier); }
+                                when 'skilled developer'{exppoints=(320*multiplier); }
+                                when 'expert architect'{exppoints=(640*multiplier); }
+                                when 'Legendary Salesforce Hero'{exppoints=(1280*multiplier); }
+                                when else {exppoints=0;}
+                            }
+                        }
+                    }
+                    Boolean isexpUpdated=recordController.updateExpPoints(exppoints, attemptId);
+                    if(isexpUpdated)
+                    {
+                        system.debug('ExpPoints( '+exppoints+' ) Updated for challengeAttempt id: '+attemptId);
+                    }
+                }
+                response.add(res);
+                response.add(String.valueOf(exppoints));
+
+                
             }
+            return response;
+        }
              catch (Exception e) {
                     throw new AuraHandledException(e.getMessage());
             }
     }
 
     @AuraEnabled
-    public static string updateExpPoints(Integer expPoints,String attemptId){
+    public static boolean updateExpPoints(Decimal expPoints,String attemptId){
         try {
-
-                List<Challenge_Attempt__c> ca=[Select id,name,Exp_gained__C from Challenge_Attempt__c where id=: attemptId limit 1];
-                Challenge_Attempt__c c=ca[0];
-                c.Exp_gained__C=expPoints;
-                update c;
-                return 'Exp Point Updated ';
-
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+        if (String.isBlank(attemptId)) {
+            throw new AuraHandledException('Attempt Id is missing.');
         }
+
+        if (expPoints == null) {
+            expPoints = 0;
+        }
+
+        // Since Exp_gained__c is Number(18, 0), keep XP as a whole number
+        expPoints = expPoints.setScale(0);
+
+        List<Challenge_Attempt__c> ca = [
+            SELECT Id, Exp_gained__c
+            FROM Challenge_Attempt__c
+            WHERE Id = :attemptId
+            LIMIT 1
+        ];
+
+        if (ca.isEmpty()) {
+            throw new AuraHandledException('No challenge attempt found for the given Id.');
+        }
+
+        Challenge_Attempt__c c = ca[0];
+        c.Exp_gained__c = expPoints;
+
+        update c;
+
+        return true;
+
+    } catch (Exception e) {
+        throw new AuraHandledException(e.getMessage());
+    }
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<Attempted_Challenge__c> getAttemptedChallenges(String username,String recordLimit){
         try {
             string queryText='';
@@ -149,7 +231,7 @@ public without sharing class recordController {
     public static List<Challenge_Attempt__C> getUserandChalengeDetails(String username){
         try {
 
-            string queryText='select id,Result__c,Name,score__c,Solution_Provided__c,Exp_gained__c,Code_Review_Good__c,Code_Review_Bad__c,Action_Type__c,Attempted_Challenge__r.Scenario__c,Attempted_Challenge__r.Path__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = :username' ;
+            string queryText='select id,Result__c,Name,score__c,Solution_Provided__c,Exp_gained__c,Code_Review_Good__c,Code_Review_Bad__c,Action_Type__c,Attempted_Challenge__c,Attempted_Challenge__r.Scenario__c,Attempted_Challenge__r.Path__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate,Attempted_Challenge__r.Result__c FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = :username' ;
             List<Challenge_Attempt__C> ca=Database.query(queryText);
             if(ca.size()==0)
             {

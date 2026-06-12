@@ -22,8 +22,8 @@
             <div class="login-container">
                 <input type="text" onkeyup={handleUsernameChange} placeholder="Username"></input>
                 <input type="password" onkeyup={handlePasswordChange} placeholder="Password"></input>
-                <button onclick={login}>Login</button>
-                <button onclick={showSignUp}>New User? Signup Here</button>
+                <button  onclick={login}>Login</button>
+                <button data-action='signup' onclick={showSignUp}>New User? Signup Here</button>
             </div>
         </template>
         <template if:true={signup}>

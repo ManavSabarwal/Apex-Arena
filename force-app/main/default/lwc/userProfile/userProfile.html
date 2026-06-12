@@ -130,15 +130,24 @@
                                 </svg>
 
                             </div>
-                            <div class="label">
-                                <span class="detail-label"> Submissions</span>
+                            <div class="label" title="Includes Test Runs">
+                                <span class="detail-label">Total Submissions
+                                </span>
                                 <span class="detail-value submissions">{submissions}</span>
                             </div>
 
                         </div>
+                        <div style="display:flex;gap:20px">
                         <div class="div-values">
+                            <span class="test">Test Attempts <span class="value-count">{testAttempts}</span></span>
+                            <span class="submit">Submits <span class="value-count">{submitAttempts}</span></span>
+                        </div>
+                        <div style="border-right:1px solid rgb(75,75,75)">
+                        </div>
+                        <div class="div-values" >
                             <span class="easy">Accepted <span class="value-count">{solved}</span></span>
                             <span class="hard">Wrong <span class="value-count">{wrong}</span></span>
+                        </div>
                         </div>
 
                     </div>
@@ -325,7 +334,7 @@
 
                             <!-- Difficulty -->
                             <div>
-                                <span class={item.DifficultyLevel__c}>
+                                <span class={item.diffClass}>
                                     {item.DifficultyLevel__c}
                                 </span>
                             </div>

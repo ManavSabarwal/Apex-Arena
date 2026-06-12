@@ -13,7 +13,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     userLevel = 'Beginner';
     userAbout = 'Code. Compete. Conquer. Forge your legacy in the Apex Arena.';
     joinDate = 'May 25, 2026';
-    expPoints = '899';
+    expPoints = '0';
     submissions = 0;
     solved = 0;
     easy = 0;
@@ -34,6 +34,8 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     selectedDifficulty = 'All Difficulties';
     selectedPath = 'All Paths';
     selectedResultFilter = 'All Results';
+    testAttempts=0;
+    submitAttempts=0;
 
     heatmapData = [];
 
@@ -85,17 +87,28 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
             value: "All Difficulties"
         },
         {
-            label: "Easy",
-            value: "Easy"
+            label: "Beginner",
+            value: "Beginner"
         },
         {
-            label: "Medium",
-            value: "Medium"
+            label: "Apprentice",
+            value: "Apprentice"
         },
         {
-            label: "Hard",
-            value: "Hard"
-        }];
+            label: "Skilled Developer",
+            value: "Skilled Developer"
+        },
+        {
+            label: "Expert Architect",
+            value: "Expert Architect"
+        },
+        {
+            label: "Legendary Salesforce Hero",
+            value: "Legendary Salesforce Hero"
+        }
+
+    
+    ];
     pathOptions = [{
         label: "All Paths",
         value: "All Paths"
@@ -139,6 +152,8 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                     console.log(error);
                 });
 
+            this.loadAttemptedChallenges();
+
 
         }
 
@@ -147,27 +162,45 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     
 
     bifData(result) {
-        console.log('In Function');
         try {
             this.submissions = result.length;
+            let setChallenges=new Set();
+            let setEasy=new Set();
+            let setMedium=new Set();
+            let setHard=new Set();
             for (let res of result) {
-                if (res.Result__c == 'Pass') {
-                    this.solved++;
-                    if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Easy') {
-                        this.easy++;
+                if (res.Attempted_Challenge__r.Result__c.toLowerCase() == 'pass') {
+                    setChallenges.add(res.Attempted_Challenge__c)
+                    if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Beginner' || res.Attempted_Challenge__r.DifficultyLevel__c == 'Apprentice') {
+                        
+                        setEasy.add(res.Attempted_Challenge__c);
                     }
-                    else if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Medium') {
-                        this.medium++;
+                    else if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Skilled Developer') {
+                        
+                        setMedium.add(res.Attempted_Challenge__c);
                     }
-                    else if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Hard') {
-                        this.hard++;
+                    else if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Expert Architect' || res.Attempted_Challenge__r.DifficultyLevel__c == 'Legendary Salesforce Hero') {
+                        
+                        setHard.add(res.Attempted_Challenge__c);
                     }
+                }
+                this.solved=setChallenges.size;
+                this.easy=setEasy.size;
+                this.medium=setMedium.size;
+                this.hard=setHard.size;
+                if(res.Action_Type__c.toLowerCase()=='test')
+                {
+                    this.testAttempts++;
+                }
+                else if(res.Action_Type__c.toLowerCase()=='submit')
+                {
+                    this.submitAttempts++;
                 }
 
 
             }
             this.wrong = this.submissions - this.solved;
-            this.acceptanceRate = ((this.solved / this.submissions) * 100).toFixed(2);
+            this.acceptanceRate = this.submissions>0?((this.solved / this.submissions * 100).toFixed(2)):0.00;
             this.expPoints = result[0].Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c;
             this.joinDate = new Date(result[0].Attempted_Challenge__r.Apex_Arena_User__r.CreatedDate)
                 .toLocaleDateString('en-US', {
@@ -183,64 +216,54 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         }
     }
 
-    @wire(getAttemptedChallenges,
-        { username: '$loginName', recordLimit: '$limitSize' }
-    )
-    wiredChallenges({ data, error }) {
-
-        if (data) {
-
-            console.log(data);
-
-            this.recent4problems = data.map(record => {
-
-                const modifiedDate =
-                    new Date(record.LastModifiedDate);
-
-                const now = new Date();
-
-                const diffMs = now - modifiedDate;
-
-                const diffMinutes =
-                    Math.floor(diffMs / (1000 * 60));
-
-                const diffHours =
-                    Math.floor(diffMinutes / 60);
-
-                const diffDays =
-                    Math.floor(diffHours / 24);
-
-                let timeAgo = '';
-
-                if (diffMinutes < 60) {
-
-                    timeAgo = diffMinutes + ' min ago';
-                }
-                else if (diffHours < 24) {
-
-                    timeAgo = diffHours + ' hr ago';
-                }
-                else {
-
-                    timeAgo = diffDays + ' day ago';
-                }
-
-                return {
-                    ...record,
-                    timeAgo: timeAgo,
-
-                };
+     async loadAttemptedChallenges() {
+        try {
+            const data = await getAttemptedChallenges({
+                username: this.loginName,
+                recordLimit: this.limitSize
             });
 
-            this.recent4problems.forEach(item => { item.Result__c = item.Result__c.charAt(0).toUpperCase() + item.Result__c.substring(1) });
-            console.log(this.recent4problems);
-        }
+            if (data) {
+                console.log(data);
 
-        else if (error) {
+                this.recent4problems = data.map(record => {
 
-            console.log(error);
+                    const modifiedDate = new Date(record.LastModifiedDate);
+                    const now = new Date();
+
+                    const diffMs = now - modifiedDate;
+                    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+                    const diffHours = Math.floor(diffMinutes / 60);
+                    const diffDays = Math.floor(diffHours / 24);
+
+                    let timeAgo = '';
+
+                    if (diffMinutes < 60) {
+                        timeAgo = diffMinutes + ' min ago';
+                    } else if (diffHours < 24) {
+                        timeAgo = diffHours + ' hr ago';
+                    } else {
+                        timeAgo = diffDays + ' day ago';
+                    }
+
+                    return {
+                        ...record,
+                        timeAgo: timeAgo,
+                        Result__c: record.Result__c
+                            ? record.Result__c.charAt(0).toUpperCase() + record.Result__c.substring(1)
+                            : ''
+                    };
+                });
+
+                console.log(this.recent4problems);
+            }
+
+        } catch (error) {
+            console.error('Error loading attempted challenges:', error);
         }
     }
+
+    
 
     async viewAllProblems() {
         this.showProfile = false;
@@ -278,7 +301,20 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                         ? 'pass-icon'
                         : item.Result__c === 'FAIL'
                             ? 'fail-icon'
-                            : 'pending-icon'
+                            : 'pending-icon',
+
+                diffClass:
+                    item.DifficultyLevel__c.toLowerCase()=='beginner'
+                        ? 'Beginner'
+                        : item.DifficultyLevel__c.toLowerCase()=='apprentice'
+                            ? 'Apprentice'
+                            : item.DifficultyLevel__c.toLowerCase()=='expert architect'
+                                ? 'Expert'
+                                : item.DifficultyLevel__c.toLowerCase()=='skilled developer'
+                                    ? 'Skilled'
+                                    : item.DifficultyLevel__c.toLowerCase()=='legendary salesforce hero'
+                                        ? 'Legend'
+                                        : 'default'
 
             }));
             this.challengeData.forEach(item => {

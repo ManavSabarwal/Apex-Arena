@@ -221,7 +221,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                     errorcode: this.code,
                     symptoms: this.symptoms,
                     type: this.type,
-                    difficultylevel: this.difficulty,
+                    difficultylevel: this.difficultyfromPrompt,
                     username: this.loginName,
                     path: 'Debugging',
                     sampledata: '',
@@ -310,8 +310,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             console.log('Submitting solution...');
             this.submitting = true;
             this.isReadonly = true;
-            const response = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode });
-            const parsedResponse = JSON.parse(response);
+            const parsedResponse = await invokeValidationPrompt({ scenario: this.scenario, solution: this.textAreacode,challengeId: this.savedId });
             this.result = parsedResponse.Result;
             this.reason = parsedResponse.Reasoning;
             this.thebad = JSON.parse(parsedResponse.CodeReviewBad);
@@ -319,44 +318,14 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             console.log(this.thegood);
             this.optimizedCode = parsedResponse.ArchitectOptimization;
             this.score=parsedResponse.Score;
-
-            //creating Challenge Attempt
-
-            let saveRes = await createChallengeAttempt(
-                    {
-                        id: this.savedId,
-                        result: this.result,
-                        solution: this.textAreacode,
-                        thegood: this.thegood.toString(),
-                        thebad: this.thebad.toString(),
-                        actionType:'Submit'
-
-                    }
-                );
-
-                if (saveRes && Object.keys(saveRes).length > 0) {
-                    console.log(saveRes);
-                    let attemptId = saveRes.attemptId.toString();
-                    if (this.result.toLowerCase().includes('pass')) {
-                        let exppoints = this.template.querySelector('c-modal-component').openModal(this.loginName, this.difficultyfromPrompt, saveRes.oldresult, saveRes.attempt, 'debug', { score: 0 });
-                        if (exppoints != 0) {
-                            let updateResponse = await updateExpPoints({
-                                expPoints: exppoints,
-                                attemptId: attemptId
-
-                            });
-                            console.log(updateResponse + ' - ' + exppoints);
-                        }
-                    }
-
-                }
-                else {
-                    console.log(saveRes);
-                    console.log('Error in creating attempt. Check logs');
-                }
+            let message=parsedResponse.message;
+            let expPoints=parsedResponse.expPoints;
+            if (this.result.toLowerCase().includes('pass')) {
+                    this.template.querySelector('c-modal-component').openModal(message,expPoints);
+            }
 
         } catch (error) {
-            console.error('Error submitting solution:', error);
+            console.error('Error in submitSolution method:', error);
         }
         finally {
             this.submitting = false;

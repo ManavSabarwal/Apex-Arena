@@ -27,6 +27,26 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     resultsWithStyle = [];
     passed=0;
     total=0;
+
+    getDiffClass()
+    {
+        if(this.difficulty=='Beginner')
+        {
+            return 'Beginner';
+        }
+        else if(this.difficulty=='Apprentice')
+        {
+            return 'Apprentice';
+        }
+        else if(this.difficulty=='Expert Architect')
+        {
+            return 'Expert';
+        }
+        else if(this.difficulty=='Legendary Salesforce Hero')
+        {
+            return 'Legend';
+        }
+    }
     get codemenuItem() {
         return this.selectedMenu === 'Code'
             ? 'menu-item selected'

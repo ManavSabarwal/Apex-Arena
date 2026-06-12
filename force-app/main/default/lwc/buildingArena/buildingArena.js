@@ -311,7 +311,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                     errorcode: '',
                     symptoms: this.requirements,
                     type: this.type,
-                    difficultylevel: this.difficulty,
+                    difficultylevel: this.difficultyfromPrompt,
                     username: this.loginName,
                     path: 'Coding',
                     sampledata: this.sampleData,
@@ -436,7 +436,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             console.log('Submitting solution...');
 
             this.isReadonly = true;
-            const response = await invokeValidationPromptCoding({ scenario: this.scenario, solution: this.textAreacode, sampleData: this.sampleData, submissionType: actionType + ' ' + this.difficulty , requirements: this.requirements });
+            const response = await invokeValidationPromptCoding({ scenario: this.scenario, solution: this.textAreacode, sampleData: this.sampleData, submissionType: actionType + ' ' + this.difficulty , requirements: this.requirements,challengeId: this.savedId});
             console.log('Submission Response:', response);
 
             clearInterval(intervalId);
@@ -457,6 +457,8 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             this.recommendations = response.recommendedImprovements;
             this.scenarioResults = response.scenarioResults;
             this.score = response.score;
+            let message=response.message;
+            let expPoints=response.expPoints;
             console.log(this.scenarioResults);
             this.scenarioResults.forEach(item=>{
                 if(item.status.toLowerCase().includes('pass'))
@@ -474,44 +476,13 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             if(this.testdone==true)
                 this.submitReadOnly = false;
 
-            let saveRes = await createChallengeAttempt(
-                    {
-                        id: this.savedId,
-                        result: this.result,
-                        solution: this.textAreacode,
-                        thegood: this.thegood.join(',/n'),
-                        thebad: this.thebad.join(',/n'),
-                        score:this.score,
-                        actionType:actionType,
-                        testCaseResults:JSON.stringify(this.scenarioResults)
-
-                    }
-                );
-
-                if (saveRes && Object.keys(saveRes).length > 0 && actionType==='Submit') {
-                    console.log(saveRes);
-                    let attemptId = saveRes.attemptId.toString();
-                    if (this.result.toLowerCase().includes('pass')) {
-                        let exppoints = this.template.querySelector('c-modal-component').openModal(this.loginName, this.difficultyfromPrompt, saveRes.oldresult, saveRes.attempt, 'coding',this.score);
-                        if (exppoints != 0) {
-                            let updateResponse = await updateExpPoints({
-                                expPoints: exppoints,
-                                attemptId: attemptId
-
-                            });
-                            console.log(updateResponse + ' - ' + exppoints);
-                        }
-                    }
-
-                }
-                else {
-                    console.log(saveRes);
-                    console.log('Error in updating EXP Points. Check logs');
-                }
+            if (this.result.toLowerCase().includes('pass') && actionType=='Submit') {
+                   this.template.querySelector('c-modal-component').openModal(message,expPoints);
+            }
 
 
         } catch (error) {
-            console.error('Error submitting solution/Creating Attempt:', error);
+            console.error('Error in submitSolution method', error);
         }
         finally {
             this.submitting = false;

@@ -301,6 +301,7 @@
     display: grid;
     padding: 10px;
     justify-content: center;
+    justify-items:center;
 }
 
 .label-container{
@@ -336,11 +337,11 @@
     color:rgb(81, 174, 251);
 }
 
-.easy{
+.easy,.submit{
     color:rgb(36, 255, 98);
     font-size: 15px;
 }
-.medium{
+.medium,.test{
     color:rgb(235, 179, 65);
     font-size: 15px;
 }
@@ -713,12 +714,45 @@
 
 /* DIFFICULTY */
 
-.difficulty {
-    padding: 5px 12px;
-    border-radius: 8px;
+.default
+{
+    color:#263f47;
+}
 
-    font-size: 12px;
-    font-weight: 600;
+.Beginner{
+    background: rgba(34,197,94,0.10);
+    border:1px solid rgb(34, 197, 94);
+    color:#22C55E;
+    padding: 2px 5px;
+    border-radius: 5px;
+}
+.Apprentice{
+    background: rgba(59, 130, 246,0.10);
+    border:1px solid rgb(59, 130, 246);
+    color:#3B82F6;
+    padding: 2px 5px;
+    border-radius: 5px;
+}
+.Skilled{
+    background: rgba(139, 92, 246,0.10);
+    border:1px solid rgb(139, 92, 246);
+    color:rgb(139, 92, 246);
+    padding: 2px 5px;
+    border-radius: 5px;
+}
+.Expert{
+    background: rgba(249, 115, 22,0.10);
+    border:1px solid rgb(249, 115, 22);
+    color:rgb(249, 115, 22);
+    padding: 2px 5px;
+    border-radius: 5px;
+}
+.Legend{
+    background: rgba(239, 68, 68,0.10);
+    border:1px solid rgb(239, 68, 68);
+    color:rgb(239, 68, 68);
+    padding: 2px 5px;
+    border-radius: 5px;
 }
 
 .Easy {

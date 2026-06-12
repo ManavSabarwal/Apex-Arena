@@ -37,7 +37,6 @@ export default class Index extends NavigationMixin(LightningElement) {
     handleUsernameChange(event)
     {
         this.username=event.target.value;
-        console.log(this.username);
     }
 
     handlePasswordChange(event)
@@ -76,10 +75,9 @@ export default class Index extends NavigationMixin(LightningElement) {
                 },3000);
     }
 
+
     async login()
     {
-        alert('LOGIN METHOD CALLED');
-        console.log('LOGIN METHOD CALLED');
         if(this.username=='' || this.password=='')
         {
             this.showError('Please enter your Username and Password.');
@@ -89,11 +87,9 @@ export default class Index extends NavigationMixin(LightningElement) {
 
         try{
             const result = await loginHelper({Username:this.username,Password:this.password});
-            console.log(result);
             if(result==null)
             {
                 this.isLoggedIn=false;
-                console.log('In if result==null');
                 this.showError('Invalid Username or Password');
             }
             else{
@@ -101,8 +97,6 @@ export default class Index extends NavigationMixin(LightningElement) {
                 this.loginName=result;
 
                 this.isLoading=true;
-                console.log('Loading...');
-                console.log(result);
                 window.sessionStorage.setItem('loginName',result);
                 window.sessionStorage.setItem('isLoggedIn',true); 
                 this[NavigationMixin.Navigate]({
@@ -132,9 +126,7 @@ export default class Index extends NavigationMixin(LightningElement) {
     {
         try{
             this.isLoading = true;
-            console.log('signup pressed');
         const result=await signupHelper({Username:this.username,Password:this.confirmPassword});
-        console.log(result);
         if(result=='SignUp Successful')
         {
             this.dispatchEvent(new ShowToastEvent({
