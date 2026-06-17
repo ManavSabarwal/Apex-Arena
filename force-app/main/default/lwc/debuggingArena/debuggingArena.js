@@ -319,12 +319,17 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             let message = parsedResponse.message;
             let expPoints = parsedResponse.expPoints;
             this.unlockedAchievements = parsedResponse.unlockedAchievements;
-            if (this.result.toLowerCase().includes('pass')) {
-                this.template.querySelector('c-modal-component').openModal(message, expPoints);
-            }
-            if (this.unlockedAchievements.length > 0) {
+            if (this.unlockedAchievements.length > 0 && this.unlockedAchievements.formulaKey=='FIRST_SUBMISSION') {
                 this.template.querySelector('c-show-achievement-modal').openModal(this.unlockedAchievements);
             }
+            if (this.result.toLowerCase().includes('pass')) {
+                this.template.querySelector('c-modal-component').openModal(message, expPoints);
+                if(this.unlockedAchievements.length > 0 && this.unlockedAchievements.formulaKey!='FIRST_SUBMISSION')
+                {
+                    this.template.querySelector('c-show-achievement-modal').openModal(this.unlockedAchievements);
+                }
+            }
+            
 
         } catch (error) {
             console.error('Error in submitSolution method:', error);
@@ -338,6 +343,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
 
     showNewAchievements() {
         console.log(this.unlockedAchievements.length);
+        this.template.querySelector('c-show-achievement-modal').openModal(this.unlockedAchievements);
         
     }
 

@@ -184,9 +184,15 @@ public static ValidationResponseWrapper invokeValidationPromptCoding(
         wrapper.expPoints=response[1];
         String challengeAttemptId=response[2];
         String userId=response[3];
-
-        List<AchievementEngine.UnlockedAchievementDTO> unlockedAchievements =AchievementEngine.evaluateAndAssign(userId,challengeAttemptId);
+        List<String> actionType=submissionType.split(' ');
+        List<AchievementEngine.UnlockedAchievementDTO> unlockedAchievements=new List<AchievementEngine.UnlockedAchievementDTO>();
+        if(actionType[0].toLowerCase()=='submit')
+        {
+            unlockedAchievements=AchievementEngine.evaluateAndAssign(userId,challengeAttemptId);
+        
+        }
         wrapper.unlockedAchievements=unlockedAchievements;
+
 
         return wrapper;
 

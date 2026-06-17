@@ -3,12 +3,13 @@ import { NavigationMixin } from 'lightning/navigation';
 import getAttemptedChallenges from '@salesforce/apex/recordController.getAttemptedChallenges';
 import getUserandChalengeDetails from '@salesforce/apex/recordController.getUserandChalengeDetails';
 import getSolvedChallenges from '@salesforce/apex/recordController.getSolvedChallenges';
-
+import getUserAchievements from '@salesforce/apex/recordController.getUserAchievements';
+import ACHIEVEMENT_ICONS from '@salesforce/resourceUrl/ApexArenaAchievementIcons';
 
 
 export default class UserProfile extends NavigationMixin(LightningElement) {
     loginName = '';
-    limitSize = '4';
+    limitSize = '3';
     isLoggedIn = false;
     userLevel = 'Beginner';
     userAbout = 'Code. Compete. Conquer. Forge your legacy in the Apex Arena.';
@@ -38,6 +39,19 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     submitAttempts=0;
 
     heatmapData = [];
+    currentStreak=0;
+    bestStreak=0;
+
+    userAchievements=[];
+    recent4userAchievement=[];
+
+    showAch=true;
+    showMore=false;
+
+    showActivity=true;
+
+    nextLevel='Beginner';
+    xpToNextLevel=0;
 
     resultOptions = [
         {
@@ -126,7 +140,6 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
-        console.log(this.loginName);
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
@@ -142,8 +155,6 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
             })
 
                 .then(result => {
-
-                    console.log(result);
                     this.bifData(result);
                 })
 
@@ -153,21 +164,102 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 });
 
             this.loadAttemptedChallenges();
+            
+            getUserAchievements(
+                {
+                    username:this.loginName
+                }
+            )
+
+            .then(result=>
+            {
+                this.userAchievements=result;
+                this.userAchievements.forEach(item=>{
+                    item.Achievement__r.Icon__c=item.Achievement__r.Icon__c.replace('/resource/ApexArenaAchievementIcons',ACHIEVEMENT_ICONS);
+                    item.Unlock_Date__c=new Date(item.Unlock_Date__c).toLocaleDateString('en-US',
+                    {
+                        month: 'long',
+                        day: '2-digit',
+                        year: 'numeric'
+                    });
+                })
+                if(this.userAchievements.length>4)
+                {
+                   this.recent4userAchievement=this.userAchievements.slice(0,5);
+                   this.showMore=true;
+                   
+                }
+                else{
+                    this.recent4userAchievement=this.userAchievements;
+                    if(this.recent4userAchievement.length==0)
+                    {
+                        this.showAch=false;
+                    }
+                }
+            }
+            )
+            .catch(error=>{
+                console.log('Error Fetching userAchievements' + error);
+            })
+
 
 
         }
 
     }
 
-    
+    get xpProgressStyle() {
+        return `width: ${this.xpProgressPercent}%;`;
+    }
 
     bifData(result) {
         try {
             this.submissions = result.length;
+            this.expPoints = parseInt(result[0].Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c,10);
+
+            this.nextLevel =
+                    this.expPoints < 1000 ? 'Apprentice' :
+                    this.expPoints < 3000 ? 'Skilled Developer' :
+                    this.expPoints < 5500 ? 'Expert Architect' :
+                    this.expPoints < 8500 ? 'Legendary Salesforce Hero' :
+                    'Max Level';
+
+            this.xpToNextLevel =
+                    this.expPoints < 1000 ? 1001 - this.expPoints :
+                    this.expPoints < 3000 ? 3001 - this.expPoints :
+                    this.expPoints < 5500 ? 5501 - this.expPoints :
+                    this.expPoints < 8500 ? 8501 - this.expPoints :
+                0;
+
+            this.nextLevelXp =
+        this.expPoints < 1000 ? 1001 :
+        this.expPoints < 3000 ? 3001 :
+        this.expPoints < 5500 ? 5501 :
+        this.expPoints < 8500 ? 8501 :
+        this.expPoints;
+
+    this.currentLevelStartXp =
+        this.expPoints < 1000 ? 0 :
+        this.expPoints < 3000 ? 1001 :
+        this.expPoints < 5500 ? 3001 :
+        this.expPoints < 8500 ? 5501 :
+        8501;
+
+        const levelRange = this.nextLevelXp - this.currentLevelStartXp;
+    const xpGainedInCurrentLevel = this.expPoints  - this.currentLevelStartXp;
+
+            this.xpProgressPercent =
+        this.nextLevel === 'Max Level'
+            ? 100
+            : Math.floor((xpGainedInCurrentLevel / levelRange) * 100);
+
+
             let setChallenges=new Set();
             let setEasy=new Set();
             let setMedium=new Set();
             let setHard=new Set();
+            this.currentStreak=result[0].Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c;
+            this.bestStreak=result[0].Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c;
             for (let res of result) {
                 if (res.Attempted_Challenge__r.Result__c.toLowerCase() == 'pass') {
                     setChallenges.add(res.Attempted_Challenge__c)
@@ -201,7 +293,6 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
             }
             this.wrong = this.submissions - this.solved;
             this.acceptanceRate = this.submissions>0?((this.solved / this.submissions * 100).toFixed(2)):0.00;
-            this.expPoints = result[0].Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c;
             this.joinDate = new Date(result[0].Attempted_Challenge__r.Apex_Arena_User__r.CreatedDate)
                 .toLocaleDateString('en-US', {
                     month: 'long',
@@ -212,6 +303,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
         }
         catch (error) {
+            console.log('Error in BifData');
             console.log(error);
         }
     }
@@ -223,8 +315,12 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 recordLimit: this.limitSize
             });
 
+            if(data.length==0)
+            {
+                this.showActivity=false;
+            }
+
             if (data) {
-                console.log(data);
 
                 this.recent4problems = data.map(record => {
 
@@ -255,7 +351,6 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                     };
                 });
 
-                console.log(this.recent4problems);
             }
 
         } catch (error) {

@@ -8,6 +8,7 @@ public without sharing class AchievementEngine {
         @AuraEnabled public String category;
         @AuraEnabled public String rarity;
         @AuraEnabled public String iconUrl;
+        @AuraEnabled public String formulaKey;
     }
 
     private class UserStats {
@@ -84,7 +85,8 @@ public without sharing class AchievementEngine {
                    Rarity__c,
                    Icon__c,
                    Is_Active__c,
-                   Display_Order__c
+                   Display_Order__c,
+                   Formula_Key__c
             FROM Achievement__c
             WHERE Is_Active__c = true
             ORDER BY Display_Order__c ASC
@@ -183,6 +185,7 @@ public without sharing class AchievementEngine {
             dto.category = achievement.Category__c;
             dto.rarity = achievement.Rarity__c;
             dto.iconUrl = achievement.Icon__c;
+            dto.formulaKey=achievement.Formula_Key__c;
 
             newlyUnlockedAchievements.add(dto);
         }
@@ -365,6 +368,7 @@ public without sharing class AchievementEngine {
             'Id',
             'CreatedDate',
             'Result__c',
+            'Action_Type__c',
             'Attempted_Challenge__c',
             'Attempted_Challenge__r.DifficultyLevel__c',
             'Attempted_Challenge__r.Type__c',
@@ -380,100 +384,122 @@ public without sharing class AchievementEngine {
         }
 
         String queryString =
-            'SELECT ' + String.join(selectFields, ', ') +
-            ' FROM Challenge_Attempt__c' +
-            ' WHERE Attempted_Challenge__r.Apex_Arena_User__c = :arenaUserId' +
-            ' ORDER BY CreatedDate ASC';
+                'SELECT ' + String.join(selectFields, ', ') +
+                ' FROM Challenge_Attempt__c' +
+                ' WHERE Attempted_Challenge__r.Apex_Arena_User__c = :arenaUserId' +
+                ' ORDER BY CreatedDate ASC';
 
         List<SObject> attempts = Database.query(queryString);
 
-        stats.totalSubmissions = attempts.size();
+        List<SObject> submitAttempts = new List<SObject>();
 
         Set<Id> solvedChallengeIds = new Set<Id>();
 
         Integer currentWinStreak = 0;
 
         for (SObject attempt : attempts) {
-            String result = getStringValue(attempt, 'Result__c');
-            Boolean isPass = isPassed(result);
+    String result = getStringValue(attempt, 'Result__c');
+    String actionType = getStringValue(attempt, 'Action_Type__c');
 
-            if (isPass) {
-                stats.passedAttempts++;
-                currentWinStreak++;
+    Boolean isPass = isPassed(result);
+    Boolean isSubmit = equalsIgnoreCase(actionType, 'Submit');
+    Boolean isTest = equalsIgnoreCase(actionType, 'Test');
 
-                if (currentWinStreak > stats.maxWinStreak) {
-                    stats.maxWinStreak = currentWinStreak;
-                }
+    Boolean countsForStreak = isSubmit || isTest;
 
-                Decimal score = getDecimalValue(attempt, scoreField);
+    // Streak calculation considers both Test and Submit
+    if (countsForStreak) {
+        if (isPass) {
+            currentWinStreak++;
 
-                if (score != null && score == 100) {
-                    stats.perfectScores++;
-                }
+            if (currentWinStreak > stats.maxWinStreak) {
+                stats.maxWinStreak = currentWinStreak;
+            }
+        } else {
+            currentWinStreak = 0;
+        }
+    }
 
-                Decimal timeTakenMinutes =
-                    getDecimalValue(attempt, timeTakenField);
+    // Everything below this point should only count final submissions
+    if (!isSubmit) {
+        continue;
+    }
 
-                if (
-                    timeTakenMinutes != null &&
-                    timeTakenMinutes <= 10
-                ) {
-                    stats.fastSolvesUnder10++;
-                }
+    submitAttempts.add(attempt);
 
-                Id challengeId = (Id) attempt.get('Attempted_Challenge__c');
+    stats.totalSubmissions++;
 
-                if (
-                    challengeId != null &&
-                    !solvedChallengeIds.contains(challengeId)
-                ) {
-                    solvedChallengeIds.add(challengeId);
+    if (isPass) {
+        stats.passedAttempts++;
 
-                    stats.solvedTotal++;
+        Decimal score = getDecimalValue(attempt, scoreField);
 
-                    SObject challenge =
-                        attempt.getSObject('Attempted_Challenge__r');
+        if (score != null && score == 100) {
+            stats.perfectScores++;
+        }
 
-                    String difficulty = challenge == null
-                        ? null
-                        : getStringValue(challenge, 'DifficultyLevel__c');
+        Decimal timeTakenMinutes = getDecimalValue(attempt, timeTakenField);
 
-                    String type = challenge == null
-                        ? null
-                        : getStringValue(challenge, 'Type__c');
+        if (timeTakenMinutes != null && timeTakenMinutes <= 10) {
+            stats.fastSolvesUnder10++;
+        }
 
-                    String path = challenge == null
-                        ? null
-                        : getStringValue(challenge, 'Path__c');
+        Id challengeId = (Id) attempt.get('Attempted_Challenge__c');
 
-                    if (equalsIgnoreCase(difficulty, 'Beginner') || equalsIgnoreCase(difficulty, 'Apprentice')) {
-                        stats.solvedEasy++;
-                    } else if (equalsIgnoreCase(difficulty, 'Skilled Developer')) {
-                        stats.solvedMedium++;
-                    } else if (equalsIgnoreCase(difficulty, 'Expert Architect') || equalsIgnoreCase(difficulty, 'Legendary Salesforce Hero')) {
-                        stats.solvedHard++;
-                    }
+        if (
+            challengeId != null &&
+            !solvedChallengeIds.contains(challengeId)
+        ) {
+            solvedChallengeIds.add(challengeId);
 
-                    if (equalsIgnoreCase(path, 'Coding')) {
-                        stats.solvedCoding++;
-                    } else if (equalsIgnoreCase(path, 'Debugging')) {
-                        stats.solvedDebugging++;
-                    }
+            stats.solvedTotal++;
 
-                    if (equalsIgnoreCase(type, 'Sync Apex')) {
-                        stats.solvedSync++;
-                    } else if (equalsIgnoreCase(type, 'Async Apex')) {
-                        stats.solvedAsync++;
-                    } else if (equalsIgnoreCase(type, 'Trigger')) {
-                        stats.solvedTrigger++;
-                    } else if (equalsIgnoreCase(type, 'Test Class')) {
-                        stats.solvedTestClass++;
-                    }
-                }
-            } else {
-                currentWinStreak = 0;
+            SObject challenge = attempt.getSObject('Attempted_Challenge__r');
+
+            String difficulty = challenge == null
+                ? null
+                : getStringValue(challenge, 'DifficultyLevel__c');
+
+            String type = challenge == null
+                ? null
+                : getStringValue(challenge, 'Type__c');
+
+            String path = challenge == null
+                ? null
+                : getStringValue(challenge, 'Path__c');
+
+            if (
+                equalsIgnoreCase(difficulty, 'Beginner') ||
+                equalsIgnoreCase(difficulty, 'Apprentice')
+            ) {
+                stats.solvedEasy++;
+            } else if (equalsIgnoreCase(difficulty, 'Skilled Developer')) {
+                stats.solvedMedium++;
+            } else if (
+                equalsIgnoreCase(difficulty, 'Expert Architect') ||
+                equalsIgnoreCase(difficulty, 'Legendary Salesforce Hero')
+            ) {
+                stats.solvedHard++;
+            }
+
+            if (equalsIgnoreCase(path, 'Coding')) {
+                stats.solvedCoding++;
+            } else if (equalsIgnoreCase(path, 'Debugging')) {
+                stats.solvedDebugging++;
+            }
+
+            if (equalsIgnoreCase(type, 'Sync Apex')) {
+                stats.solvedSync++;
+            } else if (equalsIgnoreCase(type, 'Async Apex')) {
+                stats.solvedAsync++;
+            } else if (equalsIgnoreCase(type, 'Trigger')) {
+                stats.solvedTrigger++;
+            } else if (equalsIgnoreCase(type, 'Test Class')) {
+                stats.solvedTestClass++;
             }
         }
+    }
+}
 
         if (stats.totalSubmissions > 0) {
             stats.successRate =
@@ -482,7 +508,7 @@ public without sharing class AchievementEngine {
 
         populateComebackStats(
             stats,
-            attempts,
+            submitAttempts,
             latestAttemptId
         );
 

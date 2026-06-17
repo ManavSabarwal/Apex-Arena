@@ -55,7 +55,6 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
-        console.log(this.loginName);
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
@@ -192,12 +191,11 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     }
 
     showSampleData() {
-        console.log('showSampleData clicked ');
+        
         this.template.querySelector('c-sampledata-modal-component').openModal(this.sampleData);
     }
 
     showResults() {
-        console.log('showResults clicked ');
         this.template.querySelector('c-show-scenario-results').openModal(this.scenarioResults);
     }
 
@@ -221,20 +219,12 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         try{
             this.dataLoaded=true;
             const parsedData = response;
-            console.log(parsedData);
             this.scenario = parsedData.Scenario;
-            console.log(this.scenario);
             this.requirements = parsedData.BusinessRequirements;
             this.problemTitle = parsedData.ProblemTitle;
             this.difficultyfromPrompt = parsedData.DifficultyLevel;
-            console.log(this.difficultyfromPrompt);
             const sampData = parsedData.SampleData;
-            console.log(sampData);
             this.sampleData = sampData;
-
-            console.log('Sample Data =============');
-
-            console.log(typeof this.sampleData);
 
             switch (this.difficultyfromPrompt) {
                 case 'Beginner': this.estimatedTime = '20:00'; this.expReward = '80 XP'; break;
@@ -319,7 +309,6 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                     constraints: this.constraints
                 })
                 console.log('Challenge Saved');
-                console.log(this.savedId);
 
             }
             catch (error) {
@@ -332,7 +321,6 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
     handleCodeChange(event) {
         this.textAreacode = event.target.value;
-        console.log('Code updated:', this.textAreacode);
     }
 
     tabspacing(event) {
@@ -437,7 +425,6 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
             this.isReadonly = true;
             const response = await invokeValidationPromptCoding({ scenario: this.scenario, solution: this.textAreacode, sampleData: this.sampleData, submissionType: actionType + ' ' + this.difficulty , requirements: this.requirements,challengeId: this.savedId});
-            console.log('Submission Response:', response);
 
             clearInterval(intervalId);
             // Add all remaining messages immediately
@@ -459,7 +446,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             this.score = response.score;
             let message=response.message;
             let expPoints=response.expPoints;
-            console.log(this.scenarioResults);
+            this.unlockedAchievements = response.unlockedAchievements;
             this.scenarioResults.forEach(item=>{
                 if(item.status.toLowerCase().includes('pass'))
                 {
@@ -471,13 +458,15 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
             this.loadingMessages.push(timestamp + ' Submission Complete\n');
 
-            // creating challenge Attempt
-
             if(this.testdone==true)
                 this.submitReadOnly = false;
 
             if (this.result.toLowerCase().includes('pass') && actionType=='Submit') {
                    this.template.querySelector('c-modal-component').openModal(message,expPoints);
+                   if(this.unlockedAchievements.length > 0 && this.unlockedAchievements.formulaKey!='FIRST_SUBMISSION')
+                {
+                    this.template.querySelector('c-show-achievement-modal').openModal(this.unlockedAchievements);
+                }
             }
 
 
@@ -491,6 +480,10 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             
 
         }
+    }
+    showNewAchievements() {
+        this.template.querySelector('c-show-achievement-modal').openModal(this.unlockedAchievements);
+        
     }
 
 }

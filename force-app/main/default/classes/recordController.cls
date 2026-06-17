@@ -234,7 +234,7 @@ public without sharing class recordController {
     public static List<Challenge_Attempt__C> getUserandChalengeDetails(String username){
         try {
 
-            string queryText='select id,Result__c,Name,score__c,Solution_Provided__c,Exp_gained__c,Code_Review_Good__c,Code_Review_Bad__c,Action_Type__c,Attempted_Challenge__c,Attempted_Challenge__r.Scenario__c,Attempted_Challenge__r.Path__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate,Attempted_Challenge__r.Result__c FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = :username' ;
+            string queryText='select id,Result__c,Name,score__c,Solution_Provided__c,Exp_gained__c,Code_Review_Good__c,Code_Review_Bad__c,Action_Type__c,Attempted_Challenge__c,Attempted_Challenge__r.Scenario__c,Attempted_Challenge__r.Path__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate,Attempted_Challenge__r.Result__c, Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c,Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = :username' ;
             List<Challenge_Attempt__C> ca=Database.query(queryText);
             if(ca.size()==0)
             {
@@ -245,6 +245,24 @@ public without sharing class recordController {
             return ca;
             
 
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static List<User_Achievement__C> getUserAchievements(String username){
+        try {
+            List<User_Achievement__C> ach=[Select id,Achievement__r.name__c,Achievement__r.Description__c,Achievement__r.Icon__c,Achievement__r.rarity__c,Unlock_Date__c from User_Achievement__c where Apex_Arena_User__r.name=:username];
+            if(ach.size()>0)
+            {
+                system.debug('Fetched records');
+            }
+            else{
+                system.debug('No records fetched');
+            }
+            return ach;
+            
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }
