@@ -230,12 +230,14 @@ public without sharing class recordController {
         }
     }
 
+
     @AuraEnabled
     public static List<Challenge_Attempt__C> getUserandChalengeDetails(String username){
         try {
 
-            string queryText='select id,Result__c,Name,score__c,Solution_Provided__c,Exp_gained__c,Code_Review_Good__c,Code_Review_Bad__c,Action_Type__c,Attempted_Challenge__c,Attempted_Challenge__r.Scenario__c,Attempted_Challenge__r.Path__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate,Attempted_Challenge__r.Result__c, Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c,Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = :username' ;
+            string queryText='select id,Result__c,Name,score__c,Solution_Provided__c,Exp_gained__c,Code_Review_Good__c,Code_Review_Bad__c,Action_Type__c,Attempted_Challenge__c,Attempted_Challenge__r.Scenario__c,Attempted_Challenge__r.Path__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c,Attempted_Challenge__r.Apex_Arena_User__r.AboutMe__c,Attempted_Challenge__r.Apex_Arena_User__r.profilePic__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate,Attempted_Challenge__r.Result__c, Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c,Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = :username' ;
             List<Challenge_Attempt__C> ca=Database.query(queryText);
+            system.debug(ca[0].Action_Type__C);
             if(ca.size()==0)
             {
                  system.debug('No Challenge_Attempt__c records found for the given criteria.');
@@ -253,7 +255,7 @@ public without sharing class recordController {
     @AuraEnabled
     public static List<User_Achievement__C> getUserAchievements(String username){
         try {
-            List<User_Achievement__C> ach=[Select id,Achievement__r.name__c,Achievement__r.Description__c,Achievement__r.Icon__c,Achievement__r.rarity__c,Unlock_Date__c from User_Achievement__c where Apex_Arena_User__r.name=:username];
+            List<User_Achievement__C> ach=[Select id,Achievement__r.name__c,Achievement__r.Description__c,Achievement__r.Icon__c,Achievement__r.rarity__c,Unlock_Date__c from User_Achievement__c where Apex_Arena_User__r.name=:username order by Unlock_Date__c desc];
             if(ach.size()>0)
             {
                 system.debug('Fetched records');
@@ -266,6 +268,50 @@ public without sharing class recordController {
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }
+    }
+
+    @AuraEnabled
+    public static string saveChanges(string username,string imageUrl,string aboutMe){
+        try {
+        List<Apex_Arena_User__c> users = [
+            SELECT Id, ProfilePic__c, AboutMe__c
+            FROM Apex_Arena_User__c
+            WHERE Name = :username
+            LIMIT 1
+        ];
+
+        if (users.isEmpty()) {
+            throw new AuraHandledException('No user found');
+        }
+
+        Apex_Arena_User__c userRecord = users[0];
+
+        Boolean aboutChanged =
+            !String.isBlank(aboutMe) &&
+            userRecord.AboutMe__c != aboutMe;
+
+        Boolean imageChanged =
+            !String.isBlank(imageUrl) &&
+            userRecord.ProfilePic__c != imageUrl;
+
+        if (aboutChanged) {
+            userRecord.AboutMe__c = aboutMe;
+        }
+
+        if (imageChanged) {
+            userRecord.ProfilePic__c = imageUrl;
+        }
+
+        if (aboutChanged || imageChanged) {
+            update userRecord;
+            return 'Changes Saved';
+        }
+
+        return 'No changes';
+
+    } catch (Exception e) {
+        throw new AuraHandledException(e.getMessage());
+    }
     }
     @AuraEnabled
      public static PaginationWrapper getSolvedChallenges(Integer pageNumber,
@@ -333,6 +379,8 @@ public without sharing class recordController {
 
         return response;
     }
+
+   
 
     public class PaginationWrapper {
 
@@ -408,7 +456,7 @@ public without sharing class recordController {
     public static List<Map<String, Object>> getAttemptDetails(String challengeId) {
         try {
 
-            List<Challenge_Attempt__c> attempts = [SELECT Id, Name, Result__c, score__c, Solution_Provided__c, Exp_gained__c, Code_Review_Good__c, Code_Review_Bad__c, Action_Type__c,Test_Case_Results__C,CreatedDate,Attempted_Challenge__r.Exp_Gained__c,Attempted_Challenge__r.Name, Attempted_Challenge__r.sampleData__c,Attempted_Challenge__r.Scenario__c, Attempted_Challenge__r.Path__c, Attempted_Challenge__r.DifficultyLevel__c, Attempted_Challenge__r.Type__c, Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c WHERE Attempted_Challenge__r.Id = :challengeId order by CreatedDate desc];
+            List<Challenge_Attempt__c> attempts = [SELECT Id, Name, Result__c, score__c, Solution_Provided__c, Exp_gained__c, Code_Review_Good__c, Code_Review_Bad__c, Action_Type__c,Test_Case_Results__C,CreatedDate,Attempted_Challenge__r.Exp_Gained__c,Attempted_Challenge__r.Name, Attempted_Challenge__r.sampleData__c,Attempted_Challenge__r.Scenario__c, Attempted_Challenge__r.Path__c,Attempted_Challenge__r.Result__c ,Attempted_Challenge__r.DifficultyLevel__c, Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate FROM Challenge_Attempt__c WHERE Attempted_Challenge__r.Id = :challengeId order by CreatedDate desc];
             List<Attempted_Challenge__c> ac=[Select id,Name,Result__c,Scenario__C,DifficultyLevel__c,Type__c,Path__c,LastModifiedDate from Attempted_Challenge__c where id=:challengeId];
             List<Map<String, Object>> attemptDetails = new List<Map<String, Object>>();
             if(attempts.size()==0)
@@ -432,7 +480,8 @@ public without sharing class recordController {
                     'UserLevel' => null,
                     'AttemptDate' => null,
                     'sampleData'=>null,
-                    'testCaseResults'=>null
+                    'testCaseResults'=>null,
+                    'finalResult'=>ac[0].Result__c
                 };
                 attemptDetails.add(details);
             } 
@@ -459,7 +508,8 @@ public without sharing class recordController {
                     'UserLevel' => attempt.Attempted_Challenge__r.Apex_Arena_User__r.Level__c,
                     'AttemptDate' => attempt.CreatedDate,
                     'sampleData'=>attempt.Attempted_Challenge__r.sampleData__c,
-                    'testCaseResults'=>attempt.Test_Case_Results__c
+                    'testCaseResults'=>attempt.Test_Case_Results__c,
+                    'finalResult'=>attempt.Attempted_Challenge__r.Result__c
                     
                 };
                 attemptDetails.add(details);

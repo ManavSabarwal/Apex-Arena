@@ -22,7 +22,6 @@
 
     display: flex;
     align-items: center;
-    justify-content: space-between;
 
     padding: 0 15px;
 
@@ -30,6 +29,77 @@
     backdrop-filter: blur(16px);
 
     border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.display-container{
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 0.01fr 1fr;
+    gap: 10px;
+    padding:10px;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 380px;
+    padding: 8px 16px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(139, 92, 246, 0.45);
+    position: absolute;
+    left: 40%;
+}
+
+.search-icon {
+    width: 20px;
+    height: 20px;
+    color: #a78bfa;
+}
+
+.search-box input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 15px;
+}
+
+.search-box input::placeholder {
+    color: #9ca3af;
+}
+
+.sidebar{
+    border-radius: 15px;
+    background-color: rgb(26 29 62 / 49%);
+    border: 1px solid rgb(242 229 255 / 18%);
+    padding: 10px;
+    display: grid;
+    align-content: space-between;
+}
+
+.sidebarItems{
+    color: rgba(105, 105, 105, 1);
+    padding: 10px 0px;
+    cursor:pointer;
+    width:200px;
+}
+
+.sidebarItems:hover{
+    border:1px solid rgba(75,75,75,0.5);
+    border-radius: 10px;
+    transition: 0.3s ease;
+}
+
+.sideSelected{
+    font-weight: 600;
+    border:1px solid rgba(75,75,75,0.5);
+    border-radius: 10px;
+    background: linear-gradient(135deg, #7c3aed, #c084fc);
+    color: white;
+    cursor: no-drop;
 }
 
 .logo-section {
@@ -124,7 +194,6 @@
     display: flex;
     flex-direction: column;
     gap:10px;
-    padding:10px;
 
 }
 
@@ -169,12 +238,7 @@
     align-items: center;
     justify-items: start;
 }
-.login-name
-{
-    color: white;
-    font-size: 35px;
-    font-weight:600;
-}
+
 .user-level{
     border: 1px solid rgb(124, 58, 237);
     border-radius: 15px;
@@ -186,9 +250,57 @@
 .user-about{
     color: #9f9f9f;
     font-size: 15px;
-    width:100%;
+    width:stretch;
+    border: 0px;
+    background: transparent;
+    transition: all 0.25s ease;
+    outline: none;
+    flex:1;
     
 }
+
+.user-about:focus,
+.user-about:focus-visible,
+.user-about:active {
+  outline: none;
+  border-bottom: 1px solid #00e5ff;
+}
+.login-name
+{
+    color: white;
+    font-size: 35px;
+    font-weight:600;
+    background: transparent;
+    transition: all 0.25s ease;
+    outline:none;
+    border:0px;
+
+}
+
+.penciloverlay{
+    background-color: #0206175b;
+    position: absolute;
+    
+    color: white;
+    cursor:pointer;
+    text-align: center;
+    border-radius: 50%;
+    padding: 80px;
+}
+
+.red{
+    color:rgb(200, 92, 73);
+}
+.white{
+    color:rgb(146, 146, 146);
+}
+
+.editable{
+    outline: none;
+    border-bottom: 1px solid #00e5ff;
+}
+
+
 .user-join{
     color: rgb(109, 109, 109);
     font-size: 15px;
@@ -525,7 +637,6 @@
     border: 1px solid #9f9f9fa4;
     height: 90vh;
     background-color: rgb(26 29 62 / 49%);
-    margin: 10px;
     padding: 20px;
 }
 .back-btn{

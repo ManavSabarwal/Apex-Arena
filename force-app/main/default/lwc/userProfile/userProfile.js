@@ -5,6 +5,8 @@ import getUserandChalengeDetails from '@salesforce/apex/recordController.getUser
 import getSolvedChallenges from '@salesforce/apex/recordController.getSolvedChallenges';
 import getUserAchievements from '@salesforce/apex/recordController.getUserAchievements';
 import ACHIEVEMENT_ICONS from '@salesforce/resourceUrl/ApexArenaAchievementIcons';
+import PROFILE_PIC from '@salesforce/resourceUrl/ApexArenaPfP';
+import saveChanges from '@salesforce/apex/recordController.saveChanges';
 
 
 export default class UserProfile extends NavigationMixin(LightningElement) {
@@ -12,7 +14,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     limitSize = '3';
     isLoggedIn = false;
     userLevel = 'Beginner';
-    userAbout = 'Code. Compete. Conquer. Forge your legacy in the Apex Arena.';
+    aboutMe = 'Code. Compete. Conquer. Forge your legacy in the Apex Arena.';
     joinDate = 'May 25, 2026';
     expPoints = '0';
     submissions = 0;
@@ -35,23 +37,30 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     selectedDifficulty = 'All Difficulties';
     selectedPath = 'All Paths';
     selectedResultFilter = 'All Results';
-    testAttempts=0;
-    submitAttempts=0;
+    testAttempts = 0;
+    submitAttempts = 0;
 
     heatmapData = [];
-    currentStreak=0;
-    bestStreak=0;
+    currentStreak = 0;
+    bestStreak = 0;
 
-    userAchievements=[];
-    recent4userAchievement=[];
+    userAchievements = [];
+    recent4userAchievement = [];
 
-    showAch=true;
-    showMore=false;
+    showAch = true;
+    showMore = false;
 
-    showActivity=true;
+    showActivity = true;
 
-    nextLevel='Beginner';
-    xpToNextLevel=0;
+    nextLevel = 'Beginner';
+    xpToNextLevel = 0;
+
+    item = 'profile';
+    showText='Show More';
+
+    profilePic='';
+
+    editProfile=false;
 
     resultOptions = [
         {
@@ -121,7 +130,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
             value: "Legendary Salesforce Hero"
         }
 
-    
+
     ];
     pathOptions = [{
         label: "All Paths",
@@ -137,6 +146,18 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     }
     ]
 
+    get achievementsData()
+    {
+        return this.showText==='Show Less' ?
+                this.userAchievements
+             : this.recent4userAchievement;
+    }
+
+    get labelText()
+    {
+        return this.showText;
+    }
+
 
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
@@ -150,7 +171,55 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
             });
         }
         else {
-            getUserandChalengeDetails({
+            
+            this.loadUserandChallengeDetails();
+
+            this.loadAttemptedChallenges();
+
+            getUserAchievements(
+                {
+                    username: this.loginName
+                }
+            )
+
+                .then(result => {
+                    this.userAchievements = result;
+                    this.userAchievements.forEach(item => {
+                        item.Achievement__r.Icon__c = item.Achievement__r.Icon__c.replace('/resource/ApexArenaAchievementIcons', ACHIEVEMENT_ICONS);
+                        item.Unlock_Date__c = new Date(item.Unlock_Date__c).toLocaleDateString('en-US',
+                            {
+                                month: 'long',
+                                day: '2-digit',
+                                year: 'numeric'
+                            });
+                    })
+                    if (this.userAchievements.length > 4) {
+                        this.recent4userAchievement = this.userAchievements.slice(0, 4);
+                        this.showMore = true;
+
+                    }
+                    else {
+                        this.recent4userAchievement = this.userAchievements;
+                        if (this.recent4userAchievement.length == 0) {
+                            this.showAch = false;
+                        }
+                    }
+                }
+                )
+                .catch(error => {
+                    console.log('Error Fetching userAchievements' + error);
+                })
+
+
+
+        }
+
+    }
+
+    loadUserandChallengeDetails()
+    {
+
+        getUserandChalengeDetails({
                 username: this.loginName
             })
 
@@ -162,50 +231,152 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
                     console.log(error);
                 });
+    }
 
-            this.loadAttemptedChallenges();
-            
-            getUserAchievements(
-                {
-                    username:this.loginName
-                }
-            )
+    get inputReadonly()
+    {
+        return !this.editProfile;
+    }
 
-            .then(result=>
+    get aboutClass()
+    {
+        return this.editProfile
+                ? 'user-about editable'
+                : 'user-about';
+    }
+    get aboutLength()
+    {
+        return this.aboutMe.length;
+    }
+    get aboutLengthClass()
+    {
+        return this.aboutMe.length>=201
+            ? 'red'
+            : 'white'
+    }
+
+    get editButtonText()
+    {
+        return this.editProfile? '💾 Save Changes' : '✏️ Edit Profile'
+    }
+
+    handleAboutChange(event)
+    {
+        const changedValue=event.target.value;
+        this.aboutMe=changedValue;
+    }
+
+
+    async editProfileFun()
+    {
+        this.editProfile=!this.editProfile;
+        if(!this.editProfile)
+        {
+            console.log('Saving Data');
+            const result=await saveChanges({username:this.loginName,aboutMe:this.aboutMe,imageUrl:this.profilePic});
+
+            if(result=='Changes Saved');
             {
-                this.userAchievements=result;
-                this.userAchievements.forEach(item=>{
-                    item.Achievement__r.Icon__c=item.Achievement__r.Icon__c.replace('/resource/ApexArenaAchievementIcons',ACHIEVEMENT_ICONS);
-                    item.Unlock_Date__c=new Date(item.Unlock_Date__c).toLocaleDateString('en-US',
-                    {
-                        month: 'long',
-                        day: '2-digit',
-                        year: 'numeric'
-                    });
-                })
-                if(this.userAchievements.length>4)
-                {
-                   this.recent4userAchievement=this.userAchievements.slice(0,5);
-                   this.showMore=true;
-                   
-                }
-                else{
-                    this.recent4userAchievement=this.userAchievements;
-                    if(this.recent4userAchievement.length==0)
-                    {
-                        this.showAch=false;
-                    }
-                }
+
+                this.loadUserandChallengeDetails();
             }
-            )
-            .catch(error=>{
-                console.log('Error Fetching userAchievements' + error);
-            })
-
-
-
+            
         }
 
+    }
+
+    changeProfilePic()
+    {
+        this.template.querySelector('c-change-profilepic-modal').openModal();
+    }
+
+    imageReceivedFunc(event)
+    {
+        this.profilePic=event.detail.imageLink;
+    }
+
+    viewAllAchievements()
+    {
+        if(this.showText=='Show More')
+        {
+            this.showText='Show Less';
+            
+        }
+        else if(this.showText=='Show Less')
+        {
+            this.showText= 'Show More';
+        }
+            
+        
+    }
+
+    get profileClass() {
+        return this.item === 'profile'
+            ? 'sidebarItems sideSelected'
+            : 'sidebarItems';
+    }
+    get leaderboardClass() {
+        return this.item === 'leaderboard'
+            ? 'sidebarItems sideSelected'
+            : 'sidebarItems';
+    }
+
+    get activityClass() {
+        return this.item === 'activity'
+            ? 'sidebarItems sideSelected'
+            : 'sidebarItems';
+    }
+
+    get achievementsClass() {
+        return this.item === 'achievements'
+            ? 'sidebarItems sideSelected'
+            : 'sidebarItems';
+    }
+
+    handleSidebarItemClick(event) {
+        this.item = event.target.dataset.id;
+        switch (this.item) {
+            case 'profile':
+                this.backToProfile();
+                break;
+
+            case 'code':
+                window.sessionStorage.setItem('isLoggedIn', true);
+                window.sessionStorage.setItem('loginName', this.loginName);
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: {
+                        url: '/buildinarena'
+                    }
+                });
+                break;
+
+            case 'debug':
+                window.sessionStorage.setItem('isLoggedIn', true);
+                window.sessionStorage.setItem('loginName', this.loginName);
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: {
+                        url: '/debuggingArena'
+                    }
+                });
+                break;
+
+            case 'leaderboard':
+                console.log('Open Leaderboard Page');
+                break;
+
+            case 'achievements':
+                console.log('Open Achievement Page');
+                break;
+
+            case 'activity':
+                this.viewAllProblems();
+                break;
+
+            default:
+                console.log('Invalid option');
+        }
     }
 
     get xpProgressStyle() {
@@ -214,85 +385,90 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
     bifData(result) {
         try {
+            this.testAttempts=0;
+            this.submitAttempts=0;
             this.submissions = result.length;
-            this.expPoints = parseInt(result[0].Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c,10);
+            this.expPoints = parseInt(result[0].Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, 10);
 
             this.nextLevel =
-                    this.expPoints < 1000 ? 'Apprentice' :
+                this.expPoints < 1000 ? 'Apprentice' :
                     this.expPoints < 3000 ? 'Skilled Developer' :
-                    this.expPoints < 5500 ? 'Expert Architect' :
-                    this.expPoints < 8500 ? 'Legendary Salesforce Hero' :
-                    'Max Level';
+                        this.expPoints < 5500 ? 'Expert Architect' :
+                            this.expPoints < 8500 ? 'Legendary Salesforce Hero' :
+                                'Max Level';
 
             this.xpToNextLevel =
-                    this.expPoints < 1000 ? 1001 - this.expPoints :
+                this.expPoints < 1000 ? 1001 - this.expPoints :
                     this.expPoints < 3000 ? 3001 - this.expPoints :
-                    this.expPoints < 5500 ? 5501 - this.expPoints :
-                    this.expPoints < 8500 ? 8501 - this.expPoints :
-                0;
+                        this.expPoints < 5500 ? 5501 - this.expPoints :
+                            this.expPoints < 8500 ? 8501 - this.expPoints :
+                                0;
 
             this.nextLevelXp =
-        this.expPoints < 1000 ? 1001 :
-        this.expPoints < 3000 ? 3001 :
-        this.expPoints < 5500 ? 5501 :
-        this.expPoints < 8500 ? 8501 :
-        this.expPoints;
+                this.expPoints < 1000 ? 1001 :
+                    this.expPoints < 3000 ? 3001 :
+                        this.expPoints < 5500 ? 5501 :
+                            this.expPoints < 8500 ? 8501 :
+                                this.expPoints;
 
-    this.currentLevelStartXp =
-        this.expPoints < 1000 ? 0 :
-        this.expPoints < 3000 ? 1001 :
-        this.expPoints < 5500 ? 3001 :
-        this.expPoints < 8500 ? 5501 :
-        8501;
+            this.currentLevelStartXp =
+                this.expPoints < 1000 ? 0 :
+                    this.expPoints < 3000 ? 1001 :
+                        this.expPoints < 5500 ? 3001 :
+                            this.expPoints < 8500 ? 5501 :
+                                8501;
 
-        const levelRange = this.nextLevelXp - this.currentLevelStartXp;
-    const xpGainedInCurrentLevel = this.expPoints  - this.currentLevelStartXp;
+            const levelRange = this.nextLevelXp - this.currentLevelStartXp;
+            const xpGainedInCurrentLevel = this.expPoints - this.currentLevelStartXp;
 
             this.xpProgressPercent =
-        this.nextLevel === 'Max Level'
-            ? 100
-            : Math.floor((xpGainedInCurrentLevel / levelRange) * 100);
+                this.nextLevel === 'Max Level'
+                    ? 100
+                    : Math.floor((xpGainedInCurrentLevel / levelRange) * 100);
 
 
-            let setChallenges=new Set();
-            let setEasy=new Set();
-            let setMedium=new Set();
-            let setHard=new Set();
-            this.currentStreak=result[0].Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c;
-            this.bestStreak=result[0].Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c;
+            let setChallenges = new Set();
+            let setEasy = new Set();
+            let setMedium = new Set();
+            let setHard = new Set();
+            
+            this.currentStreak = result[0].Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c;
+            this.bestStreak = result[0].Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c;
+            this.aboutMe = result[0].Attempted_Challenge__r.Apex_Arena_User__r.AboutMe__c? result[0].Attempted_Challenge__r.Apex_Arena_User__r.AboutMe__c:this.aboutMe
+            this.profilePic = result[0].Attempted_Challenge__r.Apex_Arena_User__r.profilePic__c;
             for (let res of result) {
                 if (res.Attempted_Challenge__r.Result__c.toLowerCase() == 'pass') {
                     setChallenges.add(res.Attempted_Challenge__c)
                     if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Beginner' || res.Attempted_Challenge__r.DifficultyLevel__c == 'Apprentice') {
-                        
+
                         setEasy.add(res.Attempted_Challenge__c);
                     }
                     else if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Skilled Developer') {
-                        
+
                         setMedium.add(res.Attempted_Challenge__c);
                     }
                     else if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Expert Architect' || res.Attempted_Challenge__r.DifficultyLevel__c == 'Legendary Salesforce Hero') {
-                        
+
                         setHard.add(res.Attempted_Challenge__c);
                     }
                 }
-                this.solved=setChallenges.size;
-                this.easy=setEasy.size;
-                this.medium=setMedium.size;
-                this.hard=setHard.size;
-                if(res.Action_Type__c.toLowerCase()=='test')
-                {
+                
+                this.solved = setChallenges.size;
+                this.easy = setEasy.size;
+                this.medium = setMedium.size;
+                this.hard = setHard.size;
+                
+                if (res.Action_Type__c?.toLowerCase() == 'test') {
                     this.testAttempts++;
                 }
-                else if(res.Action_Type__c.toLowerCase()=='submit')
-                {
+                else if (res.Action_Type__c?.toLowerCase() == 'submit') {
                     this.submitAttempts++;
                 }
 
 
             }
             this.wrong = this.submissions - this.solved;
-            this.acceptanceRate = this.submissions>0?((this.solved / this.submissions * 100).toFixed(2)):0.00;
+            this.acceptanceRate = this.submissions > 0 ? ((this.solved / this.submissions * 100).toFixed(2)) : 0.00;
             this.joinDate = new Date(result[0].Attempted_Challenge__r.Apex_Arena_User__r.CreatedDate)
                 .toLocaleDateString('en-US', {
                     month: 'long',
@@ -303,21 +479,20 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
         }
         catch (error) {
-            console.log('Error in BifData');
-            console.log(error);
+            console.log('Error in BifData' , error);
+            console.log('Raw error:', JSON.parse(JSON.stringify(error)));
         }
     }
 
-     async loadAttemptedChallenges() {
+    async loadAttemptedChallenges() {
         try {
             const data = await getAttemptedChallenges({
                 username: this.loginName,
                 recordLimit: this.limitSize
             });
 
-            if(data.length==0)
-            {
-                this.showActivity=false;
+            if (data.length == 0) {
+                this.showActivity = false;
             }
 
             if (data) {
@@ -358,9 +533,10 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         }
     }
 
-    
+
 
     async viewAllProblems() {
+        this.item = 'activity';
         this.showProfile = false;
         console.log('In View All Problems');
         try {
@@ -399,15 +575,15 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                             : 'pending-icon',
 
                 diffClass:
-                    item.DifficultyLevel__c.toLowerCase()=='beginner'
+                    item.DifficultyLevel__c.toLowerCase() == 'beginner'
                         ? 'Beginner'
-                        : item.DifficultyLevel__c.toLowerCase()=='apprentice'
+                        : item.DifficultyLevel__c.toLowerCase() == 'apprentice'
                             ? 'Apprentice'
-                            : item.DifficultyLevel__c.toLowerCase()=='expert architect'
+                            : item.DifficultyLevel__c.toLowerCase() == 'expert architect'
                                 ? 'Expert'
-                                : item.DifficultyLevel__c.toLowerCase()=='skilled developer'
+                                : item.DifficultyLevel__c.toLowerCase() == 'skilled developer'
                                     ? 'Skilled'
-                                    : item.DifficultyLevel__c.toLowerCase()=='legendary salesforce hero'
+                                    : item.DifficultyLevel__c.toLowerCase() == 'legendary salesforce hero'
                                         ? 'Legend'
                                         : 'default'
 
@@ -466,7 +642,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         this[NavigationMixin.Navigate]({
             type: 'comm__namedPage',
             attributes: {
-            name: 'viewDetails__c'
+                name: 'viewDetails__c'
             },
             state: {
                 recordId: recordId

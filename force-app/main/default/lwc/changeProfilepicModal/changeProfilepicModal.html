@@ -1,0 +1,41 @@
+<template>
+    <template if:true={showModal}>
+
+        <!-- BACKDROP -->
+        <div class="backdrop"></div>
+
+        <!-- MODAL -->
+        <section class="modal-container">
+
+            <!-- CLOSE -->
+            <button class="close-btn" onclick={closeModal}>
+                ✕
+            </button>
+
+            <div class="pfp-container">
+                <template for:each={profilePictures} for:item="pfp">
+                    <div key={pfp.id} class="pfp-card" data-url={pfp.url} onclick={handleAvatarClick}>
+                        <img src={pfp.url} alt={pfp.name} class="pfp-img" />
+                    </div>
+                </template>
+            </div>
+
+            <template if:true={selectedAvatar}>
+                <div class="selected-preview">
+                    <p>Selected Avatar</p>
+                    <img src={selectedAvatar} class="selected-img" />
+                </div>
+            </template>
+
+            <div class="footer">
+
+                <button class="select" disabled={buttonDisabled} onclick={setSelectedImage}>Select</button>
+                <button class="cancel" onclick={closeModal}>Cancel</button>
+
+            </div>
+
+
+        </section>
+
+    </template>
+</template>

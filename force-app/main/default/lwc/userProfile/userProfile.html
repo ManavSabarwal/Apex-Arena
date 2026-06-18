@@ -2,6 +2,8 @@
 
     <div class="app-container">
 
+        <c-change-profilepic-modal onimagereceived={imageReceivedFunc}></c-change-profilepic-modal>
+
         <!-- HEADER -->
         <div class="navbar">
 
@@ -10,600 +12,774 @@
                 <div class="logo-text">Apex Arena</div>
             </div>
 
-            <div class="nav-links">
-                <a class="active-link">Homepage</a>
-                <a>Contact</a>
-            </div>
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none">
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+                    <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
 
-            <div class="nav-right">
-
-                <div class="user-box">
-                    <span onclick={choosePath}>Choose Path</span>
-                </div>
-
-                <div class="logout-btn" onclick={logoutFunc}>
-                    <span>⎋ Logout</span>
-                </div>
+                <input type="text" placeholder="Search for Users or Challenges" />
             </div>
 
         </div>
+        <div class="display-container">
 
-        <template if:true={showProfile}>
+            <div class="sidebar">
 
-            <!-- MAIN CONTENT -->
+                <div style="display:grid;">
 
-            <div class="main-container">
+                    <span class={profileClass} onclick={handleSidebarItemClick} data-id="profile"><svg
+                            class="profile-icon" viewBox="0 0 24 24" fill="currentColor"
+                            style="width: 20px;height: 20px;">
+                            <path
+                                d="M12 12C14.76 12 17 9.76 17 7C17 4.24 14.76 2 12 2C9.24 2 7 4.24 7 7C7 9.76 9.24 12 12 12Z" />
 
-                <div class="hero">
-                    <div style="display: flex;justify-content: space-between;">
-                        <div class="hero-left-container">
-                            <div class="hero-left">
-                                <div class="avatar">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
+                            <path d="M4 22C4 17.58 7.58 14 12 14C16.42 14 20 17.58 20 22H4Z" />
+                        </svg> Profile
+                    </span>
+                    <span class="sidebarItems" onclick={handleSidebarItemClick} data-id="code">
 
-                                        <!-- Head -->
-                                        <circle cx="12" cy="8" r="4"></circle>
+                        <svg class="coding-icon" viewBox="0 0 24 24" fill="none" style="width: 20px;height: 20px;">
+                            <path d="M8 9L4 12L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
 
-                                        <!-- Body -->
-                                        <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
-                                    </svg>
+                            <path d="M16 9L20 12L16 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+
+                            <path d="M14 5L10 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+
+                        Coding Arena</span>
+                    <span class="sidebarItems" onclick={handleSidebarItemClick} data-id="debug">
+
+                        <svg class="debug-icon" viewBox="0 0 24 24" fill="none" style="width: 20px;height: 20px;">
+                            <path d="M8 8L4 12L8 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+
+                            <path d="M16 8L20 12L16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+
+                            <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+
+                            <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+                        </svg>
+                        Debugging Arena</span>
+                    <span class={leaderboardClass} onclick={handleSidebarItemClick} data-id="leaderboard">
+
+                        <svg class="leaderboard-icon" viewBox="0 0 24 24" fill="none" style="width: 20px;height: 20px;">
+                            <path d="M7 21V11" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+
+                            <path d="M12 21V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+
+                            <path d="M17 21V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+
+                            <path d="M4 21H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+
+                            <path d="M12 3L13 4.8L15 5.1L13.5 6.5L13.9 8.5L12 7.5L10.1 8.5L10.5 6.5L9 5.1L11 4.8L12 3Z"
+                                fill="currentColor" />
+                        </svg>
+
+                        Leaderboards</span>
+                    <span class={activityClass} onclick={handleSidebarItemClick} data-id="activity">
+
+                        <svg class="activities-icon" viewBox="0 0 24 24" fill="none" style="width: 20px;height: 20px;">
+                            <path d="M4 19V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+
+                            <path d="M4 19H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+
+                            <path d="M7 15L10.5 11.5L13.5 14.5L19 8" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+
+                            <circle cx="7" cy="15" r="1.5" fill="currentColor" />
+                            <circle cx="10.5" cy="11.5" r="1.5" fill="currentColor" />
+                            <circle cx="13.5" cy="14.5" r="1.5" fill="currentColor" />
+                            <circle cx="19" cy="8" r="1.5" fill="currentColor" />
+                        </svg>
+
+                        Activities</span>
+
+                </div>
+
+                <div style="    border: 1px solid rgba(75, 75, 75, 0.5); border-radius: 10px;padding: 10px;">
+                    <span style="font-size: 20px;    color: white;font-weight: 600;">{loginName}</span>
+                    <div class="logout-btn" onclick={logoutFunc}>
+                        <span>⎋ Logout</span>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <template if:true={showProfile}>
+
+                <!-- MAIN CONTENT -->
+
+                <div class="main-container">
+
+                    <div class="hero">
+                        <div style="display: flex;justify-content: space-between;">
+                            <div class="hero-left-container">
+                                <div class="hero-left">
+                                    <div class="avatar">
+
+                                        <template lwc:if={editProfile}>
+                                            <div class="penciloverlay" onclick={changeProfilePic}>
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M4 20H8.25L19.81 8.44L15.56 4.19L4 15.75V20Z"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path d="M14.5 5.25L18.75 9.5" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path d="M13.5 6.5L17.5 10.5" stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </div>
+                                        </template>
+
+                                        <template lwc:if={profilePic}>
+                                            <img src={profilePic} style="max-width: 100%;height: auto;border-radius: 50%;"></img>
+
+
+                                        </template>
+                                        <template lwc:else>
+
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+
+                                                <!-- Head -->
+                                                <circle cx="12" cy="8" r="4"></circle>
+
+                                                <!-- Body -->
+                                                <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+                                            </svg>
+
+                                        </template>
+                                    </div>
+                                    <div class="user-data">
+                                        <div style="display:flex;">
+                                            <input class="login-name" onkeyup={handleNameChange} value={loginName}
+                                                readonly>
+                                        </div>
+                                        <span class="user-level">{userLevel}</span>
+                                        <div style="display: flex;width: stretch;justify-content: space-between;">
+                                            <input class={aboutClass} onkeyup={handleAboutChange} value={aboutMe}
+                                                readonly={inputReadonly}>
+
+                                            <template lwc:if={editProfile}>
+                                                <span><span class={aboutLengthClass}>{aboutLength}</span>/200</span>
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;">
+                                                    <path d="M4 20H8.25L19.81 8.44L15.56 4.19L4 15.75V20Z"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path d="M14.5 5.25L18.75 9.5" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path d="M13.5 6.5L17.5 10.5" stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </template>
+                                        </div>
+                                        <span class="user-join">📅 {joinDate}</span>
+                                    </div>
                                 </div>
-                                <div class="user-data">
-                                    <span class="login-name">{loginName}</span>
-                                    <span class="user-level">{userLevel}</span>
-                                    <span class="user-about">{userAbout}</span>
-                                    <span class="user-join">📅 {joinDate}</span>
+                            </div>
+
+                            <div class="hero-right">
+
+                                <button class="edit-btn" onclick={editProfileFun}>
+                                    {editButtonText}
+                                </button>
+
+                                <div class="exp-container">
+                                    <div class="bolt-wrapper">
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                                            stroke-linecap="round" stroke-linejoin="round" class="lightning-icon">
+
+                                            <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"></path>
+
+                                        </svg>
+
+                                    </div>
+                                    <div style="display:grid">
+                                        <span class="exp-label"> Exp Points</span>
+                                        <span class="exp-value">{expPoints} XP</span>
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
 
-                        <div class="hero-right">
+                        <div class="streak-achievement-cont">
 
-                            <button class="edit-btn">
-                                <lightning-icon icon-name="utility:edit" size="x-small"></lightning-icon> Edit Profile
-                            </button>
+                            <div class="streak-cont">
+                                <div style=" display: flex;gap: 5px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+                                        fill="none" class="streak-icon">
+                                        <path fill="#FF7A00"
+                                            d="M12 22c4.4 0 8-3.2 8-7.5 0-3.2-1.8-5.9-4.4-7.2.2 1.8-.6 3.1-1.8 3.8.1-3.6-1.7-6.8-5.1-9.1.4 3.8-1.4 5.8-3 7.8C4.6 11.2 4 12.8 4 14.5 4 18.8 7.6 22 12 22z" />
+                                        <path fill="#FFD84D"
+                                            d="M12 18c1.7 0 3-1.2 3-2.9 0-1.3-.7-2.3-1.8-2.9.1 1-.4 1.8-1.2 2.2 0-1.9-.9-3.4-2.5-4.6.2 2-.7 3.1-1.4 4.1-.5.7-.8 1.4-.8 2.2C7.3 16.8 9.1 18 12 18z" />
+                                    </svg>
+                                    <div style="display: grid;">
+                                        <span class="detail-label">Current Streak</span>
+                                        <div>
+                                            <span
+                                                style="color: #ffa500;font-size: 28px;padding-left: 10px;">{currentStreak}</span>
+                                            <span style="color: #9f9f9f;padding: 10px;">days</span>
+                                        </div>
+                                    </div>
 
-                            <div class="exp-container">
-                                <div class="bolt-wrapper">
+                                </div>
 
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-                                        stroke-linejoin="round" class="lightning-icon">
+                            </div>
+                            <div class="straight-line"></div>
 
-                                        <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"></path>
+                            <div class="streak-cont">
+                                <div style="display: flex;gap: 5px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+                                        fill="none" class="crown-icon">
+                                        <path fill="#A855F7"
+                                            d="M4 17l1.4-9.2c.1-.7.9-1 1.4-.5l3.1 3.1 1.4-6.2c.2-.8 1.3-.8 1.5 0l1.4 6.2 3.1-3.1c.5-.5 1.3-.2 1.4.5L20 17H4z" />
+                                        <path fill="#7C3AED"
+                                            d="M3.5 18.5h17a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-17a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1z" />
+                                        <circle cx="6.2" cy="6.6" r="1.2" fill="#FACC15" />
+                                        <circle cx="12" cy="3.2" r="1.2" fill="#FACC15" />
+                                        <circle cx="17.8" cy="6.6" r="1.2" fill="#FACC15" />
+                                    </svg>
+
+                                    <div style="display: grid;">
+                                        <span class="detail-label">Best Streak</span>
+                                        <div>
+                                            <span
+                                                style="color: rgb(168, 85, 247);font-size: 28px;padding-left: 10px;">{bestStreak}</span>
+                                            <span style="color: #9f9f9f;padding: 10px;">days</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="straight-line"></div>
+
+                            <div class="streak-cont-xp">
+                                <div style="    display: flex;gap: 5px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+                                        fill="none" style="display:block;" class="xp-next-icon">
+                                        <rect x="3" y="14" width="3" height="6" rx="1" fill="#22C55E" />
+                                        <rect x="9" y="10" width="3" height="10" rx="1" fill="#39FF88" />
+                                        <rect x="15" y="6" width="3" height="14" rx="1" fill="#16A34A" />
+
+                                        <path d="M4 11.5L9 7L13 10L20 3" stroke="#39FF88" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+
+                                        <path d="M15.5 3H20V7.5" stroke="#39FF88" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="xp-progress-section">
+
+                                        <div class="xp-progress-header">
+                                            <span class="detail-label">XP to Next Level</span>
+                                            <strong>{xpToNextLevel} XP</strong>
+                                        </div>
+
+                                        <div class="next-level-name">
+                                            Next Level: {nextLevel}
+                                        </div>
+
+                                        <div class="xp-progress-bar">
+                                            <div class="xp-progress-fill" style={xpProgressStyle}></div>
+                                        </div>
+
+                                        <div class="xp-progress-footer">
+                                            <span>{expPoints} XP</span>
+                                            <span>{nextLevelXp} XP</span>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="problem-details">
+                        <div class="detail-container">
+                            <div class="label-container">
+
+                                <div class="tick-circle">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round" class="tick-icon">
+
+                                        <path d="M20 6L9 17l-5-5"></path>
+
+                                    </svg>
+                                </div>
+                                <div class="label">
+                                    <span class="detail-label">Problems Solved</span>
+                                    <span class="detail-value solved">{solved}</span>
+                                </div>
+
+
+                            </div>
+                            <div class="div-values">
+                                <span class="easy">Easy <span class="value-count">{easy}</span></span>
+                                <span class="medium">Medium <span class="value-count">{medium}</span></span>
+                                <span class="hard">Hard <span class="value-count">{hard}</span></span>
+                            </div>
+
+                        </div>
+                        <div class="detail-container">
+                            <div class="label-container">
+                                <div class="icon-wrapper">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" class="submission-icon">
+
+                                        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                                        <path d="M7 8h10"></path>
+                                        <path d="M7 12h10"></path>
+                                        <path d="M7 16h6"></path>
+
+                                    </svg>
+
+                                </div>
+                                <div class="label" title="Includes Test Runs">
+                                    <span class="detail-label">Total Submissions
+                                    </span>
+                                    <span class="detail-value submissions">{submissions}</span>
+                                </div>
+
+                            </div>
+                            <div style="display:flex;gap:20px">
+                                <div class="div-values">
+                                    <span class="test">Test Attempts <span
+                                            class="value-count">{testAttempts}</span></span>
+                                    <span class="submit">Submits <span
+                                            class="value-count">{submitAttempts}</span></span>
+                                </div>
+                                <div class="straight-line"></div>
+                                <div class="div-values">
+                                    <span class="easy">Accepted <span class="value-count">{solved}</span></span>
+                                    <span class="hard">Wrong <span class="value-count">{wrong}</span></span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="detail-container">
+                            <div class="label-container">
+                                <div class="icon-box">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" class="trophy-icon">
+
+                                        <path d="M8 21h8"></path>
+                                        <path d="M12 17v4"></path>
+                                        <path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
+                                        <path d="M5 9a3 3 0 0 1-3-3V4h5"></path>
+                                        <path d="M19 9a3 3 0 0 0 3-3V4h-5"></path>
+                                    </svg>
+                                </div>
+                                <div class="label">
+                                    <span class="detail-label">Acceptance Rate</span>
+                                    <span class="detail-value accepted">{acceptanceRate}%</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div style="display: grid;grid-template-columns: 1fr 1fr;gap: 10px;">
+
+                        <div class="recent-problems">
+                            <div class="recent-title">
+                                <span class="recent-title-label">
+
+                                    <svg class="achievements-icon" viewBox="0 0 24 24" fill="none"
+                                        style="width: 20px;height: 20px;">
+                                        <path d="M8 4H16V7C16 9.2 14.2 11 12 11C9.8 11 8 9.2 8 7V4Z"
+                                            fill="currentColor" />
+
+                                        <path d="M6 5H8V7C6.3 7 5 5.7 5 4V4C5 3.45 5.45 3 6 3H8" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" />
+
+                                        <path d="M18 5H16V7C17.7 7 19 5.7 19 4V4C19 3.45 18.55 3 18 3H16"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+
+                                        <path d="M12 11V16" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+
+                                        <path d="M9 20H15" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+
+                                        <path d="M10 16H14L15 20H9L10 16Z" fill="currentColor" />
+                                    </svg>
+
+                                    Achievements</span>
+                                <template if:true={showMore}><span class="activity-link"
+                                        onclick={viewAllAchievements}>{labelText}</span></template>
+                            </div>
+                            <template if:true={showAch}>
+                                <div class="achievements">
+                                    <template for:each={achievementsData} for:item="item">
+                                        <div key={item.Id} class="achievement-card">
+                                            <img src={item.Achievement__r.Icon__c} class="iconClass">
+                                            <div style="display:grid;">
+                                                <span
+                                                    style="font-size: 16px;font-weight: 700;">{item.Achievement__r.Name__c}</span>
+                                                <span
+                                                    style="font-size: 13px;color: #9f9f9f;">{item.Achievement__r.Description__c}</span>
+                                                <span
+                                                    style="    font-size: 14px;color: grey;">{item.Unlock_Date__c}</span>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:false={showAch}>
+                                <div style="display:flex;gap:10px;justify-content: center;align-items: center;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120"
+                                        height="120" fill="none" style="display:block;">
+
+                                        <!-- Outer glow circle -->
+                                        <circle cx="60" cy="60" r="48" fill="#1E1B4B" stroke="#7C3AED" stroke-width="2"
+                                            opacity="0.9" />
+
+                                        <!-- Badge ribbon left -->
+                                        <path d="M46 76L39 100L52 91L60 104L60 79Z" fill="#312E81" stroke="#8B5CF6"
+                                            stroke-width="2" stroke-linejoin="round" />
+
+                                        <!-- Badge ribbon right -->
+                                        <path d="M74 76L81 100L68 91L60 104L60 79Z" fill="#312E81" stroke="#8B5CF6"
+                                            stroke-width="2" stroke-linejoin="round" />
+
+                                        <!-- Medal circle -->
+                                        <circle cx="60" cy="52" r="27" fill="#111827" stroke="#A855F7"
+                                            stroke-width="3" />
+
+                                        <!-- Small empty star outline -->
+                                        <path d="M60 35L65 46L77 47L68 55L71 67L60 61L49 67L52 55L43 47L55 46L60 35Z"
+                                            stroke="#9CA3AF" stroke-width="3" stroke-linejoin="round" fill="none" />
+
+                                        <!-- Slash line -->
+                                        <path d="M40 78L80 28" stroke="#EF4444" stroke-width="4"
+                                            stroke-linecap="round" />
+
+                                        <!-- Small dots -->
+                                        <circle cx="30" cy="35" r="3" fill="#8B5CF6" />
+                                        <circle cx="91" cy="42" r="3" fill="#22C55E" />
+                                        <circle cx="88" cy="78" r="2.5" fill="#FACC15" />
+                                    </svg>
+                                    <span style="font-weight: 700;">No Achievements Yet! Keep Trying!</span>
+                                </div>
+                            </template>
+                        </div>
+
+
+                        <div class="recent-problems">
+                            <div class="recent-title">
+                                <span class="recent-title-label">
+
+                                    <svg class="activities-icon" viewBox="0 0 24 24" fill="none"
+                                        style="width: 20px;height: 20px;">
+                                        <path d="M4 19V5" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+
+                                        <path d="M4 19H20" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+
+                                        <path d="M7 15L10.5 11.5L13.5 14.5L19 8" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+
+                                        <circle cx="7" cy="15" r="1.5" fill="currentColor" />
+                                        <circle cx="10.5" cy="11.5" r="1.5" fill="currentColor" />
+                                        <circle cx="13.5" cy="14.5" r="1.5" fill="currentColor" />
+                                        <circle cx="19" cy="8" r="1.5" fill="currentColor" />
+                                    </svg>
+                                    Recent Activity</span>
+                                <span class="activity-link" onclick={viewAllProblems}>View All</span>
+                            </div>
+
+                            <template if:true={showActivity}>
+
+                                <div class="recent-problem-details-container">
+                                    <template for:each={recent4problems} for:item="recentProblem">
+                                        <div data-id={recentProblem.Id} key={recentProblem.Id}
+                                            class="recent-problem-cont" onclick={viewDetails}>
+                                            <div data-id={recentProblem.Id} class="recent-problem-details">
+                                                <span data-id={recentProblem.Id}
+                                                    class="detail-label">{recentProblem.Name}</span>
+                                                <div data-id={recentProblem.Id} class="capsules">
+                                                    <span data-id={recentProblem.Id}
+                                                        class={recentProblem.Result__c}>{recentProblem.Result__c}</span>
+                                                    <span data-id={recentProblem.Id}
+                                                        class="path-details">{recentProblem.Path__c}</span>
+                                                </div>
+                                            </div>
+                                            <div data-id={recentProblem.Id} class="activity-time">
+                                                <span>{recentProblem.timeAgo} ></span>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:false={showActivity}>
+                                <div style="display:flex;gap:10px;justify-content: center;align-items: center;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120"
+                                        height="120" fill="none" style="display:block;">
+
+                                        <!-- Background circle -->
+                                        <circle cx="60" cy="60" r="48" fill="#111827" stroke="#374151"
+                                            stroke-width="2" />
+
+                                        <!-- Pulse line -->
+                                        <path d="M25 63H42L49 48L59 76L70 56L78 63H95" stroke="#8B5CF6" stroke-width="4"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+
+                                        <!-- Inactive clock -->
+                                        <circle cx="60" cy="60" r="25" stroke="#22C55E" stroke-width="3"
+                                            opacity="0.25" />
+
+                                        <path d="M60 47V61L70 67" stroke="#22C55E" stroke-width="3"
+                                            stroke-linecap="round" stroke-linejoin="round" opacity="0.45" />
+
+                                        <!-- Small muted dots -->
+                                        <circle cx="32" cy="35" r="3" fill="#8B5CF6" />
+                                        <circle cx="88" cy="38" r="3" fill="#22C55E" />
+                                        <circle cx="91" cy="84" r="2.5" fill="#A855F7" />
+
+                                        <!-- Slash -->
+                                        <path d="M36 86L84 34" stroke="#EF4444" stroke-width="4"
+                                            stroke-linecap="round" />
+                                    </svg>
+                                    <span style="font-weight: 700;">No Recent Activity</span>
+                                </div>
+                            </template>
+
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <!--Problem List-->
+            <template if:false={showProfile}>
+
+                <div class="main-container-List">
+                    <div class="Header-cont">
+
+                        <div class="challenge-icon-wrapper">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="challenge-icon">
+
+                                <path d="M4 7h16"></path>
+                                <path d="M4 12h16"></path>
+                                <path d="M4 17h16"></path>
+
+                            </svg>
+                        </div>
+
+                        <div style="display:grid;">
+                            <span class="header">All Challenges</span>
+                            <p class="exp-label">A history of all the challenges you have solved</p>
+                        </div>
+                        <div class="subm-solv-class">
+                            <div class="subm-solv-container">
+                                <div class="icon-wrapper">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" class="submission-icon">
+
+                                        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                                        <path d="M7 8h10"></path>
+                                        <path d="M7 12h10"></path>
+                                        <path d="M7 16h6"></path>
 
                                     </svg>
 
                                 </div>
                                 <div style="display:grid">
-                                    <span class="exp-label"> Exp Points</span>
-                                    <span class="exp-value">{expPoints} XP</span>
+                                    <span class="exp-label">Submissions</span>
+                                    <span class="exp-value">{submissions}</span>
                                 </div>
                             </div>
+                            <div class="subm-solv-container">
+                                <div class="tick-circle">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                        stroke-linejoin="round" class="tick-icon">
 
-                        </div>
-                    </div>
+                                        <path d="M20 6L9 17l-5-5"></path>
 
-                    <div class="streak-achievement-cont">
-
-                        <div class="streak-cont">
-                            <div style=" display: flex;gap: 5px;">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
-                                    fill="none" class="streak-icon">
-                                    <path fill="#FF7A00"
-                                        d="M12 22c4.4 0 8-3.2 8-7.5 0-3.2-1.8-5.9-4.4-7.2.2 1.8-.6 3.1-1.8 3.8.1-3.6-1.7-6.8-5.1-9.1.4 3.8-1.4 5.8-3 7.8C4.6 11.2 4 12.8 4 14.5 4 18.8 7.6 22 12 22z" />
-                                    <path fill="#FFD84D"
-                                        d="M12 18c1.7 0 3-1.2 3-2.9 0-1.3-.7-2.3-1.8-2.9.1 1-.4 1.8-1.2 2.2 0-1.9-.9-3.4-2.5-4.6.2 2-.7 3.1-1.4 4.1-.5.7-.8 1.4-.8 2.2C7.3 16.8 9.1 18 12 18z" />
-                                </svg>
-                                <div style="display: grid;">
-                                    <span class="detail-label">Current Streak</span>
-                                    <div>
-                                        <span
-                                            style="color: #ffa500;font-size: 28px;padding-left: 10px;">{currentStreak}</span>
-                                        <span style="color: #9f9f9f;padding: 10px;">days</span>
-                                    </div>
+                                    </svg>
                                 </div>
-
-                            </div>
-
-                        </div>
-                        <div class="straight-line"></div>
-
-                        <div class="streak-cont">
-                            <div style="display: flex;gap: 5px;">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
-                                    fill="none" class="crown-icon">
-                                    <path fill="#A855F7"
-                                        d="M4 17l1.4-9.2c.1-.7.9-1 1.4-.5l3.1 3.1 1.4-6.2c.2-.8 1.3-.8 1.5 0l1.4 6.2 3.1-3.1c.5-.5 1.3-.2 1.4.5L20 17H4z" />
-                                    <path fill="#7C3AED"
-                                        d="M3.5 18.5h17a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-17a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1z" />
-                                    <circle cx="6.2" cy="6.6" r="1.2" fill="#FACC15" />
-                                    <circle cx="12" cy="3.2" r="1.2" fill="#FACC15" />
-                                    <circle cx="17.8" cy="6.6" r="1.2" fill="#FACC15" />
-                                </svg>
-
-                                <div style="display: grid;">
-                                    <span class="detail-label">Best Streak</span>
-                                    <div>
-                                        <span
-                                            style="color: rgb(168, 85, 247);font-size: 28px;padding-left: 10px;">{bestStreak}</span>
-                                        <span style="color: #9f9f9f;padding: 10px;">days</span>
-                                    </div>
+                                <div style="display:grid">
+                                    <span class="exp-label">Problems Solved</span>
+                                    <span class="detail-value solved">{solved}</span>
                                 </div>
                             </div>
-
-                        </div>
-                        <div class="straight-line"></div>
-
-                        <div class="streak-cont-xp">
-                            <div style="    display: flex;gap: 5px;">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
-                                    fill="none" style="display:block;" class="xp-next-icon">
-                                    <rect x="3" y="14" width="3" height="6" rx="1" fill="#22C55E" />
-                                    <rect x="9" y="10" width="3" height="10" rx="1" fill="#39FF88" />
-                                    <rect x="15" y="6" width="3" height="14" rx="1" fill="#16A34A" />
-
-                                    <path d="M4 11.5L9 7L13 10L20 3" stroke="#39FF88" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-
-                                    <path d="M15.5 3H20V7.5" stroke="#39FF88" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                                <div class="xp-progress-section">
-
-                                    <div class="xp-progress-header">
-                                        <span class="detail-label">XP to Next Level</span>
-                                        <strong>{xpToNextLevel} XP</strong>
-                                    </div>
-
-                                    <div class="next-level-name">
-                                        Next Level: {nextLevel}
-                                    </div>
-
-                                    <div class="xp-progress-bar">
-                                        <div class="xp-progress-fill" style={xpProgressStyle}></div>
-                                    </div>
-
-                                    <div class="xp-progress-footer">
-                                        <span>{expPoints} XP</span>
-                                        <span>{nextLevelXp} XP</span>
-                                    </div>
-
-                                </div>
-
-                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="problem-details">
-                    <div class="detail-container">
-                        <div class="label-container">
-
-                            <div class="tick-circle">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round" class="tick-icon">
-
-                                    <path d="M20 6L9 17l-5-5"></path>
-
-                                </svg>
-                            </div>
-                            <div class="label">
-                                <span class="detail-label">Problems Solved</span>
-                                <span class="detail-value solved">{solved}</span>
-                            </div>
-
-
-                        </div>
-                        <div class="div-values">
-                            <span class="easy">Easy <span class="value-count">{easy}</span></span>
-                            <span class="medium">Medium <span class="value-count">{medium}</span></span>
-                            <span class="hard">Hard <span class="value-count">{hard}</span></span>
-                        </div>
-
-                    </div>
-                    <div class="detail-container">
-                        <div class="label-container">
-                            <div class="icon-wrapper">
-
-                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="submission-icon">
-
-                                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                                    <path d="M7 8h10"></path>
-                                    <path d="M7 12h10"></path>
-                                    <path d="M7 16h6"></path>
-
-                                </svg>
-
-                            </div>
-                            <div class="label" title="Includes Test Runs">
-                                <span class="detail-label">Total Submissions
-                                </span>
-                                <span class="detail-value submissions">{submissions}</span>
-                            </div>
-
-                        </div>
-                        <div style="display:flex;gap:20px">
-                            <div class="div-values">
-                                <span class="test">Test Attempts <span class="value-count">{testAttempts}</span></span>
-                                <span class="submit">Submits <span class="value-count">{submitAttempts}</span></span>
-                            </div>
-                            <div class="straight-line"></div>
-                            <div class="div-values">
-                                <span class="easy">Accepted <span class="value-count">{solved}</span></span>
-                                <span class="hard">Wrong <span class="value-count">{wrong}</span></span>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="detail-container">
-                        <div class="label-container">
-                            <div class="icon-box">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="trophy-icon">
-
-                                    <path d="M8 21h8"></path>
-                                    <path d="M12 17v4"></path>
-                                    <path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
-                                    <path d="M5 9a3 3 0 0 1-3-3V4h5"></path>
-                                    <path d="M19 9a3 3 0 0 0 3-3V4h-5"></path>
-                                </svg>
-                            </div>
-                            <div class="label">
-                                <span class="detail-label">Acceptance Rate</span>
-                                <span class="detail-value accepted">{acceptanceRate}</span>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div style="display: grid;grid-template-columns: 1fr 1fr;gap: 10px;">
-
-                    <div class="recent-problems">
-                        <div class="recent-title">
-                            <span class="recent-title-label">Achievements</span>
-                            <template if:true={showMore}><span class="activity-link" onclick={viewAllAchievements}>Show
-                                    More</span></template>
-                        </div>
-                        <template if:true={showAch}>
-                            <div class="achievements">
-                                <template for:each={recent4userAchievement} for:item="item">
-                                    <div key={item.Id} class="achievement-card">
-                                        <img src={item.Achievement__r.Icon__c} class="iconClass">
-                                        <div style="display:grid;">
-                                            <span
-                                                style="font-size: 16px;font-weight: 700;">{item.Achievement__r.Name__c}</span>
-                                            <span
-                                                style="font-size: 13px;color: #9f9f9f;">{item.Achievement__r.Description__c}</span>
-                                            <span style="    font-size: 14px;color: grey;">{item.Unlock_Date__c}</span>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-                        <template if:false={showAch}>
-                            <div style="display:flex;gap:10px;justify-content: center;align-items: center;">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"
-                                    fill="none" style="display:block;">
-
-                                    <!-- Outer glow circle -->
-                                    <circle cx="60" cy="60" r="48" fill="#1E1B4B" stroke="#7C3AED" stroke-width="2"
-                                        opacity="0.9" />
-
-                                    <!-- Badge ribbon left -->
-                                    <path d="M46 76L39 100L52 91L60 104L60 79Z" fill="#312E81" stroke="#8B5CF6"
-                                        stroke-width="2" stroke-linejoin="round" />
-
-                                    <!-- Badge ribbon right -->
-                                    <path d="M74 76L81 100L68 91L60 104L60 79Z" fill="#312E81" stroke="#8B5CF6"
-                                        stroke-width="2" stroke-linejoin="round" />
-
-                                    <!-- Medal circle -->
-                                    <circle cx="60" cy="52" r="27" fill="#111827" stroke="#A855F7" stroke-width="3" />
-
-                                    <!-- Small empty star outline -->
-                                    <path d="M60 35L65 46L77 47L68 55L71 67L60 61L49 67L52 55L43 47L55 46L60 35Z"
-                                        stroke="#9CA3AF" stroke-width="3" stroke-linejoin="round" fill="none" />
-
-                                    <!-- Slash line -->
-                                    <path d="M40 78L80 28" stroke="#EF4444" stroke-width="4" stroke-linecap="round" />
-
-                                    <!-- Small dots -->
-                                    <circle cx="30" cy="35" r="3" fill="#8B5CF6" />
-                                    <circle cx="91" cy="42" r="3" fill="#22C55E" />
-                                    <circle cx="88" cy="78" r="2.5" fill="#FACC15" />
-                                </svg>
-                                <span style="font-weight: 700;">No Achievements Yet! Keep Trying!</span>
-                            </div>
-                        </template>
-                    </div>
-
-
-                    <div class="recent-problems">
-                        <div class="recent-title">
-                            <span class="recent-title-label">Recent Activity</span>
-                            <span class="activity-link" onclick={viewAllProblems}>View All</span>
-                        </div>
-
-                        <template if:true={showActivity}>
-
-                            <div class="recent-problem-details-container">
-                                <template for:each={recent4problems} for:item="recentProblem">
-                                    <div data-id={recentProblem.Id} key={recentProblem.Id} class="recent-problem-cont"
-                                        onclick={viewDetails}>
-                                        <div data-id={recentProblem.Id} class="recent-problem-details">
-                                            <span data-id={recentProblem.Id}
-                                                class="detail-label">{recentProblem.Name}</span>
-                                            <div data-id={recentProblem.Id} class="capsules">
-                                                <span data-id={recentProblem.Id}
-                                                    class={recentProblem.Result__c}>{recentProblem.Result__c}</span>
-                                                <span data-id={recentProblem.Id}
-                                                    class="path-details">{recentProblem.Path__c}</span>
-                                            </div>
-                                        </div>
-                                        <div data-id={recentProblem.Id} class="activity-time">
-                                            <span>{recentProblem.timeAgo} ></span>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-                        <template if:false={showAch}>
-                            <div style="display:flex;gap:10px;justify-content: center;align-items: center;">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"
-                                    fill="none" style="display:block;">
-
-                                    <!-- Background circle -->
-                                    <circle cx="60" cy="60" r="48" fill="#111827" stroke="#374151" stroke-width="2" />
-
-                                    <!-- Pulse line -->
-                                    <path d="M25 63H42L49 48L59 76L70 56L78 63H95" stroke="#8B5CF6" stroke-width="4"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-
-                                    <!-- Inactive clock -->
-                                    <circle cx="60" cy="60" r="25" stroke="#22C55E" stroke-width="3" opacity="0.25" />
-
-                                    <path d="M60 47V61L70 67" stroke="#22C55E" stroke-width="3" stroke-linecap="round"
-                                        stroke-linejoin="round" opacity="0.45" />
-
-                                    <!-- Small muted dots -->
-                                    <circle cx="32" cy="35" r="3" fill="#8B5CF6" />
-                                    <circle cx="88" cy="38" r="3" fill="#22C55E" />
-                                    <circle cx="91" cy="84" r="2.5" fill="#A855F7" />
-
-                                    <!-- Slash -->
-                                    <path d="M36 86L84 34" stroke="#EF4444" stroke-width="4" stroke-linecap="round" />
-                                </svg>
-                                <span style="font-weight: 700;">No Recent Activity</span>
-                            </div>
-                        </template>
-
-                    </div>
-                </div>
-            </div>
-        </template>
-        <!--Problem List-->
-        <template if:false={showProfile}>
-
-            <div class="main-container-List">
-
-                <div class="back-btn" onclick={backToProfile}> ← Back to Profile</div>
-                <div class="Header-cont">
-
-                    <div class="challenge-icon-wrapper">
-
-                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="challenge-icon">
-
-                            <path d="M4 7h16"></path>
-                            <path d="M4 12h16"></path>
-                            <path d="M4 17h16"></path>
-
-                        </svg>
-                    </div>
-
-                    <div style="display:grid;">
-                        <span class="header">All Challenges</span>
-                        <p class="exp-label">A history of all the challenges you have solved</p>
-                    </div>
-                    <div class="subm-solv-class">
-                        <div class="subm-solv-container">
-                            <div class="icon-wrapper">
-
-                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="submission-icon">
-
-                                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                                    <path d="M7 8h10"></path>
-                                    <path d="M7 12h10"></path>
-                                    <path d="M7 16h6"></path>
-
-                                </svg>
-
-                            </div>
-                            <div style="display:grid">
-                                <span class="exp-label">Submissions</span>
-                                <span class="exp-value">{submissions}</span>
-                            </div>
-                        </div>
-                        <div class="subm-solv-container">
-                            <div class="tick-circle">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round" class="tick-icon">
-
-                                    <path d="M20 6L9 17l-5-5"></path>
-
-                                </svg>
-                            </div>
-                            <div style="display:grid">
-                                <span class="exp-label">Problems Solved</span>
-                                <span class="detail-value solved">{solved}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="utilities-container">
-
-                    <input type="text" placeholder="🔍 Search by problem name or path" class="search-input"
-                        onkeyup={handleSearch} />
-                    <select id="result" onchange={handleResultFilterChange} class="category-dropdown">
-                        <template for:each={resultOptions} for:item="result">
-                            <option key={result.value} value={result.value}>{result.label}</option>
-                        </template>
-                    </select>
-                    <select id="category" onchange={handleCategoryChange} class="category-dropdown">
-                        <template for:each={categoryOptions} for:item="category">
-                            <option key={category.value} value={category.value}>{category.label}</option>
-                        </template>
-                    </select>
-
-                    <select id="difficulty" onchange={handleDifficultyChange} class="category-dropdown">
-                        <template for:each={difficultyOptions} for:item="difficulty">
-                            <option key={difficulty.value} value={difficulty.value}>{difficulty.label}</option>
-                        </template>
-                    </select>
-
-                    <select id="sort" onchange={handlePathChange} class="category-dropdown">
-                        <template for:each={pathOptions} for:item="path">
-                            <option key={path.value} value={path.value}>{path.label}</option>
-                        </template>
-                    </select>
-
-
-                </div>
-
-
-
-                <div class="history-container">
-
-                    <!-- Header -->
-                    <div class="table-header">
-                        <div>CHALLENGE</div>
-                        <div>CATEGORY</div>
-                        <div>DIFFICULTY</div>
-                        <div>RESULT</div>
-                        <div>SOLVED ON</div>
-                        <div>PATH</div>
-                        <div></div>
-                    </div>
-
-                    <!-- Rows -->
-                    <template for:each={challengeData} for:item="item">
-
-                        <div key={item.Id} data-id={item.Id} class="table-row">
-
-                            <!-- Challenge -->
-                            <div class="challenge-section">
-                                <div>
-                                    <div class="challenge-name">
-                                        {item.Name}
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <!-- Category -->
-                            <div class="category">
-
-                                <span>{item.Type__c}</span>
-                            </div>
-
-                            <!-- Difficulty -->
-                            <div>
-                                <span class={item.diffClass}>
-                                    {item.DifficultyLevel__c}
-                                </span>
-                            </div>
-
-                            <!-- Points -->
-                            <div class={item.Result__c}>
-                                <lightning-icon icon-name={item.statusIcon} size="small" class={item.statusClass}
-                                    alternative-text={item.Result__c}>
-                                </lightning-icon>
-                            </div>
-
-                            <!-- Solved On -->
-                            <div class="date">
-                                {item.LastModifiedDate}
-                            </div>
-
-                            <!-- Time -->
-                            <div class={item.Path__c}>
-                                {item.Path__c}
-                            </div>
-
-                            <!-- Action -->
-                            <div class="btn-container">
-                                <button data-id={item.Id} class="details-btn" onclick={viewDetails}>
-                                    View Details
-                                </button>
-                            </div>
-
-                        </div>
-
-                    </template>
-
-                    <!-- Footer -->
-                    <div class="footer">
-
-                        <div class="results-text">
-                            {showingText}
-                        </div>
-
-                        <div class="pagination">
-
-                            <!-- Previous -->
-                            <button class="page-btn" onclick={handlePrevious}>
-
-                                ‹
-
-                            </button>
-
-                            <!-- Dynamic Pages -->
-                            <template for:each={pageNumbers} for:item="page">
-
-                                <button key={page.number} data-page={page.number} class={page.className}
-                                    onclick={handlePageClick}>
-
-                                    {page.number}
-
-                                </button>
-
+                    <div class="utilities-container">
+
+                        <input type="text" placeholder="🔍 Search by problem name or path" class="search-input"
+                            onkeyup={handleSearch} />
+                        <select id="result" onchange={handleResultFilterChange} class="category-dropdown">
+                            <template for:each={resultOptions} for:item="result">
+                                <option key={result.value} value={result.value}>{result.label}</option>
                             </template>
+                        </select>
+                        <select id="category" onchange={handleCategoryChange} class="category-dropdown">
+                            <template for:each={categoryOptions} for:item="category">
+                                <option key={category.value} value={category.value}>{category.label}</option>
+                            </template>
+                        </select>
 
-                            <!-- Next -->
-                            <button class="page-btn" onclick={handleNext}>
+                        <select id="difficulty" onchange={handleDifficultyChange} class="category-dropdown">
+                            <template for:each={difficultyOptions} for:item="difficulty">
+                                <option key={difficulty.value} value={difficulty.value}>{difficulty.label}</option>
+                            </template>
+                        </select>
 
-                                ›
+                        <select id="sort" onchange={handlePathChange} class="category-dropdown">
+                            <template for:each={pathOptions} for:item="path">
+                                <option key={path.value} value={path.value}>{path.label}</option>
+                            </template>
+                        </select>
 
-                            </button>
+
+                    </div>
+
+
+
+                    <div class="history-container">
+
+                        <!-- Header -->
+                        <div class="table-header">
+                            <div>CHALLENGE</div>
+                            <div>CATEGORY</div>
+                            <div>DIFFICULTY</div>
+                            <div>RESULT</div>
+                            <div>SOLVED ON</div>
+                            <div>PATH</div>
+                            <div></div>
+                        </div>
+
+                        <!-- Rows -->
+                        <template for:each={challengeData} for:item="item">
+
+                            <div key={item.Id} data-id={item.Id} class="table-row">
+
+                                <!-- Challenge -->
+                                <div class="challenge-section">
+                                    <div>
+                                        <div class="challenge-name">
+                                            {item.Name}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Category -->
+                                <div class="category">
+
+                                    <span>{item.Type__c}</span>
+                                </div>
+
+                                <!-- Difficulty -->
+                                <div>
+                                    <span class={item.diffClass}>
+                                        {item.DifficultyLevel__c}
+                                    </span>
+                                </div>
+
+                                <!-- Points -->
+                                <div class={item.Result__c}>
+                                    <lightning-icon icon-name={item.statusIcon} size="small" class={item.statusClass}
+                                        alternative-text={item.Result__c}>
+                                    </lightning-icon>
+                                </div>
+
+                                <!-- Solved On -->
+                                <div class="date">
+                                    {item.LastModifiedDate}
+                                </div>
+
+                                <!-- Time -->
+                                <div class={item.Path__c}>
+                                    {item.Path__c}
+                                </div>
+
+                                <!-- Action -->
+                                <div class="btn-container">
+                                    <button data-id={item.Id} class="details-btn" onclick={viewDetails}>
+                                        View Details
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </template>
+
+                        <!-- Footer -->
+                        <div class="footer">
+
+                            <div class="results-text">
+                                {showingText}
+                            </div>
+
+                            <div class="pagination">
+
+                                <!-- Previous -->
+                                <button class="page-btn" onclick={handlePrevious}>
+
+                                    ‹
+
+                                </button>
+
+                                <!-- Dynamic Pages -->
+                                <template for:each={pageNumbers} for:item="page">
+
+                                    <button key={page.number} data-page={page.number} class={page.className}
+                                        onclick={handlePageClick}>
+
+                                        {page.number}
+
+                                    </button>
+
+                                </template>
+
+                                <!-- Next -->
+                                <button class="page-btn" onclick={handleNext}>
+
+                                    ›
+
+                                </button>
+
+                            </div>
 
                         </div>
 
                     </div>
 
+
+
+
                 </div>
 
 
 
-
-            </div>
-
-
-
-        </template>
+            </template>
+        </div>
 
     </div>
 

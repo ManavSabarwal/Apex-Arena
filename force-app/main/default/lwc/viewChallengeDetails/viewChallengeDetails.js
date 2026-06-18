@@ -18,6 +18,7 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     difficulty = '';
     type = '';
     path = '';
+    finalResult='';
     selectedMenu = 'Code';
     selectedChallenge = [];
     loading = false;
@@ -28,7 +29,7 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     passed=0;
     total=0;
 
-    getDiffClass()
+    get DiffClass()
     {
         if(this.difficulty=='Beginner')
         {
@@ -113,7 +114,6 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
 
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
-        console.log(this.loginName);
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
@@ -129,6 +129,8 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     }
     handleCardClick(event) {
         try {
+            this.passed=0;
+            this.total=0;
             const recId = event.currentTarget.dataset.value;
             this.loading = true;
             setTimeout(() => {
@@ -190,6 +192,11 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     async loadData() {
 
         try {
+
+            if(!this.recordId)
+            {
+                this.backToProfile();
+            }
             const response = await getAttemptDetails({
                 challengeId: this.recordId
             });
@@ -207,6 +214,8 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
                 this.difficulty = firstAttempt.DifficultyLevel;
                 this.type = firstAttempt.Type;
                 this.path = firstAttempt.Path;
+                this.finalResult=firstAttempt.finalResult;
+                this.finalResult=this.finalResult.slice(0,1).toUpperCase()+this.finalResult.substring(1);
                 if (this.challengeAttempts.length == 1 && firstAttempt.Id == null) {
                     this.totalAttempts = 0;
                     this.successfulAttempts = 0;
