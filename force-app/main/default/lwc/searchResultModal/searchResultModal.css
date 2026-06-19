@@ -1,0 +1,48 @@
+:host {
+    --primary: #9d4dff;
+    --primary-dark: #6f2cff;
+    --bg: rgba(5, 8, 25, 0.78);
+}
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    background: transparent;
+    backdrop-filter: blur(6px);
+    z-index: 999;
+}
+
+.modal-container {
+    position: fixed;
+
+    top: 10%;
+    left: 30%;
+
+    transform: translate(-50%, -50%);
+
+    width: 520px;
+    max-width: 90%;
+
+    padding: 3rem 2.5rem;
+
+    border-radius: 28px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 24, 52, 0.98),
+            rgba(10, 14, 30, 0.98)
+        );
+
+    border: 1px solid rgba(157, 77, 255, 0.28);
+
+    box-shadow:
+        0 0 30px rgba(111, 44, 255, 0.28),
+        0 0 90px rgba(111, 44, 255, 0.12);
+
+    text-align: center;
+
+    z-index: 1000;
+
+    animation: popup 0.28s ease;
+}

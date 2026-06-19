@@ -235,7 +235,7 @@ public without sharing class recordController {
     public static List<Challenge_Attempt__C> getUserandChalengeDetails(String username){
         try {
 
-            string queryText='select id,Result__c,Name,score__c,Solution_Provided__c,Exp_gained__c,Code_Review_Good__c,Code_Review_Bad__c,Action_Type__c,Attempted_Challenge__c,Attempted_Challenge__r.Scenario__c,Attempted_Challenge__r.Path__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c,Attempted_Challenge__r.Apex_Arena_User__r.AboutMe__c,Attempted_Challenge__r.Apex_Arena_User__r.profilePic__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate,Attempted_Challenge__r.Result__c, Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c,Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = :username' ;
+            string queryText='select id,Result__c,Name,score__c,Solution_Provided__c,Exp_gained__c,Code_Review_Good__c,Code_Review_Bad__c,Action_Type__c,Attempted_Challenge__c,Attempted_Challenge__r.Scenario__c,Attempted_Challenge__r.Path__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c,Attempted_Challenge__r.Apex_Arena_User__r.AboutMe__c,Attempted_Challenge__r.Apex_Arena_User__r.profilePic__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate,Attempted_Challenge__r.Result__c, Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c,Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c,Attempted_Challenge__r.Apex_Arena_User__r.isPublicProfile__c FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = :username' ;
             List<Challenge_Attempt__C> ca=Database.query(queryText);
             system.debug(ca[0].Action_Type__C);
             if(ca.size()==0)
@@ -271,10 +271,10 @@ public without sharing class recordController {
     }
 
     @AuraEnabled
-    public static string saveChanges(string username,string imageUrl,string aboutMe){
+    public static string saveChanges(string username,string imageUrl,string aboutMe,Boolean isPublic){
         try {
         List<Apex_Arena_User__c> users = [
-            SELECT Id, ProfilePic__c, AboutMe__c
+            SELECT Id, ProfilePic__c, AboutMe__c,isPublicProfile__c
             FROM Apex_Arena_User__c
             WHERE Name = :username
             LIMIT 1
@@ -294,6 +294,9 @@ public without sharing class recordController {
             !String.isBlank(imageUrl) &&
             userRecord.ProfilePic__c != imageUrl;
 
+        Boolean isPublicChanged=
+                userRecord.isPublicProfile__c != isPublic;
+
         if (aboutChanged) {
             userRecord.AboutMe__c = aboutMe;
         }
@@ -302,7 +305,11 @@ public without sharing class recordController {
             userRecord.ProfilePic__c = imageUrl;
         }
 
-        if (aboutChanged || imageChanged) {
+        if (isPublicChanged) {
+            userRecord.isPublicProfile__c = isPublic;
+        }
+
+        if (aboutChanged || imageChanged || isPublicChanged) {
             update userRecord;
             return 'Changes Saved';
         }
@@ -552,6 +559,159 @@ public without sharing class recordController {
 
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    public class SearchResponse {
+        @AuraEnabled public List<SearchItem> users = new List<SearchItem>();
+        @AuraEnabled public List<SearchItem> challenges = new List<SearchItem>();
+    }
+
+    public class SearchItem {
+        @AuraEnabled public Id recordId;
+        @AuraEnabled public String type;
+        @AuraEnabled public String title;
+        @AuraEnabled public String subtitle;
+        @AuraEnabled public Integer score;
+
+        public SearchItem(Id recordId, String type, String title, String subtitle, Integer score) {
+            this.recordId = recordId;
+            this.type = type;
+            this.title = title;
+            this.subtitle = subtitle;
+            this.score = score;
+        }
+    }
+
+    @AuraEnabled
+    public static SearchResponse globalSearch(String searchKey,string username) {
+
+        SearchResponse response = new SearchResponse();
+
+        if (String.isBlank(searchKey) || searchKey.trim().length() < 2) {
+            return response;
+        }
+
+        String normalizedKey = normalize(searchKey);
+        String soslSearchTerm = buildSoslSearchTerm(normalizedKey);
+
+        List<List<SObject>> searchResults = [
+            FIND :soslSearchTerm IN ALL FIELDS
+            RETURNING
+                Apex_Arena_User__c(
+                    Id,
+                    Name,
+                    Level__c,
+                    Total_Exp_Points__c
+                    WHERE IsPublicProfile__C=true
+                    LIMIT 5
+                ),
+                Attempted_Challenge__c(
+                    Id,
+                    Name,
+                    DifficultyLevel__c,
+                    Type__c,
+                    Path__c,
+                    Result__c
+                    WHERE Apex_Arena_User__r.name = :username
+                    LIMIT 8
+                )
+        ];
+
+        system.debug(searchResults);
+
+        List<Apex_Arena_User__c> users =
+            (List<Apex_Arena_User__c>) searchResults[0];
+
+        List<Attempted_Challenge__c> challenges =
+            (List<Attempted_Challenge__c>) searchResults[1];
+
+        for (Apex_Arena_User__c userRecord : users) {
+            response.users.add(
+                new SearchItem(
+                    userRecord.Id,
+                    'User',
+                    userRecord.Name,
+                    userRecord.Level__c + ' • ' + userRecord.Total_Exp_Points__c + ' XP',
+                    calculateScore(normalizedKey, userRecord.Name)
+                )
+            );
+        }
+
+        for (Attempted_Challenge__c challenge : challenges) {
+            response.challenges.add(
+                new SearchItem(
+                    challenge.Id,
+                    'Challenge',
+                    challenge.Name,
+                    challenge.Path__c + ' • ' + challenge.Type__c + ' • ' + challenge.DifficultyLevel__c,
+                    calculateScore(normalizedKey, challenge.Name)
+                )
+            );
+        }
+
+        response.users.sort(new SearchItemSorter());
+        response.challenges.sort(new SearchItemSorter());
+
+        return response;
+    }
+
+    private static String normalize(String value) {
+        return value
+            .toLowerCase()
+            .replaceAll('[^a-z0-9\\s]', ' ')
+            .replaceAll('\\s+', ' ')
+            .trim();
+    }
+
+    private static String buildSoslSearchTerm(String value) {
+
+        List<String> tokens = value.split(' ');
+        List<String> searchTokens = new List<String>();
+
+        for (String token : tokens) {
+            if (token.length() >= 2) {
+                searchTokens.add(token + '*');
+            }
+        }
+
+        return String.join(searchTokens, ' OR ');
+    }
+
+    private static Integer calculateScore(String searchKey, String target) {
+
+        if (String.isBlank(target)) {
+            return 0;
+        }
+
+        String normalizedTarget = normalize(target);
+
+        if (normalizedTarget == searchKey) {
+            return 100;
+        }
+
+        if (normalizedTarget.startsWith(searchKey)) {
+            return 80;
+        }
+
+        if (normalizedTarget.contains(searchKey)) {
+            return 60;
+        }
+
+        List<String> tokens = normalizedTarget.split(' ');
+
+        for (String token : tokens) {
+            if (token.startsWith(searchKey)) {
+                return 50;
+            }
+        }
+
+        return 20;
+    }
+
+    public class SearchItemSorter implements Comparator<SearchItem> {
+        public Integer compare(SearchItem a, SearchItem b) {
+            return b.score - a.score;
         }
     }
 }

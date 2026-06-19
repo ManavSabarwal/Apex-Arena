@@ -400,13 +400,13 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         const timestamp = '[ ' + new Date(Date.now()).toLocaleTimeString('en-GB') + ' ]';
         this.loadingMessages.push(timestamp + ' Initializing Apex Runtime...\n');
         const steps = [
-            timestamp + ' Connecting to Challenge Engine...\n',
-            timestamp + ' Saving Solution...\n',
-            timestamp + ' Executing Apex Tests...\n',
-            timestamp + ' Validating Business Rules...\n',
-            timestamp + ' Running Hidden Test Cases...\n',
-            timestamp + ' Calculating Performance Score...\n',
-            timestamp + ' Creating Challenge Attempt...\n'
+            ' Connecting to Challenge Engine...\n',
+           ' Saving Solution...\n',
+            ' Executing Apex Tests...\n',
+            ' Validating Business Rules...\n',
+            ' Running Hidden Test Cases...\n',
+            ' Calculating Performance Score...\n',
+            ' Creating Challenge Attempt...\n'
         ];
 
         let currentIndex = 0;
@@ -415,7 +415,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             if (currentIndex < steps.length) {
                 this.loadingMessages = [
                     ...this.loadingMessages,
-                    steps[currentIndex]
+                    '[ ' + new Date(Date.now()).toLocaleTimeString('en-GB') + ' ]' + steps[currentIndex]
                 ];
                 currentIndex++;
             }
@@ -428,10 +428,11 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
             clearInterval(intervalId);
             // Add all remaining messages immediately
+            const timenow='[ ' + new Date(Date.now()).toLocaleTimeString('en-GB') + ' ]'
             if (currentIndex < steps.length) {
                 this.loadingMessages = [
                     ...this.loadingMessages,
-                    ...steps.slice(currentIndex)
+                    ...steps.slice(currentIndex).map(step => `${timenow}${step}`)
                 ];
             }
 
@@ -456,7 +457,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             });
             this.resultIcon = response.overallVerdict.toLowerCase().includes('pass') ? '✔' : response.overallVerdict.toLowerCase().includes('fail') ? 'x' : '⚠';
 
-            this.loadingMessages.push(timestamp + ' Submission Complete\n');
+            this.loadingMessages.push('[ ' + new Date(Date.now()).toLocaleTimeString('en-GB') + ' ]' + ' Submission Complete\n');
 
             if(this.testdone==true)
                 this.submitReadOnly = false;

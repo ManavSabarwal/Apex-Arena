@@ -7,11 +7,13 @@ import getUserAchievements from '@salesforce/apex/recordController.getUserAchiev
 import ACHIEVEMENT_ICONS from '@salesforce/resourceUrl/ApexArenaAchievementIcons';
 import PROFILE_PIC from '@salesforce/resourceUrl/ApexArenaPfP';
 import saveChanges from '@salesforce/apex/recordController.saveChanges';
+import globalSearch from '@salesforce/apex/recordController.globalSearch';
 
 
 export default class UserProfile extends NavigationMixin(LightningElement) {
     loginName = '';
     limitSize = '3';
+    isPublic=false;
     isLoggedIn = false;
     userLevel = 'Beginner';
     aboutMe = 'Code. Compete. Conquer. Forge your legacy in the Apex Arena.';
@@ -266,6 +268,12 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         this.aboutMe=changedValue;
     }
 
+    handlePublicChange(event)
+    {
+        const changedValue=event.target.checked;
+        this.isPublic=changedValue;
+    }
+
 
     async editProfileFun()
     {
@@ -273,7 +281,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         if(!this.editProfile)
         {
             console.log('Saving Data');
-            const result=await saveChanges({username:this.loginName,aboutMe:this.aboutMe,imageUrl:this.profilePic});
+            const result=await saveChanges({username:this.loginName,aboutMe:this.aboutMe,imageUrl:this.profilePic,isPublic:this.isPublic});
 
             if(result=='Changes Saved');
             {
@@ -389,6 +397,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
             this.submitAttempts=0;
             this.submissions = result.length;
             this.expPoints = parseInt(result[0].Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, 10);
+            this.isPublic=result[0].Attempted_Challenge__r.Apex_Arena_User__r.isPublicProfile__c;
 
             this.nextLevel =
                 this.expPoints < 1000 ? 'Apprentice' :
@@ -636,7 +645,6 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
     async viewDetails(event) {
         const recordId = event.target.dataset.id;
-        console.log(recordId);
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
         this[NavigationMixin.Navigate]({
@@ -755,6 +763,104 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 url: '/'
             }
         });
+    }
+
+    searchusers=[];
+    userCount=0;
+    searchchallenges=[];
+    challengeCount=0;
+    responseReturned=false;
+    searchMenuItem='user';
+
+    get searchResultContClass()
+    {
+        return this.responseReturned
+            ? 'searchResultCont'
+            : 'searchResultCont Hidden'
+    }
+
+    get searchBackdrop()
+    {
+        return this.responseReturned
+            ? 'searchBackdrop'
+            : 'searchBackdrop Hidden'
+    }
+
+
+    async onSearchChange(event)
+    {
+        const searchItem=event.target.value;
+        const response= await globalSearch(
+            {
+                searchKey:searchItem,
+                username:this.loginName
+            }
+        );
+        this.responseReturned=true;
+        this.searchusers=response.users;
+        this.searchchallenges=response.challenges;
+        this.userCount=this.searchusers.length;
+        this.challengeCount=this.searchchallenges.length;
+
+        
+    }
+
+    closeSearch()
+    {
+        this.responseReturned=false;
+        const searchbar = this.template.querySelector('[data-id="searchbar"]');
+
+        if (searchbar) {
+            searchbar.value = '';
+        }
+    }
+
+    get menuItemUserClass()
+    {
+        return this.searchMenuItem=='user'
+            ? 'searchMenuItems searchSelected'
+            : 'searchMenuItems'
+    }
+
+    get isUserItemSelected()
+    {
+        return this.searchMenuItem=='user'
+            ? true
+            : false
+    }
+
+    get menuItemChallengeClass()
+    {
+        return this.searchMenuItem=='challenge'
+            ? 'searchMenuItems searchSelected'
+            : 'searchMenuItems'
+    }
+
+    handleMenuItemClick(event)
+    {
+        this.searchMenuItem=event.currentTarget.dataset.id;
+
+    }
+
+    handleUserResultSelected(event){
+        const recordId=event.currentTarget.dataset.id;
+        
+    }
+
+    handleChallengeResultSelected(event){
+        const recordId=event.currentTarget.dataset.id;
+        window.sessionStorage.setItem('isLoggedIn', true);
+        window.sessionStorage.setItem('loginName', this.loginName);
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: {
+                name: 'viewDetails__c'
+            },
+            state: {
+                recordId: recordId
+            }
+        });
+        
     }
 
 }

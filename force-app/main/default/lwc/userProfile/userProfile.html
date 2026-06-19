@@ -18,8 +18,46 @@
                     <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
 
-                <input type="text" placeholder="Search for Users or Challenges" />
+                <input data-id="searchbar" type="text" placeholder="Search for Users or Challenges" onkeyup={onSearchChange} />
             </div>
+            <div class={searchBackdrop} onclick={closeSearch}></div>
+            <div class={searchResultContClass}>
+
+                <div
+                    style="margin-right: 10px;border-right: 1px solid rgba(75, 75, 75, 0.5);padding-right: 10px;width:200px;">
+                    <div class={menuItemUserClass} data-id="user" onclick={handleMenuItemClick}>
+                        <span>Users</span>
+                        <span class="countClass">{userCount}</span>
+
+                    </div>
+                    <div class={menuItemChallengeClass} data-id="challenge" onclick={handleMenuItemClick}>
+                        <span>My Challenges</span>
+                        <span class="countClass">{challengeCount}</span>
+
+                    </div>
+                </div>
+                <div style="width: stretch;">
+                    <template lwc:if={isUserItemSelected}>
+                        <template for:each={searchusers} for:item="user">
+                            <div key={user.recordId} data-id={user.recordId} class="resultItemDiv"
+                                onclick={handleUserResultSelected}>
+                                <p>{user.title}</p>
+                                <p>{user.subtitle}</p>
+                            </div>
+                        </template>
+                    </template>
+                    <template lwc:else>
+                        <template for:each={searchchallenges} for:item="item">
+                            <div key={item.recordId} data-id={item.recordId} class="resultItemDiv"
+                                onclick={handleChallengeResultSelected}>
+                                <p>{item.title}</p>
+                                <p>{item.subtitle}</p>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+            </div>
+            
 
         </div>
         <div class="display-container">
@@ -139,7 +177,8 @@
                                         </template>
 
                                         <template lwc:if={profilePic}>
-                                            <img src={profilePic} style="max-width: 100%;height: auto;border-radius: 50%;"></img>
+                                            <img src={profilePic}
+                                                style="max-width: 100%;height: auto;border-radius: 50%;"></img>
 
 
                                         </template>
@@ -183,7 +222,32 @@
                                                 </svg>
                                             </template>
                                         </div>
+                                        <div style="display: flex;gap:10px;">
+                                            <label class="switch">
+                                                <input type="checkbox" checked={isPublic}
+                                                    onchange={handlePublicChange} disabled={inputReadonly}>
+                                                <span class="slider"></span>
+                                            </label>
+                                            <span class="info-icon"
+                                                title="Make your profile visible to other Apex Arena users. Your profile will appear in search results and display your level, achievements, streaks, statistics, and activity. Submitted code and personal information remain private.">
+                                                Public Profile ⓘ
+                                            </span>
+                                            <template lwc:if={editProfile}>
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;">
+                                                    <path d="M4 20H8.25L19.81 8.44L15.56 4.19L4 15.75V20Z"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path d="M14.5 5.25L18.75 9.5" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path d="M13.5 6.5L17.5 10.5" stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </template>
+                                        </div>
                                         <span class="user-join">📅 {joinDate}</span>
+
                                     </div>
                                 </div>
                             </div>
