@@ -201,4 +201,37 @@ public static ValidationResponseWrapper invokeValidationPromptCoding(
     }
 }
 
+@AuraEnabled
+public static List<quizWrapper> invokeQuizPrompt(String areaOfExpertise){
+    try {
+
+        List<quizWrapper> response =new List<quizWrapper>();
+        if(areaOfExpertise!=null && areaOfExpertise!='')
+        {
+            Map<String, Object> inputParams = new Map<String, Object>{
+            'Input:areaOfExpertise' => areaOfExpertise
+            };
+
+            String promptresponse = PromptTemplateRestService.invokePrompt(
+            'MultipleChoiceQuestionGenerator_ApexArena',
+            inputParams
+            );
+
+         response =(List<quizWrapper> ) JSON.deserialize(promptresponse,List<quizWrapper>.class);
+        }
+        return response;
+        
+    } catch (Exception e) {
+        throw new AuraHandledException(e.getMessage());
+    }
+}
+
+public class quizWrapper
+{
+    @AuraEnabled public String Question;
+    @AuraEnabled public List<Map<String,String>> Choices;
+    @AuraEnabled public String Answer;
+    @AuraEnabled public String Explanation;
+}
+
 }
