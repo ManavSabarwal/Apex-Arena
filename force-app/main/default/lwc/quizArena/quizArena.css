@@ -1,0 +1,224 @@
+:host {
+    display: block;
+    font-family: 'Segoe UI', sans-serif;
+    background: #070b16;
+    color: white;
+    min-height: 100vh;
+}
+
+
+.app-container {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, #1e3a8a, transparent 30%),
+        radial-gradient(circle at bottom right, #0f172a, transparent 35%),
+        linear-gradient(135deg, #020617, #0f172a, #1e293b);
+}
+
+/* TOPBAR */
+
+.navbar {
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 15px;
+
+    background: rgba(20, 20, 35, 0.45);
+    backdrop-filter: blur(16px);
+
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    width: 30px;
+    height: 30px;
+
+    border-radius: 12px;
+
+    background: linear-gradient(135deg, #8f5cff, #b26bff);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.nav-links {
+    display: flex;
+    gap: 40px;
+}
+
+.nav-links a {
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    font-size: 16px;
+    position: relative;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.nav-links a:hover,
+.active-link {
+    color: white;
+}
+
+.active-link::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 0;
+
+    width: 100%;
+    height: 3px;
+
+    background: #a855f7;
+    border-radius: 10px;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.user-box {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 14px;
+
+    border-radius: 14px;
+    cursor: pointer;
+}
+
+.user-box {
+    gap: 10px;
+}
+
+.avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #c084fc);
+}
+
+/* MAIN GRID */
+
+.main-layout {
+    display: grid;
+    min-height: 90vh;
+    gap: 10px;
+    height: 100%;
+    padding: 10px;
+}
+
+.topicDialog
+{
+    display: grid;
+    align-content: center;
+    
+    justify-items: center;
+    border-radius: 15px;
+    border: 1px solid rgb(205 148 255);
+    height: 550px;
+    width: 700px;
+    align-self: center;
+    justify-self: center;
+    box-shadow: 0 0 12px rgb(166 64 255);
+    background: linear-gradient(45deg, #110d2e, transparent);
+    animation: arenaPopup 0.5s cubic-bezier(.17,.89,.32,1.27) forwards;
+}
+
+@keyframes arenaPopup {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    70% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.topicInput
+{
+    border-radius: 5px;
+    border: 1px solid rgb(166 64 255);
+    box-shadow: 0 0 12px rgb(166 64 255);
+    background: transparent;
+    padding: 10px;
+    width: 500px;
+    margin-top: 15px;
+    color: rgb(191 191 191);
+}
+
+.buttonClass
+{
+    margin: 25px;
+    width: 200px;
+    background: linear-gradient(135deg, #8b5cf6, #d946ef);
+    color: white;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.45);
+    border: none;
+    outline: none;
+
+    padding: 10px 34px;
+
+    font-size: 18px;
+    border-radius: 14px;
+
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+}
+.buttonClass:hover
+{
+    transform: scale(1.05);
+    box-shadow: 0 0 28px rgba(168, 85, 247, 0.7);
+}
+.buttonClass:disabled{
+    filter:brightness(0.5);
+    cursor: not-allowed;
+}
+.prevTopicPill
+{
+    border-radius: 40px;
+    padding: 2px 15px;
+    background: rgb(85 85 85 / 30%);
+    cursor: pointer;
+    border: 1px solid rgb(75, 75, 75);
+     transition: all 0.3s ease;
+}
+.prevTopicPill:hover{
+    color: #8b5cf6;
+    border: 1px solid #8b5cf6;
+    box-shadow: 0 0 10px #8b5cf6;
+    transform: scale(0.95);
+}

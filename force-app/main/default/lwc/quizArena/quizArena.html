@@ -1,0 +1,81 @@
+<template>
+    <div class="app-container">
+
+        <!-- HEADER -->
+        <div class="navbar">
+
+            <div class="logo-section">
+                <div class="logo-icon">AA</div>
+                <div class="logo-text">Apex Arena</div>
+            </div>
+
+            <div class="nav-links">
+                <a class="active-link">Homepage</a>
+                <a>Contact</a>
+            </div>
+
+            <div class="nav-right">
+
+                <div class="user-box">
+                    <span onclick={choosePath}>Choose Path</span>
+                </div>
+
+                <div class="user-box" title="Click to open profile" onclick={openProfile}>
+                    <div class="avatar"></div>
+                    <span>{loginName}</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-layout">
+            <template if:false={quizGenerated}>
+                <div class="topicDialog">
+                    <svg viewBox="0 0 64 64" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        style="width: 105px;height: 105px;">
+                        <circle cx="32" cy="32" r="26" fill="#07142F" stroke="#8B5CF6" stroke-width="4" />
+                        <path d="M24 25c0-5 3.8-9 9-9 5.4 0 9 3.4 9 8.2 0 3.5-1.8 5.7-4.8 8.1-2.7 2.1-3.7 3.6-3.7 6.7"
+                            stroke="#A855F7" stroke-width="5" stroke-linecap="round" />
+                        <circle cx="32" cy="48" r="3.5" fill="#38BDF8" />
+                    </svg>
+                    <span style="font-size: 20px;font-weight: 700;    margin-top: 10px;">WHAT <span style="color: #8B5CF6;">SALESFORCE
+                            AREA</span></span>
+                    <span style="font-size: 20px;font-weight: 700;">DO YOU WANT THE QUIZ FOR ?</span>
+                    <span style="font-size: 15px;color: rgb(137 137 137);padding: 10px;"> Choose any topic or area and
+                        we'll generate 50 MCQs for you.</span>
+                    <input class="topicInput"
+                        value={topic}
+                        placeholder="e.g. Apex , LWC , Admin , Sales Cloud , Service Cloud ,Omnistudio...."
+                        onkeyup={onTopicChange}>
+                    <template lwc:if={previousTopics}>
+                        <div style="display: flex;gap: 10px;padding-top: 20px;">
+                            <template for:each={previousQuizTerms} for:item="item">
+                                <span key={item} data-id={item} onclick={onTopicSelected} class="prevTopicPill">
+                                    {item}
+                                </span>
+                            </template>
+                        </div>
+                    </template>
+                    <button class="buttonClass" onclick={launchQuiz} disabled={buttonDisabled}> Launch Quiz
+                        <svg viewBox="0 0 64 64" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M36 4L14 36H30L26 60L50 26H34L36 4Z" stroke="currentColor" stroke-width="4"
+                                stroke-linejoin="round" />
+                        </svg> </button>
+                    <div style="font-size: 15px;color: rgb(137 137 137);">
+                        <span> ⓘ 50 MCQS </span>
+                        <span>•</span>
+                        <span> Time Bound </span>
+                        <span>•</span>
+                        <span> Auto submit on Timeout </span>
+                        <span>•</span>
+                        <span> No XP Reward </span>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+
+    </div>
+
+</template>

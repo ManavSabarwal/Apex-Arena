@@ -3,6 +3,28 @@ public without sharing class recordController {
 
     }
 
+    @AuraEnabled
+    public static string getTopics(string username){
+        string topicString='';
+        try {
+            if(username!=null && username!='')
+            {
+                List<Apex_Arena_User__c> user=[select id,Quiz_Search_Terms__c from Apex_Arena_User__c where name=:username limit 1];
+                if(user.size()==0)
+                {
+                    system.debug('No User Returned');
+                }
+                else{
+                    topicString=user[0].Quiz_Search_Terms__c;
+                }
+            }
+            return topicString;
+            
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
     public string getPreviousScenarios(String username,String type,String path)
     {
         try{

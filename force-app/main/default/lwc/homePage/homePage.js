@@ -77,4 +77,17 @@ export default class HomePage extends NavigationMixin(LightningElement) {
         
     }
 
+    startQuizing()
+    {
+        console.log('Navigating to Quiz Arena...');
+        window.sessionStorage.setItem('isLoggedIn',true);
+        window.sessionStorage.setItem('loginName',this.loginName);
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/quizarena'
+            }
+        });
+    }
+
 }
