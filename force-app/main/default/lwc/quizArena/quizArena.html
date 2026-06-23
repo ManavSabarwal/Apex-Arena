@@ -30,48 +30,203 @@
 
         <!-- MAIN CONTENT -->
         <div class="main-layout">
-            <template if:false={quizGenerated}>
-                <div class="topicDialog">
-                    <svg viewBox="0 0 64 64" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg"
-                        style="width: 105px;height: 105px;">
-                        <circle cx="32" cy="32" r="26" fill="#07142F" stroke="#8B5CF6" stroke-width="4" />
-                        <path d="M24 25c0-5 3.8-9 9-9 5.4 0 9 3.4 9 8.2 0 3.5-1.8 5.7-4.8 8.1-2.7 2.1-3.7 3.6-3.7 6.7"
-                            stroke="#A855F7" stroke-width="5" stroke-linecap="round" />
-                        <circle cx="32" cy="48" r="3.5" fill="#38BDF8" />
-                    </svg>
-                    <span style="font-size: 20px;font-weight: 700;    margin-top: 10px;">WHAT <span style="color: #8B5CF6;">SALESFORCE
-                            AREA</span></span>
-                    <span style="font-size: 20px;font-weight: 700;">DO YOU WANT THE QUIZ FOR ?</span>
-                    <span style="font-size: 15px;color: rgb(137 137 137);padding: 10px;"> Choose any topic or area and
-                        we'll generate 50 MCQs for you.</span>
-                    <input class="topicInput"
-                        value={topic}
-                        placeholder="e.g. Apex , LWC , Admin , Sales Cloud , Service Cloud ,Omnistudio...."
-                        onkeyup={onTopicChange}>
-                    <template lwc:if={previousTopics}>
-                        <div style="display: flex;gap: 10px;padding-top: 20px;">
-                            <template for:each={previousQuizTerms} for:item="item">
-                                <span key={item} data-id={item} onclick={onTopicSelected} class="prevTopicPill">
-                                    {item}
-                                </span>
+            <template if:false={showQuiz}>
+                <template if:false={loading}>
+                    <div class="topicDialog">
+                        <svg viewBox="0 0 64 64" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            style="width: 105px;height: 105px;filter: drop-shadow(0px 0px 10px #8B5CF6);">
+                            <circle cx="32" cy="32" r="26" fill="#07142F" stroke="#8B5CF6" stroke-width="4" />
+                            <path
+                                d="M24 25c0-5 3.8-9 9-9 5.4 0 9 3.4 9 8.2 0 3.5-1.8 5.7-4.8 8.1-2.7 2.1-3.7 3.6-3.7 6.7"
+                                stroke="#A855F7" stroke-width="5" stroke-linecap="round" />
+                            <circle cx="32" cy="48" r="3.5" fill="#8B5CF6" />
+                        </svg>
+                        <span style="font-size: 20px;font-weight: 700;    margin-top: 10px;">WHAT <span
+                                style="color: #8B5CF6;">SALESFORCE
+                                AREA</span></span>
+                        <span style="font-size: 20px;font-weight: 700;">DO YOU WANT THE QUIZ FOR ?</span>
+                        <span style="font-size: 15px;color: rgb(137 137 137);padding: 10px;"> Choose any topic or area
+                            and
+                            we'll generate 50 MCQs for you.</span>
+                        <input class="topicInput" value={topic}
+                            placeholder="e.g. Apex , LWC , Admin , Sales Cloud , Service Cloud ,Omnistudio...."
+                            onkeyup={onTopicChange}>
+                        <template lwc:if={previousTopics}>
+                            <div style="display: flex;gap: 10px;padding-top: 20px;">
+                                <template for:each={previousQuizTerms} for:item="item">
+                                    <span key={item} data-id={item} onclick={onTopicSelected} class="prevTopicPill">
+                                        {item}
+                                    </span>
+                                </template>
+                            </div>
+                        </template>
+                        <button class="buttonClass" onclick={launchQuiz} disabled={buttonDisabled}> Launch Quiz
+                            <svg viewBox="0 0 64 64" width="32" height="32" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M36 4L14 36H30L26 60L50 26H34L36 4Z" stroke="currentColor" stroke-width="4"
+                                    stroke-linejoin="round" />
+                            </svg> </button>
+                        <div style="font-size: 15px;color: rgb(137 137 137);">
+                            <span> ⓘ 50 MCQS </span>
+                            <span>•</span>
+                            <span> 60 Minutes </span>
+                            <span>•</span>
+                            <span> Auto submit on Timeout </span>
+                            <span>•</span>
+                            <span> No XP Reward </span>
+                        </div>
+                    </div>
+                </template>
+                <template if:true={loading}>
+
+                    <div class="loadingDiv">
+                        <template if:false={showError}>
+
+                            <img src={imageUrl} class="quiz-book-icon"></img>
+
+                            <div style="font-size: 28px;font-weight: 700;padding: 10px;">{currentLoadingMessage}</div>
+                            <span style="color: rgb(127 127 127);">Preparing the quiz environment for you. It can take
+                                approximately a minute.</span>
+
+                            <div style="margin:20px">
+                                <div class="progressBar-outer">
+                                    <div style={progressStyle}>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <span><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    style="color: #8b5cf6;filter: drop-shadow(0px 0px 6px #d946ef);">
+                                    <path d="M9 18H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    <path d="M10 22H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    <path
+                                        d="M10 18V16.8C10 15.9 9.5 15.1 8.8 14.5C7.1 13.2 6 11.2 6 9C6 5.7 8.7 3 12 3C15.3 3 18 5.7 18 9C18 11.2 16.9 13.2 15.2 14.5C14.5 15.1 14 15.9 14 16.8V18"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M12 7V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                </svg> Please read each question carefully before answering.</span>
+
+
+                            <template if:true={dataLoaded}>
+
+                                <button class="buttonClass" onclick={startQuiz}> Start > </button>
+
+                            </template>
+                        </template>
+                        <template if:true={showError}>
+                            <svg width="140" height="140" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                style="color: #8b5cf6;filter: drop-shadow(0 0 10px);">
+                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+                                <path d="M12 7V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                <circle cx="12" cy="17" r="1.2" fill="currentColor" />
+                            </svg>
+                            <div style="font-size: 28px;font-weight: 700;"><span style="color: #8b5cf6;">{topic}
+                                </span>is not a valid Salesforce area !</div>
+                            <div style="color: rgb(125, 125, 125);">We could not determine the Salesforce area for your
+                                quiz. Please verify your input and
+                                enter the full name of the desired Salesforce area before trying again.</div>
+                            <button class="buttonClass" onclick={backReset}>
+                                Back </button>
+                        </template>
+                    </div>
+
+
+                </template>
+
+            </template>
+            <template if:true={showQuiz}>
+                <div class="topDiv">
+                    <div>
+                        <Span style="font-size: 20px;font-weight: 600;">Quiz Quest | </Span>
+                        <span style="font-size: 16px;font-weight: 600;color: #8b5cf6;">{topic}</span>
+                    </div>
+
+                    <div class="timer-box">
+                        <span class={timerClass}>{formattedTime}</span>
+                    </div>
+
+                    <button class="submitButton">Submit Quiz</button>
+                </div>
+                <div class="mainDiv">
+                    <div style="padding: 0px 20px 0px 0px;">
+                        <div class="left">
+                            <div style="font-weight: 600;">Quiz Stats</div>
+                            <div>
+                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6 2h8l4 4v16H6V2z" stroke="currentColor" stroke-width="2"
+                                        stroke-linejoin="round" />
+                                    <path d="M14 2v5h5" stroke="currentColor" stroke-width="2"
+                                        stroke-linejoin="round" />
+                                    <path d="M9 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    <path d="M9 16h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                </svg> Total Questions : <span>{totalQues}</span>
+                            </div>
+
+                            <div>
+                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 4h14v16H5V4z" stroke="currentColor" stroke-width="2"
+                                        stroke-linejoin="round" />
+                                    <path d="M8 8h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    <path d="M8 12h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    <path d="M8 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    <path d="M15 15l2 2 4-5" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg> Attempted : <span>{quesAttempted}</span>
+                            </div>
+
+                            <div>
+                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6 3h12v18l-6-4-6 4V3z" stroke="currentColor" stroke-width="2"
+                                        stroke-linejoin="round" />
+                                    <path d="M9 9h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                </svg> Marked for Review : <span>{quesAttempted}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="center">
+                        <div style="color: #8f5cff;font-size: 18px;font-weight: 700;">Question
+                            {selectedQuestion.questionNumber}</div>
+                        <div style="font-size: 24px;font-weight: 700;color: rgb(210 210 210);">
+                            <span>{selectedQuestion.Question}</span>
+                        </div>
+                        <div style="display: grid;gap: 10px;">
+                            <template for:each={selectedQuestion.formattedChoices} for:item="choice">
+                                <div key={choice.option} class={choice.className} data-option={choice.option}
+                                    onclick={handleChoiceSelected}>
+
+                                    <span class="optionText">{choice.option}</span>
+                                    <span class="choiceText">{choice.value}</span>
+
+                                </div>
                             </template>
                         </div>
-                    </template>
-                    <button class="buttonClass" onclick={launchQuiz} disabled={buttonDisabled}> Launch Quiz
-                        <svg viewBox="0 0 64 64" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M36 4L14 36H30L26 60L50 26H34L36 4Z" stroke="currentColor" stroke-width="4"
-                                stroke-linejoin="round" />
-                        </svg> </button>
-                    <div style="font-size: 15px;color: rgb(137 137 137);">
-                        <span> ⓘ 50 MCQS </span>
-                        <span>•</span>
-                        <span> Time Bound </span>
-                        <span>•</span>
-                        <span> Auto submit on Timeout </span>
-                        <span>•</span>
-                        <span> No XP Reward </span>
+                        <div class="buttonDiv">
+                            <button class="prev" onclick={prevQuestion}> {prevIcon} Previous</button>
+                            <button class="review" onclick={markQuestion} data-id={selectedQuestion.questionNumber}>  <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6 3h12v18l-6-4-6 4V3z" stroke="currentColor" stroke-width="2"
+                                        stroke-linejoin="round" />
+                                    <path d="M9 9h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                </svg> Mark for review</button>
+                            <button class="next" onclick={nextQuestion}> Next > </button>
+                        </div>
                     </div>
+
+                    <div class="right">
+
+                    </div>
+
+
                 </div>
+
+
             </template>
         </div>
 

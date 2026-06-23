@@ -5,7 +5,7 @@ import getUserandChalengeDetails from '@salesforce/apex/recordController.getUser
 import getSolvedChallenges from '@salesforce/apex/recordController.getSolvedChallenges';
 import getUserAchievements from '@salesforce/apex/recordController.getUserAchievements';
 import ACHIEVEMENT_ICONS from '@salesforce/resourceUrl/ApexArenaAchievementIcons';
-import PROFILE_PIC from '@salesforce/resourceUrl/ApexArenaPfP';
+
 import saveChanges from '@salesforce/apex/recordController.saveChanges';
 import globalSearch from '@salesforce/apex/recordController.globalSearch';
 
@@ -380,6 +380,17 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
             case 'activity':
                 this.viewAllProblems();
+                break;
+
+            case 'quiz':
+                window.sessionStorage.setItem('isLoggedIn', true);
+                window.sessionStorage.setItem('loginName', this.loginName);
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: {
+                        url: '/quizarena'
+                    }
+                });
                 break;
 
             default:

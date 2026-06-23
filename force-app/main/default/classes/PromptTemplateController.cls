@@ -229,7 +229,7 @@ public static List<quizWrapper> invokeQuizPrompt(String areaOfExpertise){
 public class quizWrapper
 {
     @AuraEnabled public String Question;
-    @AuraEnabled public List<Map<String,String>> Choices;
+    @AuraEnabled public Map<String,String> Choices;
     @AuraEnabled public String Answer;
     @AuraEnabled public String Explanation;
 }
