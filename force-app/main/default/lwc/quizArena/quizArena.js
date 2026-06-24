@@ -50,6 +50,38 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
     questionNumbers = Array.from({ length: 50 }, (_, index) => index + 1);
     prevIcon = '<';
 
+    timeUp = false;
+    quizSubmitted = false;
+
+    score = 0;
+
+    startQuizInstructions = [
+        'Read every question carefully.',
+        'Each question has only one correct answer.',
+        'You can move between questions during the quiz.',
+        'Use Mark for Review for questions you want to revisit.',
+        'Keep track of the remaining time.',
+        'Submit the quiz before the timer ends.',
+        'Quiz will be auto submitted as soon as the Timer Expires.'
+    ];
+
+    correct = 0;
+    incorrect = 0;
+    unanswered = 0;
+
+
+    get progressStyleScore() {
+        let color = '#ef4444'; // red
+
+        if (this.score >= 75) {
+            color = '#22c55e'; // green
+        } else if (this.score >= 50) {
+            color = '#facc15'; // yellow
+        }
+
+        return `--progress:${this.score * 3.6}deg; --score-color:${color};`;
+    }
+
     startTimer() {
         this.clearTimer();
 
@@ -61,6 +93,10 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
                 this.handleTimeUp();
             }
         }, 1000);
+    }
+
+    pauseTimer() {
+        this.clearTimer();
     }
 
     clearTimer() {
@@ -81,6 +117,13 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
         return value < 10 ? `0${value}` : value;
     }
 
+    get formattedTimeTaken() {
+        const minutes = Math.floor((3600 - this.totalSeconds) / 60);
+        const seconds = (3600 - this.totalSeconds) % 60;
+
+        return `${this.pad(minutes)}:${this.pad(seconds)}`;
+    }
+
     get timerClass() {
         if (this.totalSeconds <= 60) {
             return 'timer danger';
@@ -96,8 +139,9 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
     handleTimeUp() {
         console.log('Time is up');
 
-        // Optional: fire event to parent component
-        this.dispatchEvent(new CustomEvent('timeup'));
+        this.timeUp = true;
+        this.handleSubmitQuiz();
+
     }
 
     get progressStyle() {
@@ -177,7 +221,8 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
         try {
             this.response = await invokeQuizPrompt(
                 {
-                    areaOfExpertise: this.topic
+                    areaOfExpertise: this.topic,
+                    username: this.loginName
                 });
             this.currentLoadingMessage = 'Let the Quiz Quest begin!';
             this.progress = 100;
@@ -250,7 +295,6 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
     getQuestion(val) {
         if (val != null && this.response != null && (val >= 0 && val < 50)) {
             this.selectedQuestion = this.response[val];
-            console.log(this.selectedQuestion);
         }
     }
 
@@ -265,64 +309,207 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
         this.startTimer();
     }
 
-    nextQuestion()
-    {
-        if(this.selectedQuestion.questionNumber<50)
-        {
-            const ind=this.selectedQuestion.questionNumber;
+    nextQuestion() {
+        if (this.selectedQuestion.questionNumber < 50) {
+            const ind = this.selectedQuestion.questionNumber;
             this.getQuestion(ind);
         }
     }
 
-    prevQuestion()
-    {
-        if(this.selectedQuestion.questionNumber>1)
-        {
-            const ind=this.selectedQuestion.questionNumber-2;
+    prevQuestion() {
+        if (this.selectedQuestion.questionNumber > 1) {
+            const ind = this.selectedQuestion.questionNumber - 2;
             this.getQuestion(ind);
         }
     }
-    markQuestion()
-    {
-        this.selectedQuestion.markedForReview=true;
+    get markedClass() {
+        return this.selectedQuestion.markedForReview == true
+            ? 'review marked'
+            : 'review'
     }
-
-    get choiceDivClass()
-    {
-        return this.selectedQuestion.selectedOption==option
-    }
-
-    handleChoiceSelected(event) {
-        const option=event.currentTarget.dataset.option;
-        let attempted;
-        let selectedOption;
-        if(this.selectedQuestion.attempted==true && this.selectedQuestion.selectedOption==option)
-        {
-            attempted = false;
-            selectedOption = '';
-        } else {
-            attempted = true;
-            selectedOption = option;
-        }
-
-        this.selectedQuestion = {
-        ...this.selectedQuestion,
-        attempted: attempted,
-        selectedOption: selectedOption,
-        formattedChoices: this.selectedQuestion.formattedChoices.map(choice => ({
-            ...choice,
-            className: choice.option === selectedOption
-                ? 'choiceDiv selected'
-                : 'choiceDiv'
-        }))
-        };
-
-        this.response = this.response.map(question =>
+    markQuestion() {
+        const oldMark = this.response.find(item => item.questionNumber === this.selectedQuestion.questionNumber).markedForReview;
+        if (!oldMark) {
+            this.marked++;
+            this.selectedQuestion.markedForReview = true;
+            this.response = this.response.map(question =>
                 question.questionNumber === this.selectedQuestion.questionNumber
                     ? this.selectedQuestion
                     : question
             );
-        
+        }
+        else {
+            this.marked--;
+            this.selectedQuestion.markedForReview = false;
+            this.response = this.response.map(question =>
+                question.questionNumber === this.selectedQuestion.questionNumber
+                    ? this.selectedQuestion
+                    : question
+            );
+        }
+
+
+    }
+
+    get choiceDivClass() {
+        return this.selectedQuestion.selectedOption == option
+    }
+
+    handleChoiceSelected(event) {
+        const option = event.currentTarget.dataset.option;
+        let attempted;
+        let selectedOption;
+        if (this.selectedQuestion.attempted == true && this.selectedQuestion.selectedOption == option) {
+            attempted = false;
+            selectedOption = '';
+            this.quesAttempted--;
+        } else {
+            attempted = true;
+            selectedOption = option;
+            this.quesAttempted++;
+        }
+
+        this.selectedQuestion = {
+            ...this.selectedQuestion,
+            attempted: attempted,
+            selectedOption: selectedOption,
+            formattedChoices: this.selectedQuestion.formattedChoices.map(choice => ({
+                ...choice,
+                className: choice.option === selectedOption
+                    ? 'choiceDiv selected'
+                    : 'choiceDiv'
+            }))
+        };
+
+        this.response = this.response.map(question =>
+            question.questionNumber === this.selectedQuestion.questionNumber
+                ? this.selectedQuestion
+                : question
+        );
+
+    }
+
+    get quesDivClass() {
+        return this.response.map(question => {
+            let classes = 'numbers';
+
+            if (
+                this.selectedQuestion &&
+                question.questionNumber === this.selectedQuestion.questionNumber
+            ) {
+                classes += ' activeQuestion';
+            }
+
+            if (question.attempted) {
+                classes += ' attemptedQuestion';
+            }
+
+            if (question.markedForReview) {
+                classes += ' reviewQuestion';
+            }
+
+            return {
+                ...question,
+                navClass: classes
+            };
+        });
+    }
+
+    navigateToQuesNumber(event) {
+        const quesNum = Number(event.currentTarget.dataset.id);
+        this.selectedQuestion = this.response.find(item =>
+            item.questionNumber === quesNum
+        );
+    }
+
+    handleSubmitQuiz() {
+        this.isSubmitting = false;
+        this.quizSubmitted = true;
+        this.getQuestion(0);
+        this.response = this.response.map(question => {
+            const selectedOption = question.selectedOption;
+            const correctAnswer = question.Answer;
+
+            const isAttempted = selectedOption !== null && selectedOption !== undefined && selectedOption !== '';
+            const isCorrect = isAttempted && selectedOption === correctAnswer;
+
+            return {
+                ...question,
+
+                isAttempted: isAttempted,
+                isCorrect: isCorrect,
+                resultStatus: isAttempted ? (isCorrect ? 'Correct' : 'Incorrect') : 'Unanswered',
+                resultClass: isAttempted ? (isCorrect ? 'numbers questionCorrect' : 'numbers questionWrong') : 'numbers questionUnanswered',
+
+                formattedChoices: question.formattedChoices.map(choice => {
+                    let classes = 'choiceDivRes';
+
+                    const isUserAnswer = choice.option === selectedOption;
+                    const isCorrectAnswer = choice.option === correctAnswer;
+
+                    if (isCorrectAnswer) {
+                        classes += ' correctAnswer';
+                    }
+
+                    if (isUserAnswer) {
+                        classes += ' yourAnswer';
+                    }
+
+                    if (isUserAnswer && !isCorrectAnswer) {
+                        classes += ' wrongAnswer';
+                    }
+
+                    if (isUserAnswer && isCorrectAnswer) {
+                        classes += ' rightAnswer';
+                    }
+
+                    return {
+                        ...choice,
+                        reviewClass: classes
+                    };
+                })
+            };
+        });
+
+        this.selectedQuestion = this.response.find(
+            question => question.questionNumber === this.selectedQuestion.questionNumber
+        );
+
+        const resultSummary = this.response.reduce((summary, question) => {
+            if (!question.isAttempted) {
+                summary.unanswered++;
+            } else if (question.isCorrect) {
+                summary.correct++;
+            } else {
+                summary.incorrect++;
+            }
+
+            return summary;
+        }, {
+            correct: 0,
+            incorrect: 0,
+            unanswered: 0
+        });
+
+        this.correct = resultSummary.correct;
+        this.incorrect = resultSummary.incorrect;
+        this.unanswered = resultSummary.unanswered;
+
+        this.score = this.response.length > 0
+            ? Math.round((this.correct / this.response.length) * 100)
+            : 0;
+    }
+
+    isSubmitting = false;
+
+    submitConfirmation() {
+        this.isSubmitting = true;
+        this.pauseTimer();
+    }
+
+    handleTakeMeBack() {
+        this.isSubmitting = false;
+        this.startTimer();
     }
 
 

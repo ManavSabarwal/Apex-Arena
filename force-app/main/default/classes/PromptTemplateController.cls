@@ -202,7 +202,7 @@ public static ValidationResponseWrapper invokeValidationPromptCoding(
 }
 
 @AuraEnabled
-public static List<quizWrapper> invokeQuizPrompt(String areaOfExpertise){
+public static List<quizWrapper> invokeQuizPrompt(String areaOfExpertise,String username){
     try {
 
         List<quizWrapper> response =new List<quizWrapper>();
@@ -218,6 +218,7 @@ public static List<quizWrapper> invokeQuizPrompt(String areaOfExpertise){
             );
 
          response =(List<quizWrapper> ) JSON.deserialize(promptresponse,List<quizWrapper>.class);
+         recordController.setQuizTerms(username,areaOfExpertise);
         }
         return response;
         

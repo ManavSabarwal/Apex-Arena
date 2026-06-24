@@ -25,6 +25,43 @@ public without sharing class recordController {
         }
     }
 
+    public static void setQuizTerms(string username,string quizTerm)
+    {
+        try {
+            
+            List<Apex_Arena_User__c> user=[select id,Quiz_Search_Terms__c from Apex_Arena_User__c where name=:username limit 1];
+                if(user.size()==0)
+                {
+                    system.debug('No User Returned');
+                }
+                else{
+                    if(user[0].Quiz_Search_Terms__c!=null)
+                    {
+                        List<String> terms=user[0].Quiz_Search_Terms__c.split(',');
+                   
+                        if(!terms.contains(quizTerm.toLowerCase()))
+                        {
+                            if(terms.size()>=5)
+                            {
+                                terms.remove(0);
+                            }
+                            terms.add(quizTerm.toLowerCase());
+                        }
+                        string termsToUpdate=String.join(terms,',');
+                        user[0].Quiz_Search_Terms__c=termsToUpdate;
+                    
+                    }
+                    else {
+                        user[0].Quiz_Search_Terms__c=quizTerm.toLowerCase();
+                    }
+                    update user[0];
+                }
+            
+        } catch (Exception e) {
+            system.debug('Exception : '+e.getMessage());
+        }
+    }
+
     public string getPreviousScenarios(String username,String type,String path)
     {
         try{

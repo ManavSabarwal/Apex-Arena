@@ -1,6 +1,21 @@
 <template>
     <div class="app-container">
 
+        <template if:true={isSubmitting}>
+            <div class="modalOverlay">
+            <div class="modal">
+                <div style="font-size: 18px;font-weight: 700;">Are you sure you want to submit?</div>
+                <div style="display: flex;justify-content: space-between;">
+
+                    <button class="noButton" onclick={handleTakeMeBack}>No,Take me back</button>
+                    <button class="yesButton" onclick={handleSubmitQuiz}>Yes, Submit</button>
+
+                </div>
+            </div>
+            </div>
+
+        </template>
+
         <!-- HEADER -->
         <div class="navbar">
 
@@ -74,6 +89,8 @@
                             <span> Auto submit on Timeout </span>
                             <span>•</span>
                             <span> No XP Reward </span>
+                            <span>•</span>
+                            <span> Quiz Attempts are not stored for Future Reference </span>
                         </div>
                     </div>
                 </template>
@@ -138,93 +155,284 @@
 
             </template>
             <template if:true={showQuiz}>
-                <div class="topDiv">
-                    <div>
-                        <Span style="font-size: 20px;font-weight: 600;">Quiz Quest | </Span>
-                        <span style="font-size: 16px;font-weight: 600;color: #8b5cf6;">{topic}</span>
-                    </div>
 
-                    <div class="timer-box">
-                        <span class={timerClass}>{formattedTime}</span>
-                    </div>
+                <template if:false={quizSubmitted}>
+                    <div class="topDiv">
+                        <div>
+                            <Span style="font-size: 20px;font-weight: 600;">Quiz Quest | </Span>
+                            <span style="font-size: 16px;font-weight: 600;color: #8b5cf6;">{topic}</span>
+                        </div>
 
-                    <button class="submitButton">Submit Quiz</button>
-                </div>
-                <div class="mainDiv">
-                    <div style="padding: 0px 20px 0px 0px;">
-                        <div class="left">
-                            <div style="font-weight: 600;">Quiz Stats</div>
-                            <div>
-                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M6 2h8l4 4v16H6V2z" stroke="currentColor" stroke-width="2"
-                                        stroke-linejoin="round" />
-                                    <path d="M14 2v5h5" stroke="currentColor" stroke-width="2"
-                                        stroke-linejoin="round" />
-                                    <path d="M9 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                    <path d="M9 16h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                </svg> Total Questions : <span>{totalQues}</span>
+                        <div class="timer-box">
+                            <span class={timerClass}>{formattedTime}</span>
+                        </div>
+
+                        <button class="submitButton" onclick={submitConfirmation}>Submit Quiz</button>
+                    </div>
+                    <div class="mainDiv">
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <div class="left">
+                                <div style="font-weight: 600;">Quiz Stats</div>
+                                <div style="color: rgb(194 194 194);font-size: clamp(11px, 1.15vw, 14px);">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M6 2h8l4 4v16H6V2z" stroke="currentColor" stroke-width="2"
+                                            stroke-linejoin="round" />
+                                        <path d="M14 2v5h5" stroke="currentColor" stroke-width="2"
+                                            stroke-linejoin="round" />
+                                        <path d="M9 12h6" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+                                        <path d="M9 16h6" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+                                    </svg> Total Questions : <span>{totalQues}</span>
+                                </div>
+
+                                <div style="color: rgb(194 194 194);font-size: clamp(11px, 1.15vw, 14px);">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5 4h14v16H5V4z" stroke="currentColor" stroke-width="2"
+                                            stroke-linejoin="round" />
+                                        <path d="M8 8h8" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+                                        <path d="M8 12h5" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+                                        <path d="M8 16h4" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+                                        <path d="M15 15l2 2 4-5" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg> Attempted : <span
+                                        style="color: #86de57;font-weight: 700;">{quesAttempted}</span>
+                                </div>
+
+                                <div style="color: rgb(194 194 194);font-size: clamp(11px, 1.15vw, 14px);">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M6 3h12v18l-6-4-6 4V3z" stroke="currentColor" stroke-width="2"
+                                            stroke-linejoin="round" />
+                                        <path d="M9 9h6" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+                                    </svg> Marked for Review : <span
+                                        style="color: #9557de;font-weight: 700;">{marked}</span>
+                                </div>
+                            </div>
+                            <div class="left">
+                                <div style="font-weight: 600;">Quiz Tips</div>
+                                <template for:each={startQuizInstructions} for:item="item">
+                                    <div key={item} style="color: rgb(194 194 194);font-size: clamp(11px, 1.15vw, 14px);"><span class="dot">●</span> {item}
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="center">
+                            <div style="color: #8f5cff;font-size: 18px;font-weight: 700;">Question
+                                {selectedQuestion.questionNumber}</div>
+                            <div style="font-size: 24px;font-weight: 700;color: rgb(210 210 210);">
+                                <span>{selectedQuestion.Question}</span>
+                            </div>
+                            <div style="display: grid;gap: 10px;">
+                                <template for:each={selectedQuestion.formattedChoices} for:item="choice">
+                                    <div key={choice.option} class={choice.className} data-option={choice.option}
+                                        onclick={handleChoiceSelected}>
+
+                                        <span class="optionText">{choice.option}</span>
+                                        <span class="choiceText">{choice.value}</span>
+
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="buttonDiv">
+                                <button class="prev" onclick={prevQuestion}> {prevIcon} Previous</button>
+                                <button class={markedClass} onclick={markQuestion}
+                                    data-id={selectedQuestion.questionNumber}> <svg viewBox="0 0 24 24" width="24"
+                                        height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M6 3h12v18l-6-4-6 4V3z" stroke="currentColor" stroke-width="2"
+                                            stroke-linejoin="round" />
+                                        <path d="M9 9h6" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+                                    </svg> Mark for review</button>
+                                <button class="next" onclick={nextQuestion}> Next > </button>
+                            </div>
+                        </div>
+
+                        <div class="right">
+                            <div style="font-weight: 600;">Question Navigator</div>
+                            <div class="quesDivsCont">
+                                <template for:each={quesDivClass} for:item="ques">
+                                    <div key={ques.questionNumber} class={ques.navClass} data-id={ques.questionNumber}
+                                        onclick={navigateToQuesNumber}>{ques.questionNumber}</div>
+                                </template>
+                            </div>
+                            <div style="display:flex;gap:10px;flex-direction: column;">
+                                <span style="font-size: 13px;font-weight: 600;">Attempted <span
+                                        style="padding: 0px 8.5px;margin-left: 5px;box-shadow: inset 0 0 10px #94ff69;"></span></span>
+                                <span style="font-size: 13px;font-weight: 600;">Marked for review <span
+                                        style="padding: 0px 8.5px;margin-left: 5px;box-shadow: inset 0 0 10px #9557de;"></span></span>
+                                <span style="font-size: 13px;font-weight: 600;">Not Attempted <span
+                                        style="padding: 0px 8.5px;margin-left: 5px;box-shadow: inset 0 0 10px rgba(75, 75, 75, 0.5);border: 1px solid rgba(75, 75, 75);"></span></span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </template>
+
+                <template if:true={quizSubmitted}>
+
+                    <div style="gap: 10px;display: flex;align-items: start;flex-direction:column;flex:1;">
+                        <div>
+                            <div style="font-size: 24px;font-weight: 700;">Quiz Results</div>
+                            <span style="font-size: 14px;color: rgb(125, 125, 125);">Review your performance question by
+                                question.</span>
+                        </div>
+
+                        <div class="statsDiv">
+
+                            <div style="display: grid;justify-content: center;width: 250px;gap: 5px;">
+                                <div class="score-circle" style={progressStyleScore}>
+                                    <div class="score-inner">
+                                        <div class="score-value">{score}%</div>
+                                    </div>
+                                </div>
+
+                                <span>Your Score</span>
+
                             </div>
 
-                            <div>
-                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M5 4h14v16H5V4z" stroke="currentColor" stroke-width="2"
-                                        stroke-linejoin="round" />
-                                    <path d="M8 8h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                    <path d="M8 12h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                    <path d="M8 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                    <path d="M15 15l2 2 4-5" stroke="currentColor" stroke-width="2"
+                            <div class="verticalLine"> </div>
+
+                            <div class="stats">
+                                <svg class="passed-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                    width="64" height="64" fill="none" stroke="currentColor" stroke-width="1"
+                                    stroke-linecap="round" stroke-linejoin="round">
+
+                                    <circle cx="12" cy="12" r="9" />
+                                    <path d="M8 12l3 3 5-6" />
+
+
+                                </svg>
+                                <div style="align-content: center;">
+                                    <p style="color: rgb(34, 197, 94);font-weight: 700;">{correct}</p>
+                                    <p>Correct</p>
+                                </div>
+                            </div>
+
+                            <div class="verticalLine"> </div>
+
+                            <div class="stats">
+                                <svg class="failed-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                    width="64" height="64" fill="none" stroke="currentColor" stroke-width="1"
+                                    stroke-linecap="round" stroke-linejoin="round">
+
+                                    <circle cx="12" cy="12" r="9" />
+                                    <path d="M9 9l6 6" />
+                                    <path d="M15 9l-6 6" />
+
+                                </svg>
+                                <div style="align-content: center;">
+                                    <p style="color: rgb(220, 38, 38);font-weight: 700;">{incorrect}</p>
+                                    <p>Incorrect</p>
+                                </div>
+                            </div>
+
+                            <div class="verticalLine"> </div>
+
+                            <div class="stats">
+                                <svg viewBox="0 0 24 24" width="64" height="64" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" class="unanswerdIcon">
+                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1" />
+
+                                    <path
+                                        d="M9.5 9C9.5 7.6 10.6 6.5 12.2 6.5C13.8 6.5 15 7.5 15 9C15 10.2 14.3 10.9 13.2 11.7C12.3 12.4 12 12.9 12 14"
+                                        stroke="currentColor" stroke-width="1" stroke-linecap="round" />
+
+                                    <circle cx="12" cy="17" r="1.2" fill="currentColor" />
+                                </svg>
+                                <div style="align-content: center;">
+                                    <p style="color: rgb(249, 194, 67);font-weight: 700;">{unanswered}</p>
+                                    <p>Unanswered</p>
+                                </div>
+                            </div>
+
+                            <div class="verticalLine"> </div>
+
+                            <div class="stats">
+                                <svg viewBox="0 0 24 24" width="64" height="64" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" class="timeTaken-Icon">
+                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1" />
+
+                                    <path d="M12 7V12L15.5 14" stroke="currentColor" stroke-width="1"
                                         stroke-linecap="round" stroke-linejoin="round" />
-                                </svg> Attempted : <span>{quesAttempted}</span>
+                                </svg>
+                                <div style="align-content: center;">
+                                    <p style="color: rgb(67, 170, 249);font-weight: 700;">{formattedTimeTaken}</p>
+                                    <p>Time Taken</p>
+                                </div>
                             </div>
 
-                            <div>
-                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M6 3h12v18l-6-4-6 4V3z" stroke="currentColor" stroke-width="2"
-                                        stroke-linejoin="round" />
-                                    <path d="M9 9h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                </svg> Marked for Review : <span>{quesAttempted}</span>
+                        </div>
+
+                        <div class="resultDiv">
+
+                            <div class="questionNumberResult-cont">
+
+                                <div style="font-weight: 600;">Question Navigator</div><br>
+
+                                <div class="questionNumberResult">
+                                    <template for:each={response} for:item="response">
+                                        <div key={response.questionNumber} data-id={response.questionNumber} class={response.resultClass} onclick={navigateToQuesNumber}>
+                                            {response.questionNumber}
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <div style="margin-top: 10px;display: flex;justify-content: space-between;">
+                                    <span style="font-size: 14px;font-weight: 600;display: flex;gap: 10px;">Correct <span style="border: 1px solid #94ff69;padding: 0px 9px;border-radius: 5px;"></span></span>
+                                    <span style="font-size: 14px;font-weight: 600;display: flex;gap: 10px;">Incorrect <span style="border: 1px solid #ff5f5f;padding: 0px 9px;border-radius: 5px;"> </span></span>
+                                    <span style="font-size: 14px;font-weight: 600;display: flex;gap: 10px;">Unanswered <span style="border: 1px solid #facc15;padding: 0px 9px;border-radius: 5px;"> </span></span>
+                                </div>
+
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="center">
-                        <div style="color: #8f5cff;font-size: 18px;font-weight: 700;">Question
-                            {selectedQuestion.questionNumber}</div>
-                        <div style="font-size: 24px;font-weight: 700;color: rgb(210 210 210);">
-                            <span>{selectedQuestion.Question}</span>
-                        </div>
-                        <div style="display: grid;gap: 10px;">
-                            <template for:each={selectedQuestion.formattedChoices} for:item="choice">
-                                <div key={choice.option} class={choice.className} data-option={choice.option}
-                                    onclick={handleChoiceSelected}>
+                            <div class="questionCont">
+                                <div
+                                    style="padding-bottom: 10px;border-bottom: 1px solid rgb(75, 75, 75);display: flex;gap: 10px;">
+                                    <button onclick={prevQuestion} class="nextPrevButton"> {prevIcon} </button>
+                                    <span style="align-content: center;">Question {selectedQuestion.questionNumber} of 50</span>
+                                    <button onclick={nextQuestion} class="nextPrevButton"> > </button>
+                                </div>
 
-                                    <span class="optionText">{choice.option}</span>
-                                    <span class="choiceText">{choice.value}</span>
+                                <div style="display: grid;gap: 10px;">
+                                    <div style="padding-top: 10px;">
+                                        <p style="font-size: 14px;font-weight: 600;color: #a06beb;">Question</p>
+                                        <p style="font-size: 18px;font-weight: 600;">{selectedQuestion.Question}</p>
+                                    </div>
+
+                                    <div style="display: grid;gap: 10px;">
+                                        <template for:each={selectedQuestion.formattedChoices} for:item="choice">
+                                            <div key={choice.option} class={choice.reviewClass}>
+
+                                                <span class="optionText">{choice.option}</span>
+                                                <span class="choiceText">{choice.value}</span>
+
+                                            </div>
+                                        </template>
+                                    </div>
+
 
                                 </div>
-                            </template>
-                        </div>
-                        <div class="buttonDiv">
-                            <button class="prev" onclick={prevQuestion}> {prevIcon} Previous</button>
-                            <button class="review" onclick={markQuestion} data-id={selectedQuestion.questionNumber}>  <svg viewBox="0 0 24 24" width="24" height="24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M6 3h12v18l-6-4-6 4V3z" stroke="currentColor" stroke-width="2"
-                                        stroke-linejoin="round" />
-                                    <path d="M9 9h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                </svg> Mark for review</button>
-                            <button class="next" onclick={nextQuestion}> Next > </button>
-                        </div>
-                    </div>
 
-                    <div class="right">
+                                <div class="explanation">
+                                    <div style="color: rgb(116 186 244);font-weight: 600;">Explanation</div>
+                                    <div style="color: rgb(194, 194, 194);">{selectedQuestion.Explanation}</div>
+                                </div>
+
+                            </div>
+
+                        </div>
 
                     </div>
-
-
-                </div>
+                </template>
 
 
             </template>
