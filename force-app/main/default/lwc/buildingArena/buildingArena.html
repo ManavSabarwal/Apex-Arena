@@ -1,6 +1,10 @@
 <template>
     <div class="app-container">
 
+        <template if:true={isNavigating}>
+            <c-loading-animation></c-loading-animation>
+        </template>
+
         <c-modal-component onclosemodal={showNewAchievements}></c-modal-component>
         <c-show-achievement-modal ></c-show-achievement-modal>
 
@@ -9,31 +13,7 @@
         <c-show-scenario-results></c-show-scenario-results>
 
         <!-- HEADER -->
-        <div class="navbar">
-
-            <div class="logo-section">
-                <div class="logo-icon">AA</div>
-                <div class="logo-text">Apex Arena</div>
-            </div>
-
-            <div class="nav-links">
-                <a class="active-link">Homepage</a>
-                <a>Contact</a>
-            </div>
-
-            <div class="nav-right">
-
-                <div class="user-box">
-                    <span onclick={choosePath}>Choose Path</span>
-                </div>
-
-                <div class="user-box" title="Click to open profile" onclick={openProfile}>
-                    <div class="avatar"></div>
-                    <span>{loginName}</span>
-                </div>
-            </div>
-
-        </div>
+        <c-nav-bar-component onnavigate={setNavigating}></c-nav-bar-component>
 
         <!-- MAIN CONTENT -->
         <div class="main-layout">
@@ -71,7 +51,7 @@
                                     Class</button>
                             </div>
                         </div>
-                        <button class="generateProblem-btn" onclick={generateProblem}> Generate New Problem</button>
+                        <button class="generateProblem-btn" onclick={generateProblem} disabled={generateDisabled}> Generate New Problem</button>
                     </section>
                 </div>
 

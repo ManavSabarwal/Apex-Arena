@@ -1,8 +1,9 @@
 <template>
-
+    <template if:true={isNavigating}>
+            <c-loading-animation style="position: absolute;top: 0;left: 0;"></c-loading-animation>
+    </template>
     <!--Custom Login/Signup Component-->
     <template if:false={isLoggedIn}>
-
         <div class="title-container">
             <h1 class="app-title">Apex Arena</h1>
             <p class="app-subtitle">Train. Compete. Become a Salesforce Champion.</p>

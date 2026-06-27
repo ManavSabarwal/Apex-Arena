@@ -240,7 +240,7 @@
 }
 
 .path-card h2 {
-    font-size: clamp(30px, 2.6vw, 36px);
+    font-size: clamp(30px, 2.6vw, 30px);
     font-weight: 700;
     margin-bottom: clamp(16px, 2vh, 24px);
 }

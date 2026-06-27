@@ -29,6 +29,8 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     passed=0;
     total=0;
 
+    isNavigating=false;
+
     get DiffClass()
     {
         if(this.difficulty=='Beginner')
@@ -100,6 +102,7 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     choosePath() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
+        this.isNavigating=true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -110,11 +113,15 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
 
     }
 
-
+    setNavigating()
+    {
+        this.isNavigating=true;
+    }
 
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
@@ -342,6 +349,7 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     backToProfile() {
             this.loginName = window.sessionStorage.setItem('loginName', this.loginName);
             this.isLoggedIn = window.sessionStorage.setItem('isLoggedIn', this.isLoggedIn);
+            this.isNavigating=true;
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
                 attributes: {
@@ -358,6 +366,7 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
             sessionStorage.setItem(
             'challengeId',
             this.recordId);
+            this.isNavigating=true;
             this[NavigationMixin.Navigate]({
             type: 'comm__namedPage',
             attributes: {
@@ -370,6 +379,7 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
             sessionStorage.setItem(
             'challengeId',
             this.recordId);
+            this.isNavigating=true;
             this[NavigationMixin.Navigate]({
             type: 'comm__namedPage',
             attributes: {

@@ -11,9 +11,9 @@ import globalSearch from '@salesforce/apex/recordController.globalSearch';
 
 
 export default class UserProfile extends NavigationMixin(LightningElement) {
-    loginName = '';
+    loginName = 'Test User';
     limitSize = '3';
-    isPublic=false;
+    isPublic = false;
     isLoggedIn = false;
     userLevel = 'Beginner';
     aboutMe = 'Code. Compete. Conquer. Forge your legacy in the Apex Arena.';
@@ -25,8 +25,9 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     medium = 0;
     hard = 0;
     wrong = 0;
+    attemptedChallenges = 0;
     acceptanceRate = 0;
-    recent4problems = [];
+    recent3problems = [];
     challengeData = [];
     pageSize = 9;
     currentPage = 1;
@@ -58,11 +59,73 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     xpToNextLevel = 0;
 
     item = 'profile';
-    showText='Show More';
+    showText = 'Show More';
 
-    profilePic='';
+    profilePic = '';
 
-    editProfile=false;
+    editProfile = false;
+
+    quotes = [
+        { quote: 'Do what you can, with what you have, where you are.', day: 'Monday', author: 'Theodore Roosevelt' },
+        { quote: 'The future depends on what you do today.', day: 'Monday', author: 'Mahatma Gandhi' },
+        { quote: 'Well begun is half done.', day: 'Monday', author: 'Aristotle' },
+
+        { quote: 'It always seems impossible until it is done.', day: 'Tuesday', author: 'Nelson Mandela' },
+        { quote: 'Dream big and dare to fail.', day: 'Tuesday', author: 'Norman Vaughan' },
+        { quote: 'Act as if what you do makes a difference. It does.', day: 'Tuesday', author: 'William James' },
+
+        { quote: 'Believe you can and you are halfway there.', day: 'Wednesday', author: 'Theodore Roosevelt' },
+        { quote: 'Turn your wounds into wisdom.', day: 'Wednesday', author: 'Oprah Winfrey' },
+        { quote: 'No pressure, no diamonds.', day: 'Wednesday', author: 'Thomas Carlyle' },
+
+        { quote: 'The journey of a thousand miles begins with one step.', day: 'Thursday', author: 'Lao Tzu' },
+        { quote: 'Quality is not an act, it is a habit.', day: 'Thursday', author: 'Aristotle' },
+        { quote: 'What we think, we become.', day: 'Thursday', author: 'Buddha' },
+
+        { quote: 'Stay hungry, stay foolish.', day: 'Friday', author: 'Steve Jobs' },
+        { quote: 'Everything you can imagine is real.', day: 'Friday', author: 'Pablo Picasso' },
+        { quote: 'If you are going through hell, keep going.', day: 'Friday', author: 'Winston Churchill' },
+
+        { quote: 'Do not wait. The time will never be just right.', day: 'Saturday', author: 'Napoleon Hill' },
+        { quote: 'Make each day your masterpiece.', day: 'Saturday', author: 'John Wooden' },
+        { quote: 'Energy and persistence conquer all things.', day: 'Saturday', author: 'Benjamin Franklin' },
+
+        { quote: 'Do one thing every day that scares you.', day: 'Sunday', author: 'Eleanor Roosevelt' },
+        { quote: 'You miss 100% of the shots you do not take.', day: 'Sunday', author: 'Wayne Gretzky' },
+        { quote: 'Do better when you know better.', day: 'Sunday', author: 'Maya Angelou' }
+    ];
+    randomQuote;
+
+    levels = [
+        { "label": 'Beginner', "limit": 0 },
+        { "label": 'Apprentice', "limit": 1000 },
+        { "label": 'Skilled Developer', "limit": 3000 },
+        { "label": 'Expert Architect', "limit": 5500 },
+        { "label": 'Legendary Salesforce Developer', "limit": 8500 }
+    ]
+
+    get ProgressBarWidth() {
+        return `width:`
+    }
+
+
+    get capitalizedName() {
+        let displayName = '';
+        if (this.loginName.includes(' ')) {
+            let names = this.loginName.split(' ');
+
+            for (let name of names) {
+
+                displayName += ' ' + name.charAt(0).toUpperCase() + name.substring(1);
+            }
+            return displayName.trimStart();
+        }
+        else {
+            displayName = this.loginName.charAt(0).toUpperCase() + this.loginName.substring(1);
+
+        }
+        return displayName;
+    }
 
     resultOptions = [
         {
@@ -148,22 +211,35 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     }
     ]
 
-    get achievementsData()
-    {
-        return this.showText==='Show Less' ?
-                this.userAchievements
-             : this.recent4userAchievement;
+    get showViewAllproblems() {
+        return this.recent3problems.length >= 4;
+    }
+    get showViewAllAch() {
+        return this.userAchievements > 4;
+    }
+    get showAchievementsError() {
+        return this.userAchievements.length == 0;
+    }
+    get achievementsData() {
+        return this.showText === 'Show Less' ?
+            this.userAchievements
+            : this.recent4userAchievement;
     }
 
-    get labelText()
-    {
+    get labelText() {
         return this.showText;
+    }
+
+    get progressTitle() {
+        let xpRequired = this.nextLevelXp - this.expPoints;
+        return xpRequired + ' required to move to the next level';
     }
 
 
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        this.randomQuote = this.getTodaysQuote();
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
@@ -173,10 +249,10 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
             });
         }
         else {
-            
+
             this.loadUserandChallengeDetails();
 
-            this.loadAttemptedChallenges();
+            //this.loadAttemptedChallenges();
 
             getUserAchievements(
                 {
@@ -218,197 +294,96 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
     }
 
-    loadUserandChallengeDetails()
-    {
+    getTodaysQuote() {
+        const today = new Date().toLocaleDateString('en-US', {
+            weekday: 'long'
+        });
+
+        const todaysQuotes = this.quotes.filter(quote => quote.day === today);
+
+        if (todaysQuotes.length === 0) {
+            return null;
+        }
+
+        const randomIndex = Math.floor(Math.random() * todaysQuotes.length);
+
+        return todaysQuotes[randomIndex];
+    }
+
+    loadUserandChallengeDetails() {
 
         getUserandChalengeDetails({
-                username: this.loginName
+            username: this.loginName
+        })
+
+            .then(result => {
+                this.bifData(result);
             })
 
-                .then(result => {
-                    this.bifData(result);
-                })
+            .catch(error => {
 
-                .catch(error => {
-
-                    console.log(error);
-                });
-    }
-
-    get inputReadonly()
-    {
-        return !this.editProfile;
-    }
-
-    get aboutClass()
-    {
-        return this.editProfile
-                ? 'user-about editable'
-                : 'user-about';
-    }
-    get aboutLength()
-    {
-        return this.aboutMe.length;
-    }
-    get aboutLengthClass()
-    {
-        return this.aboutMe.length>=201
-            ? 'red'
-            : 'white'
-    }
-
-    get editButtonText()
-    {
-        return this.editProfile? '💾 Save Changes' : '✏️ Edit Profile'
-    }
-
-    handleAboutChange(event)
-    {
-        const changedValue=event.target.value;
-        this.aboutMe=changedValue;
-    }
-
-    handlePublicChange(event)
-    {
-        const changedValue=event.target.checked;
-        this.isPublic=changedValue;
-    }
-
-
-    async editProfileFun()
-    {
-        this.editProfile=!this.editProfile;
-        if(!this.editProfile)
-        {
-            console.log('Saving Data');
-            const result=await saveChanges({username:this.loginName,aboutMe:this.aboutMe,imageUrl:this.profilePic,isPublic:this.isPublic});
-
-            if(result=='Changes Saved');
-            {
-
-                this.loadUserandChallengeDetails();
-            }
-            
-        }
-
-    }
-
-    changeProfilePic()
-    {
-        this.template.querySelector('c-change-profilepic-modal').openModal();
-    }
-
-    imageReceivedFunc(event)
-    {
-        this.profilePic=event.detail.imageLink;
-    }
-
-    viewAllAchievements()
-    {
-        if(this.showText=='Show More')
-        {
-            this.showText='Show Less';
-            
-        }
-        else if(this.showText=='Show Less')
-        {
-            this.showText= 'Show More';
-        }
-            
-        
-    }
-
-    get profileClass() {
-        return this.item === 'profile'
-            ? 'sidebarItems sideSelected'
-            : 'sidebarItems';
-    }
-    get leaderboardClass() {
-        return this.item === 'leaderboard'
-            ? 'sidebarItems sideSelected'
-            : 'sidebarItems';
-    }
-
-    get activityClass() {
-        return this.item === 'activity'
-            ? 'sidebarItems sideSelected'
-            : 'sidebarItems';
-    }
-
-    get achievementsClass() {
-        return this.item === 'achievements'
-            ? 'sidebarItems sideSelected'
-            : 'sidebarItems';
-    }
-
-    handleSidebarItemClick(event) {
-        this.item = event.target.dataset.id;
-        switch (this.item) {
-            case 'profile':
-                this.backToProfile();
-                break;
-
-            case 'code':
-                window.sessionStorage.setItem('isLoggedIn', true);
-                window.sessionStorage.setItem('loginName', this.loginName);
-                this[NavigationMixin.Navigate]({
-                    type: 'standard__webPage',
-                    attributes: {
-                        url: '/buildinarena'
-                    }
-                });
-                break;
-
-            case 'debug':
-                window.sessionStorage.setItem('isLoggedIn', true);
-                window.sessionStorage.setItem('loginName', this.loginName);
-                this[NavigationMixin.Navigate]({
-                    type: 'standard__webPage',
-                    attributes: {
-                        url: '/debuggingArena'
-                    }
-                });
-                break;
-
-            case 'leaderboard':
-                console.log('Open Leaderboard Page');
-                break;
-
-            case 'achievements':
-                console.log('Open Achievement Page');
-                break;
-
-            case 'activity':
-                this.viewAllProblems();
-                break;
-
-            case 'quiz':
-                window.sessionStorage.setItem('isLoggedIn', true);
-                window.sessionStorage.setItem('loginName', this.loginName);
-                this[NavigationMixin.Navigate]({
-                    type: 'standard__webPage',
-                    attributes: {
-                        url: '/quizarena'
-                    }
-                });
-                break;
-
-            default:
-                console.log('Invalid option');
-        }
-    }
-
-    get xpProgressStyle() {
-        return `width: ${this.xpProgressPercent}%;`;
+                console.log(error);
+            });
     }
 
     bifData(result) {
         try {
-            this.testAttempts=0;
-            this.submitAttempts=0;
-            this.submissions = result.length;
-            this.expPoints = parseInt(result[0].Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c, 10);
-            this.isPublic=result[0].Attempted_Challenge__r.Apex_Arena_User__r.isPublicProfile__c;
+            this.testAttempts = 0;
+            this.submitAttempts = 0;
+
+            if (!result || result.length === 0) {
+                this.submissions = 0;
+                this.solved = 0;
+                this.easy = 0;
+                this.medium = 0;
+                this.hard = 0;
+                this.wrong = 0;
+                this.acceptanceRate = 0.00;
+                return;
+            }
+
+            const userDetails = result[0]?.Attempted_Challenge__r?.Apex_Arena_User__r;
+
+            if (!userDetails) {
+                this.submissions = 0;
+                this.solved = 0;
+                this.easy = 0;
+                this.medium = 0;
+                this.hard = 0;
+                this.wrong = 0;
+                this.acceptanceRate = 0.00;
+                return;
+            }
+
+            const actualAttempts = result.filter(item => item.Id);
+            const uniqueAttemptedChallenges = new Set();
+            result.forEach(item => {
+                if (item.Attempted_Challenge__c) {
+                    uniqueAttemptedChallenges.add(item.Attempted_Challenge__c);
+                }
+            });
+
+            this.attemptedChallenges = uniqueAttemptedChallenges.size;
+
+            this.submissions = actualAttempts.length;
+
+            this.getRecentProblems(result);
+
+            this.expPoints = parseInt(userDetails.Total_Exp_Points__c || 0, 10);
+            this.levels = this.levels.map(level => {
+
+                const percent = Math.min(
+                    Math.floor(((this.expPoints == 0 ? 1 : this.expPoints) / (level.limit == 0 ? 1 : level.limit)) * 100),
+                    100
+                );
+                return {
+                    ...level,
+                    unlocked: (this.expPoints >= level.limit || level.label == 'Beginner'),
+                    limitDisplay: level.limit == 12000 ? '' : level.limit + ' XP',
+                    widthStyle: `width:${percent}%;`
+                };
+            });
+            this.isPublic = userDetails.isPublicProfile__c;
 
             this.nextLevel =
                 this.expPoints < 1000 ? 'Apprentice' :
@@ -446,64 +421,307 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                     ? 100
                     : Math.floor((xpGainedInCurrentLevel / levelRange) * 100);
 
-
             let setChallenges = new Set();
             let setEasy = new Set();
             let setMedium = new Set();
             let setHard = new Set();
-            
-            this.currentStreak = result[0].Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c;
-            this.bestStreak = result[0].Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c;
-            this.aboutMe = result[0].Attempted_Challenge__r.Apex_Arena_User__r.AboutMe__c? result[0].Attempted_Challenge__r.Apex_Arena_User__r.AboutMe__c:this.aboutMe
-            this.profilePic = result[0].Attempted_Challenge__r.Apex_Arena_User__r.profilePic__c;
-            for (let res of result) {
-                if (res.Attempted_Challenge__r.Result__c.toLowerCase() == 'pass') {
-                    setChallenges.add(res.Attempted_Challenge__c)
-                    if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Beginner' || res.Attempted_Challenge__r.DifficultyLevel__c == 'Apprentice') {
 
-                        setEasy.add(res.Attempted_Challenge__c);
-                    }
-                    else if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Skilled Developer') {
+            this.currentStreak = userDetails.Current_Streak__c || 0;
+            this.bestStreak = userDetails.Best_Streak__c || 0;
+            this.aboutMe = userDetails.AboutMe__c ? userDetails.AboutMe__c : this.aboutMe;
+            this.profilePic = userDetails.profilePic__c;
+            this.userLevel = userDetails.Level__c;
 
-                        setMedium.add(res.Attempted_Challenge__c);
-                    }
-                    else if (res.Attempted_Challenge__r.DifficultyLevel__c == 'Expert Architect' || res.Attempted_Challenge__r.DifficultyLevel__c == 'Legendary Salesforce Hero') {
-
-                        setHard.add(res.Attempted_Challenge__c);
-                    }
-                }
-                
-                this.solved = setChallenges.size;
-                this.easy = setEasy.size;
-                this.medium = setMedium.size;
-                this.hard = setHard.size;
-                
-                if (res.Action_Type__c?.toLowerCase() == 'test') {
-                    this.testAttempts++;
-                }
-                else if (res.Action_Type__c?.toLowerCase() == 'submit') {
-                    this.submitAttempts++;
-                }
-
-
-            }
-            this.wrong = this.submissions - this.solved;
-            this.acceptanceRate = this.submissions > 0 ? ((this.solved / this.submissions * 100).toFixed(2)) : 0.00;
-            this.joinDate = new Date(result[0].Attempted_Challenge__r.Apex_Arena_User__r.CreatedDate)
-                .toLocaleDateString('en-US', {
+            this.joinDate = userDetails.CreatedDate
+                ? new Date(userDetails.CreatedDate).toLocaleDateString('en-US', {
                     month: 'long',
                     day: '2-digit',
                     year: 'numeric'
-                });
-            this.userLevel = result[0].Attempted_Challenge__r.Apex_Arena_User__r.Level__c;
+                })
+                : '';
 
-        }
-        catch (error) {
-            console.log('Error in BifData' , error);
+            for (let res of actualAttempts) {
+                const attemptedChallenge = res.Attempted_Challenge__r;
+
+                if (attemptedChallenge?.Result__c?.toLowerCase() === 'pass') {
+                    setChallenges.add(res.Attempted_Challenge__c);
+
+                    if (
+                        attemptedChallenge.DifficultyLevel__c === 'Beginner' ||
+                        attemptedChallenge.DifficultyLevel__c === 'Apprentice'
+                    ) {
+                        setEasy.add(res.Attempted_Challenge__c);
+                    }
+                    else if (attemptedChallenge.DifficultyLevel__c === 'Skilled Developer') {
+                        setMedium.add(res.Attempted_Challenge__c);
+                    }
+                    else if (
+                        attemptedChallenge.DifficultyLevel__c === 'Expert Architect' ||
+                        attemptedChallenge.DifficultyLevel__c === 'Legendary Salesforce Hero'
+                    ) {
+                        setHard.add(res.Attempted_Challenge__c);
+                    }
+                }
+
+                if (res.Action_Type__c?.toLowerCase() === 'test') {
+                    this.testAttempts++;
+                }
+                else if (res.Action_Type__c?.toLowerCase() === 'submit') {
+                    this.submitAttempts++;
+                }
+            }
+
+            this.solved = setChallenges.size;
+            this.easy = setEasy.size;
+            this.medium = setMedium.size;
+            this.hard = setHard.size;
+
+            this.wrong = this.submissions - this.solved;
+
+            this.acceptanceRate =
+                this.submissions > 0
+                    ? ((this.solved / this.submissions) * 100).toFixed(2)
+                    : 0.00;
+
+        } catch (error) {
+            console.log('Error in bifData', error);
             console.log('Raw error:', JSON.parse(JSON.stringify(error)));
         }
     }
 
+    getRecentProblems(result) {
+
+        const seenChallenges = new Set();
+        this.recent3problems = result
+            .filter(item => {
+                if (!item.Attempted_Challenge__c) {
+                    return false;
+                }
+
+                if (seenChallenges.has(item.Attempted_Challenge__c)) {
+                    return false;
+                }
+
+                seenChallenges.add(item.Attempted_Challenge__c);
+                return true;
+            })
+            .slice(0, 3)
+            .map(item => {
+                return {
+                    id: item.Attempted_Challenge__c,
+                    attemptId: item.Id,
+                    name: item.Attempted_Challenge__r?.Name.length > 48 ? item.Attempted_Challenge__r?.Name.substring(0, 47) + ". . ." : item.Attempted_Challenge__r?.Name,
+                    scenario: item.Attempted_Challenge__r?.Scenario__c,
+                    path: item.Attempted_Challenge__r?.Path__c,
+                    pathStyle: `color:${item.Attempted_Challenge__r?.Path__c.toLowerCase().includes('coding') ? '#00E5FF' : '#FF5C5C'};`,
+                    difficulty: item.Attempted_Challenge__r?.DifficultyLevel__c,
+                    type: item.Attempted_Challenge__r?.Type__c,
+                    result: item.Attempted_Challenge__r?.Result__c,
+                    isPass: item.Attempted_Challenge__r?.Result__c.toLowerCase().includes('pass'),
+                    isFail: item.Attempted_Challenge__r?.Result__c.toLowerCase().includes('fail'),
+                    isPending: item.Attempted_Challenge__r?.Result__c.toLowerCase().includes('pending'),
+                    score: item.Score__c,
+                    exp: item.Exp_gained__c,
+                    LastModifiedDate: item.CreatedDate
+                };
+            });
+
+        console.log(this.recent3problems);
+
+        this.recent3problems = this.recent3problems.map(record => {
+
+            const modifiedDate = new Date(record.LastModifiedDate);
+            const now = new Date();
+
+            const diffMs = now - modifiedDate;
+            const diffMinutes = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMinutes / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            let timeAgo = '';
+
+            if (diffMinutes < 60) {
+                timeAgo = diffMinutes + ' min ago';
+            } else if (diffHours < 24) {
+                timeAgo = diffHours + ' hr ago';
+            } else {
+                timeAgo = diffDays + ' day ago';
+            }
+
+            return {
+                ...record,
+                timeAgo: timeAgo,
+            };
+        });
+    }
+
+    get inputReadonly() {
+        return !this.editProfile;
+    }
+
+    get aboutClass() {
+        return this.editProfile
+            ? 'user-about editable'
+            : 'user-about';
+    }
+    get aboutLength() {
+        return this.aboutMe.length;
+    }
+    get aboutLengthClass() {
+        return this.aboutMe.length >= 201
+            ? 'red'
+            : 'white'
+    }
+
+    get editButtonText() {
+        return this.editProfile ? '💾 Save Changes' : '✏️ Edit Profile'
+    }
+
+    handleAboutChange(event) {
+        const changedValue = event.target.value;
+        this.aboutMe = changedValue;
+    }
+
+    handlePublicChange(event) {
+        const changedValue = event.target.checked;
+        this.isPublic = changedValue;
+    }
+
+
+    async editProfileFun() {
+        this.editProfile = !this.editProfile;
+        if ((!this.editProfile) && this.aboutMe.length <= 200) {
+            console.log('Saving Data');
+            const result = await saveChanges({ username: this.loginName, aboutMe: this.aboutMe, imageUrl: this.profilePic, isPublic: this.isPublic });
+
+            if (result == 'Changes Saved');
+            {
+
+                this.loadUserandChallengeDetails();
+            }
+
+        }
+        if (this.aboutMe.length > 200) {
+            alert('About Me value cannot be longer than 200 characters. Changes not Saved');
+        }
+
+    }
+
+    editProfileClose() {
+        this.editProfile = false;
+    }
+
+    changeProfilePic() {
+        this.template.querySelector('c-change-profilepic-modal').openModal();
+    }
+
+    imageReceivedFunc(event) {
+        this.profilePic = event.detail.imageLink;
+    }
+
+    viewAllAchievements() {
+        if (this.showText == 'Show More') {
+            this.showText = 'Show Less';
+
+        }
+        else if (this.showText == 'Show Less') {
+            this.showText = 'Show More';
+        }
+
+
+    }
+
+    get profileClass() {
+        return this.item === 'profile'
+            ? 'sidebarItems sideSelected'
+            : 'sidebarItems';
+    }
+    get leaderboardClass() {
+        return this.item === 'leaderboard'
+            ? 'sidebarItems sideSelected'
+            : 'sidebarItems';
+    }
+
+    get activityClass() {
+        return this.item === 'activity'
+            ? 'sidebarItems sideSelected'
+            : 'sidebarItems';
+    }
+
+    get achievementsClass() {
+        return this.item === 'achievements'
+            ? 'sidebarItems sideSelected'
+            : 'sidebarItems';
+    }
+
+    handleSidebarItemClick(event) {
+        this.item = event.target.dataset.id;
+
+        switch (this.item) {
+            case 'profile':
+                this.backToProfile();
+                break;
+
+            case 'code':
+                this.isNavigating = true;
+                window.sessionStorage.setItem('isLoggedIn', true);
+                window.sessionStorage.setItem('loginName', this.loginName);
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: {
+                        url: '/buildinarena'
+                    }
+                });
+                break;
+
+            case 'debug':
+                this.isNavigating = true;
+                window.sessionStorage.setItem('isLoggedIn', true);
+                window.sessionStorage.setItem('loginName', this.loginName);
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: {
+                        url: '/debuggingArena'
+                    }
+                });
+                break;
+
+            case 'leaderboard':
+                console.log('Open Leaderboard Page');
+                break;
+
+            case 'achievements':
+                console.log('Open Achievement Page');
+                break;
+
+            case 'activity':
+                this.viewAllProblems();
+                break;
+
+            case 'quiz':
+                this.isNavigating = true;
+                window.sessionStorage.setItem('isLoggedIn', true);
+                window.sessionStorage.setItem('loginName', this.loginName);
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: {
+                        url: '/quizarena'
+                    }
+                });
+                break;
+
+            default:
+                console.log('Invalid option');
+        }
+    }
+
+    get xpProgressStyle() {
+        return `--progress:${this.xpProgressPercent * 3.6}deg`;
+    }
+
+
+
+    /*
     async loadAttemptedChallenges() {
         try {
             const data = await getAttemptedChallenges({
@@ -517,7 +735,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
             if (data) {
 
-                this.recent4problems = data.map(record => {
+                this.recent3problems = data.map(record => {
 
                     const modifiedDate = new Date(record.LastModifiedDate);
                     const now = new Date();
@@ -553,7 +771,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         }
     }
 
-
+    */
 
     async viewAllProblems() {
         this.item = 'activity';
@@ -655,7 +873,8 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     }
 
     async viewDetails(event) {
-        const recordId = event.target.dataset.id;
+        const recordId = event.currentTarget.dataset.id?event.currentTarget.dataset.id:event.target.dataset.id;
+        this.isNavigating = true;
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
         this[NavigationMixin.Navigate]({
@@ -706,6 +925,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     }
 
     choosePath() {
+        this.isNavigating = true;
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
         this[NavigationMixin.Navigate]({
@@ -763,9 +983,13 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         this.viewAllProblems();
     }
 
+    get showActivities()
+    {
+        return this.recent3problems.length>0;
+    }
 
-
-    logoutFunc() {
+    handleLogout() {
+        this.isNavigating = true;
         window.sessionStorage.removeItem('loginName');
         window.sessionStorage.removeItem('isLoggedIn');
         this[NavigationMixin.Navigate]({
@@ -776,49 +1000,46 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         });
     }
 
-    searchusers=[];
-    userCount=0;
-    searchchallenges=[];
-    challengeCount=0;
-    responseReturned=false;
-    searchMenuItem='user';
+    searchusers = [];
+    userCount = 0;
+    searchchallenges = [];
+    challengeCount = 0;
+    responseReturned = false;
+    searchMenuItem = 'user';
+    isNavigating = false;
 
-    get searchResultContClass()
-    {
+    get searchResultContClass() {
         return this.responseReturned
             ? 'searchResultCont'
             : 'searchResultCont Hidden'
     }
 
-    get searchBackdrop()
-    {
+    get searchBackdrop() {
         return this.responseReturned
             ? 'searchBackdrop'
             : 'searchBackdrop Hidden'
     }
 
 
-    async onSearchChange(event)
-    {
-        const searchItem=event.target.value;
-        const response= await globalSearch(
+    async onSearchChange(event) {
+        const searchItem = event.target.value;
+        const response = await globalSearch(
             {
-                searchKey:searchItem,
-                username:this.loginName
+                searchKey: searchItem,
+                username: this.loginName
             }
         );
-        this.responseReturned=true;
-        this.searchusers=response.users;
-        this.searchchallenges=response.challenges;
-        this.userCount=this.searchusers.length;
-        this.challengeCount=this.searchchallenges.length;
+        this.responseReturned = true;
+        this.searchusers = response.users;
+        this.searchchallenges = response.challenges;
+        this.userCount = this.searchusers.length;
+        this.challengeCount = this.searchchallenges.length;
 
-        
+
     }
 
-    closeSearch()
-    {
-        this.responseReturned=false;
+    closeSearch() {
+        this.responseReturned = false;
         const searchbar = this.template.querySelector('[data-id="searchbar"]');
 
         if (searchbar) {
@@ -826,40 +1047,36 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         }
     }
 
-    get menuItemUserClass()
-    {
-        return this.searchMenuItem=='user'
+    get menuItemUserClass() {
+        return this.searchMenuItem == 'user'
             ? 'searchMenuItems searchSelected'
             : 'searchMenuItems'
     }
 
-    get isUserItemSelected()
-    {
-        return this.searchMenuItem=='user'
+    get isUserItemSelected() {
+        return this.searchMenuItem == 'user'
             ? true
             : false
     }
 
-    get menuItemChallengeClass()
-    {
-        return this.searchMenuItem=='challenge'
+    get menuItemChallengeClass() {
+        return this.searchMenuItem == 'challenge'
             ? 'searchMenuItems searchSelected'
             : 'searchMenuItems'
     }
 
-    handleMenuItemClick(event)
-    {
-        this.searchMenuItem=event.currentTarget.dataset.id;
+    handleMenuItemClick(event) {
+        this.searchMenuItem = event.currentTarget.dataset.id;
 
     }
 
-    handleUserResultSelected(event){
-        const recordId=event.currentTarget.dataset.id;
-        
+    handleUserResultSelected(event) {
+        const recordId = event.currentTarget.dataset.id;
+
     }
 
-    handleChallengeResultSelected(event){
-        const recordId=event.currentTarget.dataset.id;
+    handleChallengeResultSelected(event) {
+        const recordId = event.currentTarget.dataset.id;
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
         this[NavigationMixin.Navigate]({
@@ -871,7 +1088,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 recordId: recordId
             }
         });
-        
+
     }
 
 }

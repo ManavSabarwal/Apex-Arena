@@ -10,6 +10,7 @@ import { NavigationMixin } from 'lightning/navigation';
 
 export default class DebuggingArena extends NavigationMixin(LightningElement) {
 
+    isNavigating=false;
     loginName = '';
     problem;
     scenario = '';
@@ -63,10 +64,16 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             : 'problemSection problemSectionexpanded';
     }
 
+    setNavigating()
+    {
+        this.isNavigating=true;
+    }
+
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
-        console.log(this.loginName);
+        
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
@@ -98,6 +105,11 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         catch (error) {
             console.log(error);
         }
+    }
+
+    disconnectedCallback()
+    {
+        window.sessionStorage.setItem('challengeId',null);
     }
 
 
@@ -136,6 +148,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
     openProfile() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
+        this.isNavigating=true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -148,7 +161,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
 
-
+        this.isNavigating=true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {

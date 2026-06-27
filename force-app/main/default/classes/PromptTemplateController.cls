@@ -81,8 +81,8 @@ public static ProblemResponseWrapper invokeValidationPrompt(String scenario, Str
     List<String> responses=new List<String>();
     try {
         Map<String, Object> inputParams = new Map<String, Object>{
-            'Input:Scenario' => scenario,
-            'Input:Solution' => solution
+            'Input:Scenario' => String.isNotBlank(scenario) ? scenario : '',
+            'Input:Solution' => String.isNotBlank(solution) ? solution : ''
         };
 
         String promptresponse = PromptTemplateRestService.invokePrompt(
@@ -148,11 +148,11 @@ public static ValidationResponseWrapper invokeValidationPromptCoding(
 
     try {
         Map<String, Object> inputParams = new Map<String, Object>{
-            'Input:Scenario' => scenario,
-            'Input:SolutionCode' => solution,
-            'Input:SampleData' => sampleData,
-            'Input:SubmissionType' => submissionType,
-            'Input:Requirements' => requirements
+            'Input:Scenario' => String.isNotBlank(scenario) ? scenario : '',
+            'Input:SolutionCode' => String.isNotBlank(solution) ? solution : '',
+            'Input:SampleData' => String.isNotBlank(sampleData) ? sampleData : '[]',
+            'Input:SubmissionType' => String.isNotBlank(submissionType) ? submissionType : 'Test',
+            'Input:Requirements' => String.isNotBlank(requirements) ? requirements : ''
         };
 
         String promptresponse = PromptTemplateRestService.invokePrompt(
@@ -202,14 +202,15 @@ public static ValidationResponseWrapper invokeValidationPromptCoding(
 }
 
 @AuraEnabled
-public static List<quizWrapper> invokeQuizPrompt(String areaOfExpertise,String username){
+public static List<quizWrapper> invokeQuizPrompt(String areaOfExpertise,String username, String difficulty){
     try {
 
         List<quizWrapper> response =new List<quizWrapper>();
         if(areaOfExpertise!=null && areaOfExpertise!='')
         {
             Map<String, Object> inputParams = new Map<String, Object>{
-            'Input:areaOfExpertise' => areaOfExpertise
+            'Input:areaOfExpertise' => areaOfExpertise,
+            'Input:difficulty' => difficulty
             };
 
             String promptresponse = PromptTemplateRestService.invokePrompt(

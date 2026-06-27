@@ -3,33 +3,15 @@
 
     <div class="app-container">
 
+        <template if:true={isNavigating}>
+            <c-loading-animation></c-loading-animation>
+        </template>
+
         <!-- MAIN CONTENT -->
         <div class="main-container">
 
             <!-- TOP NAVBAR -->
-            <div class="navbar">
-
-                <div class="logo-section">
-                    <div class="logo-icon">AA</div>
-                    <div class="logo-text">Apex Arena</div>
-                </div>
-
-                <div class="nav-links">
-                    <a class="active-link">Homepage</a>
-                    <a>Contact</a>
-                </div>
-
-                <div class="nav-right">
-
-                    <div class="user-box" title="Click to open profile" onclick={openProfile}>
-                        <div class="avatar"></div>
-                        <span>{loginName}</span>
-                    </div>
-                </div>
-
-
-
-            </div>
+            <c-nav-bar-component onnavigate={setNavigating}></c-nav-bar-component>
 
             <!-- HERO -->
             <div class="hero-section">
@@ -101,7 +83,7 @@
                         <h2>Path 3: Quiz Quest</h2>
 
                         <p>
-                            Test Youir Salesforce Knowledge
+                            Test Your Salesforce Knowledge
                             with timed MCQs across clouds, certificates
                             and other topics.
                         </p>

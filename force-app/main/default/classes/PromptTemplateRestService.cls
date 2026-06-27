@@ -61,6 +61,7 @@ public without sharing class PromptTemplateRestService {
         HttpResponse res = new Http().send(req);
 
         Integer statusCode = res.getStatusCode();
+        system.debug(res.getBody());
 
         if (statusCode < 200 || statusCode >= 300) {
             throw new AuraHandledException(

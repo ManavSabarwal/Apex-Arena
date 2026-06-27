@@ -1,0 +1,26 @@
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 100%;
+    width: 100%;
+    backdrop-filter: blur(1px);
+    z-index: 999;
+    position: fixed;
+    background: #00000075;
+}
+
+.ape-loader {
+    width: 220px;
+    height: auto;
+    object-fit: contain;
+}
+
+.loader-container p {
+    color: white;
+    font-size: 18px;
+    letter-spacing: 0.4px;
+    font-weight:700;
+}

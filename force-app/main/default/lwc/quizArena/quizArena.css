@@ -196,14 +196,27 @@
     background: transparent;
     padding: clamp(7px, 1vw, 10px);
     width: min(500px, calc(100vw - 90px));
-    margin-top: clamp(8px, 1.5vh, 15px);
     color: rgb(191 191 191);
 }
+
+.diff-dropdown
+{
+    border-radius: 5px;
+    border: 1px solid rgb(166 64 255);
+    box-shadow: 0 0 12px rgb(166 64 255);
+    background: transparent;
+    color: rgb(191 191 191);
+    /* accent-color: transparent; */
+    padding: clamp(7px, 1vw, 10px);
+}
+
+
+
 
 .buttonClass
 {
     margin: clamp(12px, 2.5vh, 25px);
-    width: clamp(150px, 16vw, 200px);
+    width: clamp(150px, 17vw, 200px);
     background: linear-gradient(135deg, #8b5cf6, #d946ef);
     color: white;
     box-shadow: 0 0 20px rgba(168, 85, 247, 0.45);

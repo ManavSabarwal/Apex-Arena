@@ -1,0 +1,25 @@
+<template>
+
+    <div class="navbar">
+
+            <div class="logo-section">
+                <div class="logo-icon">AA</div>
+                <div class="logo-text">Apex Arena</div>
+            </div>
+
+
+            <div class="nav-right">
+
+                <div class="user-box">
+                    <span onclick={choosePath}>Choose Path</span>
+                </div>
+
+                <div class="user-box" title="Click to open profile" onclick={openProfile}>
+                    <div class="avatar"></div>
+                    <span>{loginName}</span>
+                </div>
+            </div>
+
+        </div>
+    
+</template>

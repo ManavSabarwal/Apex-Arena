@@ -338,6 +338,10 @@
     transform: translateY(-2px);
     box-shadow: 0 0 15px rgba(69,29,163,0.35);
 }
+.generateProblem-btn:disabled{
+    filter:brightness(0.75);
+    cursor:not-allowed;
+}
 
 .showSampledata-btn
 {

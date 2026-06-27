@@ -12,7 +12,7 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
     topic = '';
     previousQuizTerms = [];
     quizGenerated = false;
-
+    isNavigating=false;
     imageUrl = quizBook;
 
     loadingMessages = [
@@ -68,6 +68,27 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
     correct = 0;
     incorrect = 0;
     unanswered = 0;
+
+    selectedDifficulty='Easy';
+
+    difficultyOptions = [{
+        label: "Warm Up",
+        value: "Easy"
+    },
+    {
+        label: "Battle",
+        value: "Medium"
+    },
+    {
+        label: "Boss Fight",
+        value: "Hard"
+    }
+    ]
+
+    handleDifficultyChange(event) {
+
+        this.selectedDifficulty = event.target.value;
+    }
 
 
     get progressStyleScore() {
@@ -162,11 +183,15 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
             : false;
     }
 
+    setNavigating()
+    {
+        this.isNavigating=true;
+    }
+
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
-        this.loginName = window.sessionStorage.getItem('loginName');
-        this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
@@ -222,7 +247,8 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
             this.response = await invokeQuizPrompt(
                 {
                     areaOfExpertise: this.topic,
-                    username: this.loginName
+                    username: this.loginName,
+                    difficulty: this.selectedDifficulty
                 });
             this.currentLoadingMessage = 'Let the Quiz Quest begin!';
             this.progress = 100;
@@ -262,6 +288,7 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
     choosePath() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
+        this.isNavigating=true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -275,6 +302,7 @@ export default class QuizArena extends NavigationMixin(LightningElement) {
     openProfile() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
+        this.isNavigating=true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {

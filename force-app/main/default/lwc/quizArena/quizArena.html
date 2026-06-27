@@ -1,47 +1,27 @@
 <template>
     <div class="app-container">
 
+        <template if:true={isNavigating}>
+            <c-loading-animation></c-loading-animation>
+        </template>
+
         <template if:true={isSubmitting}>
             <div class="modalOverlay">
-            <div class="modal">
-                <div style="font-size: 18px;font-weight: 700;">Are you sure you want to submit?</div>
-                <div style="display: flex;justify-content: space-between;">
+                <div class="modal">
+                    <div style="font-size: 18px;font-weight: 700;">Are you sure you want to submit?</div>
+                    <div style="display: flex;justify-content: space-between;">
 
-                    <button class="noButton" onclick={handleTakeMeBack}>No,Take me back</button>
-                    <button class="yesButton" onclick={handleSubmitQuiz}>Yes, Submit</button>
+                        <button class="noButton" onclick={handleTakeMeBack}>No,Take me back</button>
+                        <button class="yesButton" onclick={handleSubmitQuiz}>Yes, Submit</button>
 
+                    </div>
                 </div>
-            </div>
             </div>
 
         </template>
 
         <!-- HEADER -->
-        <div class="navbar">
-
-            <div class="logo-section">
-                <div class="logo-icon">AA</div>
-                <div class="logo-text">Apex Arena</div>
-            </div>
-
-            <div class="nav-links">
-                <a class="active-link">Homepage</a>
-                <a>Contact</a>
-            </div>
-
-            <div class="nav-right">
-
-                <div class="user-box">
-                    <span onclick={choosePath}>Choose Path</span>
-                </div>
-
-                <div class="user-box" title="Click to open profile" onclick={openProfile}>
-                    <div class="avatar"></div>
-                    <span>{loginName}</span>
-                </div>
-            </div>
-
-        </div>
+        <c-nav-bar-component onnavigate={setNavigating}></c-nav-bar-component>
 
         <!-- MAIN CONTENT -->
         <div class="main-layout">
@@ -63,11 +43,18 @@
                         <span style="font-size: 15px;color: rgb(137 137 137);padding: 10px;"> Choose any topic or area
                             and
                             we'll generate 50 MCQs for you.</span>
-                        <input class="topicInput" value={topic}
-                            placeholder="e.g. Apex , LWC , Admin , Sales Cloud , Service Cloud ,Omnistudio...."
-                            onkeyup={onTopicChange}>
+                        <div style="display: flex;gap: 10px;padding: 10px;">
+                            <input class="topicInput" value={topic}
+                                placeholder="e.g. Apex , LWC , Admin , Sales Cloud , Service Cloud ,Omnistudio...."
+                                onkeyup={onTopicChange}>
+                            <select id="difficult" onchange={handleDifficultyChange} class="diff-dropdown">
+                                <template for:each={difficultyOptions} for:item="diff">
+                                    <option key={diff.value} value={diff.value} >{diff.label}</option>
+                                </template>
+                            </select>
+                        </div>
                         <template lwc:if={previousTopics}>
-                            <div style="display: flex;gap: 10px;padding-top: 20px;">
+                            <div style="display: flex;gap: 10px;padding-top: 10px;">
                                 <template for:each={previousQuizTerms} for:item="item">
                                     <span key={item} data-id={item} onclick={onTopicSelected} class="prevTopicPill">
                                         {item}
@@ -218,7 +205,9 @@
                             <div class="left">
                                 <div style="font-weight: 600;">Quiz Tips</div>
                                 <template for:each={startQuizInstructions} for:item="item">
-                                    <div key={item} style="color: rgb(194 194 194);font-size: clamp(11px, 1.15vw, 14px);"><span class="dot">●</span> {item}
+                                    <div key={item}
+                                        style="color: rgb(194 194 194);font-size: clamp(11px, 1.15vw, 14px);"><span
+                                            class="dot">●</span> {item}
                                     </div>
                                 </template>
                             </div>
@@ -380,16 +369,23 @@
 
                                 <div class="questionNumberResult">
                                     <template for:each={response} for:item="response">
-                                        <div key={response.questionNumber} data-id={response.questionNumber} class={response.resultClass} onclick={navigateToQuesNumber}>
+                                        <div key={response.questionNumber} data-id={response.questionNumber}
+                                            class={response.resultClass} onclick={navigateToQuesNumber}>
                                             {response.questionNumber}
                                         </div>
                                     </template>
                                 </div>
 
                                 <div style="margin-top: 10px;display: flex;justify-content: space-between;">
-                                    <span style="font-size: 14px;font-weight: 600;display: flex;gap: 10px;">Correct <span style="border: 1px solid #94ff69;padding: 0px 9px;border-radius: 5px;"></span></span>
-                                    <span style="font-size: 14px;font-weight: 600;display: flex;gap: 10px;">Incorrect <span style="border: 1px solid #ff5f5f;padding: 0px 9px;border-radius: 5px;"> </span></span>
-                                    <span style="font-size: 14px;font-weight: 600;display: flex;gap: 10px;">Unanswered <span style="border: 1px solid #facc15;padding: 0px 9px;border-radius: 5px;"> </span></span>
+                                    <span style="font-size: 14px;font-weight: 600;display: flex;gap: 10px;">Correct
+                                        <span
+                                            style="border: 1px solid #94ff69;padding: 0px 9px;border-radius: 5px;"></span></span>
+                                    <span style="font-size: 14px;font-weight: 600;display: flex;gap: 10px;">Incorrect
+                                        <span style="border: 1px solid #ff5f5f;padding: 0px 9px;border-radius: 5px;">
+                                        </span></span>
+                                    <span style="font-size: 14px;font-weight: 600;display: flex;gap: 10px;">Unanswered
+                                        <span style="border: 1px solid #facc15;padding: 0px 9px;border-radius: 5px;">
+                                        </span></span>
                                 </div>
 
                             </div>
@@ -398,7 +394,8 @@
                                 <div
                                     style="padding-bottom: 10px;border-bottom: 1px solid rgb(75, 75, 75);display: flex;gap: 10px;">
                                     <button onclick={prevQuestion} class="nextPrevButton"> {prevIcon} </button>
-                                    <span style="align-content: center;">Question {selectedQuestion.questionNumber} of 50</span>
+                                    <span style="align-content: center;">Question {selectedQuestion.questionNumber} of
+                                        50</span>
                                     <button onclick={nextQuestion} class="nextPrevButton"> > </button>
                                 </div>
 

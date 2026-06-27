@@ -2,31 +2,12 @@
 
     <div class="app-container">
 
+        <template if:true={isNavigating}>
+            <c-loading-animation></c-loading-animation>
+        </template>
+
         <!-- HEADER -->
-        <div class="navbar">
-
-            <div class="logo-section">
-                <div class="logo-icon">AA</div>
-                <div class="logo-text">Apex Arena</div>
-            </div>
-
-            <div class="nav-links">
-                <a class="active-link">Homepage</a>
-                <a>Contact</a>
-            </div>
-
-            <div class="nav-right">
-
-                <div class="user-box">
-                    <span onclick={choosePath}>Choose Path</span>
-                </div>
-
-                <div class="logout-btn" onclick={logoutFunc}>
-                    <span>⎋ Logout</span>
-                </div>
-            </div>
-
-        </div>
+        <c-nav-bar-component onnavigate={setNavigating}></c-nav-bar-component>
 
         <div class="main-container">
             <div class="header-container">

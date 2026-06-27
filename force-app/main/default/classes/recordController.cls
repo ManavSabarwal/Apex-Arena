@@ -128,13 +128,48 @@ public without sharing class recordController {
         }
     }
 
+    public static void streakCheck(String username)
+    {
+        Date today= System.today();
+        Date yesterday=today.addDays(-1);
+
+        DateTime startOfToday = DateTime.newInstance(today, Time.newInstance(0, 0, 0, 0));
+        DateTime startOfYesterday = DateTime.newInstance(yesterday, Time.newInstance(0, 0, 0, 0));
+
+        List<Challenge_Attempt__c> attemptsYesterday=[Select id from Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.name=:username and createdDate>=:startOfYesterday and createdDate<:startOfToday];
+        if(attemptsYesterday.size()==0)
+        {
+            return;
+        } 
+        else if (attemptsYesterday.size()>0) {
+            List<Apex_Arena_User__c> users=[Select id,Current_Streak__c,Best_Streak__c from Apex_Arena_User__c where name=:username limit 1];
+            if(users.size()>0)
+            {
+                Apex_Arena_User__c user=users[0];
+                Integer CurrentStreak=(Integer)user.Current_Streak__c+1;
+                Integer BestStreak=(Integer)user.Best_Streak__c;
+
+                user.Current_Streak__c=CurrentStreak;
+
+                if(BestStreak<CurrentStreak)
+                {
+                    user.Best_Streak__c=CurrentStreak;
+                }
+
+                update user;
+
+            }
+        }
+    }
+
     @AuraEnabled
     public static List<String> createChallengeAttempt(String id, String result,String solution,string thegood,string thebad,string score,string actionType,string testCaseResults){
         try {
 
-            List<Attempted_challenge__C> ac=[Select id,Apex_Arena_User__r.Id ,attempts__C,result__c,path__c,DifficultyLevel__c from Attempted_challenge__C where id=:id];
+            List<Attempted_challenge__C> ac=[Select id,Apex_Arena_User__r.Id,Apex_Arena_User__r.Name ,attempts__C,result__c,path__c,DifficultyLevel__c from Attempted_challenge__C where id=:id];
             List<String> response=new List<String>();
             String userId=ac[0].Apex_Arena_User__r.Id;
+            String username=ac[0].Apex_Arena_User__r.Name;
             String res='';
             if(!ac.isEmpty())
             {
@@ -154,6 +189,10 @@ public without sharing class recordController {
                 string difficulty=ac[0].DifficultyLevel__c.toLowerCase();
                 insert(ca);
                 system.debug('Challenege Attempt Created with id: '+ca.Id);
+                if(actionType=='Submit' && challengeResult.toLowerCase().contains('pass'))
+                {
+                    recordController.streakCheck(username);
+                }
                 string attemptId=ca.Id;
                 Decimal exppoints=0;
 
@@ -293,22 +332,82 @@ public without sharing class recordController {
     @AuraEnabled
     public static List<Challenge_Attempt__C> getUserandChalengeDetails(String username){
         try {
-
-            string queryText='select id,Result__c,Name,score__c,Solution_Provided__c,Exp_gained__c,Code_Review_Good__c,Code_Review_Bad__c,Action_Type__c,Attempted_Challenge__c,Attempted_Challenge__r.Scenario__c,Attempted_Challenge__r.Path__c,Attempted_Challenge__r.DifficultyLevel__c,Attempted_Challenge__r.Type__c,Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c,Attempted_Challenge__r.Apex_Arena_User__r.AboutMe__c,Attempted_Challenge__r.Apex_Arena_User__r.profilePic__c, Attempted_Challenge__r.Apex_Arena_User__r.Level__c, Attempted_Challenge__r.Apex_Arena_User__r.createddate,Attempted_Challenge__r.Result__c, Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c,Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c,Attempted_Challenge__r.Apex_Arena_User__r.isPublicProfile__c FROM Challenge_Attempt__c where Attempted_Challenge__r.Apex_Arena_User__r.Name = :username' ;
-            List<Challenge_Attempt__C> ca=Database.query(queryText);
-            system.debug(ca[0].Action_Type__C);
-            if(ca.size()==0)
-            {
-                 system.debug('No Challenge_Attempt__c records found for the given criteria.');
-            } else {
-                system.debug('Challenge_Attempt__c records retrieved: ' + ca.size());
-            }
-            return ca;
-            
-
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
+        if (String.isBlank(username)) {
+            return new List<Challenge_Attempt__c>();
         }
+
+        List<Apex_Arena_User__c> users = [
+            SELECT Id,
+                   Name,
+                   Total_Exp_Points__c,
+                   AboutMe__c,
+                   profilePic__c,
+                   Level__c,
+                   CreatedDate,
+                   Current_Streak__c,
+                   Best_Streak__c,
+                   isPublicProfile__c
+            FROM Apex_Arena_User__c
+            WHERE Name = :username
+            LIMIT 1
+        ];
+
+        if (users.isEmpty()) {
+            return new List<Challenge_Attempt__c>();
+        }
+
+        Apex_Arena_User__c arenaUser = users[0];
+
+        List<Challenge_Attempt__c> ca = [
+            SELECT Id,
+                   Result__c,
+                   Name,
+                   Score__c,
+                   Solution_Provided__c,
+                   Exp_gained__c,
+                   Code_Review_Good__c,
+                   Code_Review_Bad__c,
+                   Action_Type__c,
+                   CreatedDate,
+                   Attempted_Challenge__c,
+                   Attempted_Challenge__r.Name,
+                   Attempted_Challenge__r.Scenario__c,
+                   Attempted_Challenge__r.Path__c,
+                   Attempted_Challenge__r.DifficultyLevel__c,
+                   Attempted_Challenge__r.Type__c,
+                   Attempted_Challenge__r.Result__c,
+                   Attempted_Challenge__r.Exp_Gained__c,
+                   Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c,
+                   Attempted_Challenge__r.Apex_Arena_User__r.AboutMe__c,
+                   Attempted_Challenge__r.Apex_Arena_User__r.profilePic__c,
+                   Attempted_Challenge__r.Apex_Arena_User__r.Level__c,
+                   Attempted_Challenge__r.Apex_Arena_User__r.CreatedDate,
+                   Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c,
+                   Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c,
+                   Attempted_Challenge__r.Apex_Arena_User__r.isPublicProfile__c
+            FROM Challenge_Attempt__c
+            WHERE Attempted_Challenge__r.Apex_Arena_User__c = :arenaUser.Id
+            ORDER BY CreatedDate DESC
+        ];
+
+        if (ca.isEmpty()) {
+            Challenge_Attempt__c emptyAttempt = new Challenge_Attempt__c();
+
+            emptyAttempt.Attempted_Challenge__r = new Attempted_Challenge__c();
+            emptyAttempt.Attempted_Challenge__r.Apex_Arena_User__r = arenaUser;
+
+            ca.add(emptyAttempt);
+
+            System.debug('No Challenge_Attempt__c records found. Returning user details only.');
+        } else {
+            System.debug('Challenge_Attempt__c records retrieved: ' + ca.size());
+        }
+
+        return ca;
+
+    } catch (Exception e) {
+        throw new AuraHandledException(e.getMessage());
+    }
     }
 
     @AuraEnabled

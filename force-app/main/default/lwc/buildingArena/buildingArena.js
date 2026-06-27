@@ -8,8 +8,10 @@ import getChallengeDetails from '@salesforce/apex/recordController.getChallengeD
 import { NavigationMixin } from 'lightning/navigation';
 
 
+
 export default class buildingArena extends NavigationMixin(LightningElement) {
 
+    isNavigating=false;
     isProblemOptionHidden = false;
     isProblemHidden = false;
     expReward = 0;
@@ -31,7 +33,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     resultIcon = '⏳';
     testCaseCount=0;
     passedTestCases=0;
-    testReadonly=true;
+    
     submitReadOnly=true;
     testdone=false;
 
@@ -56,6 +58,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
@@ -97,6 +100,16 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         if (logContainer) {
             logContainer.scrollTop = logContainer.scrollHeight;
         }
+    }
+
+    disconnectedCallback()
+    {
+        window.sessionStorage.setItem('challengeId',null);
+    }
+
+    setNavigating()
+    {
+        this.isNavigating=true;
     }
 
     get sectionClass() {
@@ -168,6 +181,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     openProfile() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
+        this.isNavigating=true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -180,6 +194,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     choosePath() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
+        this.isNavigating=true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -247,8 +262,13 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         {
             this.isLoading = false;
             this.isReadonly = false;
-            this.testReadonly = false;
+            
         }
+    }
+
+    get generateDisabled()
+    {
+        return this.isLoading || this.submitting;
     }
 
     async generateProblem(event) {
@@ -256,8 +276,9 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         this.textAreacode = '';
         this.isReadonly = true;
         this.submitCount = 0;
-        this.testReadonly = true;
+        
         this.submitReadOnly=true;
+        this.dataLoaded=false;
 
 
 
@@ -271,7 +292,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
         try {
             this.isLoading = true;
-            console.log('Generating problem...');
+            
             response = await invokePrompt(
                 {
                     difficulty: this.difficulty,
@@ -291,7 +312,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         } finally {
             this.isLoading = false;
             this.isReadonly = false;
-            this.testReadonly = false;
+           
             response = '';
             try {
 
@@ -387,8 +408,14 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     return `--progress:${this.score * 3.6}deg`;
 }
 
+get testReadonly()
+{
+    return this.submitting || !this.dataLoaded || !this.textAreacode;
+}
+
     async submitSolution(event) {
         this.submitting = true;
+
         this.passedTestCases=0;
         this.testCaseCount=0;
         this.loadingMessages = [];
@@ -477,7 +504,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         finally {
             this.submitting = false;
             this.isReadonly = false;
-            this.testReadonly = false;
+          
             
 
         }

@@ -5,7 +5,7 @@ import signupHelper from '@salesforce/apex/loginSignupController.signupHelper';
 import { NavigationMixin } from 'lightning/navigation';
 
 export default class Index extends NavigationMixin(LightningElement) {
-
+    isNavigating=false;
     username="";
     password="";
     signup=false;
@@ -99,6 +99,7 @@ export default class Index extends NavigationMixin(LightningElement) {
                 this.isLoading=true;
                 window.sessionStorage.setItem('loginName',result);
                 window.sessionStorage.setItem('isLoggedIn',true); 
+                this.isNavigating=true;
                 this[NavigationMixin.Navigate]({
                         type: 'standard__webPage',
                         attributes: {

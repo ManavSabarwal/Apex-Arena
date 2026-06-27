@@ -2,7 +2,7 @@ import { LightningElement } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 
 export default class HomePage extends NavigationMixin(LightningElement) {
-
+    isNavigating=false;
     loginName='';
     debuggingArena=false;
     buildingArena=false;
@@ -10,11 +10,17 @@ export default class HomePage extends NavigationMixin(LightningElement) {
     isLoggedIn=false;
     handleBackButton ='';
 
+    setNavigating()
+    {
+        this.isNavigating=true;
+    }
+
     connectedCallback()
     {
         this.loginName=window.sessionStorage.getItem('loginName');
-        console.log('HomePage CC: '+this.loginName);
+        
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        
         if(this.loginName ==null || this.isLoggedIn ==null ||this.isLoggedIn ==false)
         {
             this[NavigationMixin.Navigate]({
@@ -43,6 +49,7 @@ export default class HomePage extends NavigationMixin(LightningElement) {
     {
         window.sessionStorage.setItem('isLoggedIn',true);
         window.sessionStorage.setItem('loginName',this.loginName);
+        this.isNavigating=true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -55,7 +62,7 @@ export default class HomePage extends NavigationMixin(LightningElement) {
         console.log('Navigating to Debugging Arena...');
         window.sessionStorage.setItem('isLoggedIn',true);
         window.sessionStorage.setItem('loginName',this.loginName);
-        console.log('HomePage : '+this.loginName);
+        this.isNavigating=true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -68,6 +75,7 @@ export default class HomePage extends NavigationMixin(LightningElement) {
         console.log('Navigating to Building Arena...');
         window.sessionStorage.setItem('isLoggedIn',true);
         window.sessionStorage.setItem('loginName',this.loginName);
+        this.isNavigating=true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -82,6 +90,7 @@ export default class HomePage extends NavigationMixin(LightningElement) {
         console.log('Navigating to Quiz Arena...');
         window.sessionStorage.setItem('isLoggedIn',true);
         window.sessionStorage.setItem('loginName',this.loginName);
+        this.isNavigating=true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
