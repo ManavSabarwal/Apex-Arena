@@ -16,11 +16,13 @@ export default class Index extends NavigationMixin(LightningElement) {
     isLoading=false;
     errorMessage='';
     loginError=false;
+    userNameFromSearch=null;
 
     connectedCallback()
     {
         this.loginName=window.sessionStorage.getItem('loginName');
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        
         if(this.loginName !=null || this.isLoggedIn !=null ||this.isLoggedIn ==false)
         {
             this[NavigationMixin.Navigate]({

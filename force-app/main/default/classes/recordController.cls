@@ -329,11 +329,25 @@ public without sharing class recordController {
     }
 
 
-    @AuraEnabled
-    public static List<Challenge_Attempt__C> getUserandChalengeDetails(String username){
-        try {
+   public class UserChallengeDetailsWrapper {
+    @AuraEnabled public Apex_Arena_User__c userDetails { get; set; }
+    @AuraEnabled public List<AttemptedChallengeWrapper> attemptedChallenges { get; set; }
+}
+
+public class AttemptedChallengeWrapper {
+    @AuraEnabled public Attempted_Challenge__c attemptedChallenge { get; set; }
+    @AuraEnabled public List<Challenge_Attempt__c> challengeAttempts { get; set; }
+    @AuraEnabled public Boolean hasAttempts { get; set; }
+}
+
+@AuraEnabled
+public static UserChallengeDetailsWrapper getUserandChalengeDetails(String username) {
+    try {
+        UserChallengeDetailsWrapper response = new UserChallengeDetailsWrapper();
+        response.attemptedChallenges = new List<AttemptedChallengeWrapper>();
+
         if (String.isBlank(username)) {
-            return new List<Challenge_Attempt__c>();
+            return response;
         }
 
         List<Apex_Arena_User__c> users = [
@@ -353,12 +367,34 @@ public without sharing class recordController {
         ];
 
         if (users.isEmpty()) {
-            return new List<Challenge_Attempt__c>();
+            return response;
         }
 
         Apex_Arena_User__c arenaUser = users[0];
+        response.userDetails = arenaUser;
 
-        List<Challenge_Attempt__c> ca = [
+        List<Attempted_Challenge__c> attemptedChallenges = [
+            SELECT Id,
+                   Name,
+                   Scenario__c,
+                   Path__c,
+                   DifficultyLevel__c,
+                   Type__c,
+                   Result__c,
+                   Exp_Gained__c,
+                   CreatedDate,
+                   LastModifiedDate,
+                   Apex_Arena_User__c
+            FROM Attempted_Challenge__c
+            WHERE Apex_Arena_User__c = :arenaUser.Id
+            ORDER BY LastModifiedDate DESC
+        ];
+
+        if (attemptedChallenges.isEmpty()) {
+            return response;
+        }
+
+        List<Challenge_Attempt__c> challengeAttempts = [
             SELECT Id,
                    Result__c,
                    Name,
@@ -369,46 +405,47 @@ public without sharing class recordController {
                    Code_Review_Bad__c,
                    Action_Type__c,
                    CreatedDate,
-                   Attempted_Challenge__c,
-                   Attempted_Challenge__r.Name,
-                   Attempted_Challenge__r.Scenario__c,
-                   Attempted_Challenge__r.Path__c,
-                   Attempted_Challenge__r.DifficultyLevel__c,
-                   Attempted_Challenge__r.Type__c,
-                   Attempted_Challenge__r.Result__c,
-                   Attempted_Challenge__r.Exp_Gained__c,
-                   Attempted_Challenge__r.Apex_Arena_User__r.Total_Exp_Points__c,
-                   Attempted_Challenge__r.Apex_Arena_User__r.AboutMe__c,
-                   Attempted_Challenge__r.Apex_Arena_User__r.profilePic__c,
-                   Attempted_Challenge__r.Apex_Arena_User__r.Level__c,
-                   Attempted_Challenge__r.Apex_Arena_User__r.CreatedDate,
-                   Attempted_Challenge__r.Apex_Arena_User__r.Current_Streak__c,
-                   Attempted_Challenge__r.Apex_Arena_User__r.Best_Streak__c,
-                   Attempted_Challenge__r.Apex_Arena_User__r.isPublicProfile__c
+                   Attempted_Challenge__c
             FROM Challenge_Attempt__c
             WHERE Attempted_Challenge__r.Apex_Arena_User__c = :arenaUser.Id
             ORDER BY CreatedDate DESC
         ];
 
-        if (ca.isEmpty()) {
-            Challenge_Attempt__c emptyAttempt = new Challenge_Attempt__c();
+        Map<Id, List<Challenge_Attempt__c>> attemptsByChallengeId = new Map<Id, List<Challenge_Attempt__c>>();
 
-            emptyAttempt.Attempted_Challenge__r = new Attempted_Challenge__c();
-            emptyAttempt.Attempted_Challenge__r.Apex_Arena_User__r = arenaUser;
+        for (Challenge_Attempt__c attempt : challengeAttempts) {
+            if (!attemptsByChallengeId.containsKey(attempt.Attempted_Challenge__c)) {
+                attemptsByChallengeId.put(
+                    attempt.Attempted_Challenge__c,
+                    new List<Challenge_Attempt__c>()
+                );
+            }
 
-            ca.add(emptyAttempt);
-
-            System.debug('No Challenge_Attempt__c records found. Returning user details only.');
-        } else {
-            System.debug('Challenge_Attempt__c records retrieved: ' + ca.size());
+            attemptsByChallengeId.get(attempt.Attempted_Challenge__c).add(attempt);
         }
 
-        return ca;
+        for (Attempted_Challenge__c attemptedChallenge : attemptedChallenges) {
+            AttemptedChallengeWrapper challengeWrapper = new AttemptedChallengeWrapper();
+
+            challengeWrapper.attemptedChallenge = attemptedChallenge;
+
+            if (attemptsByChallengeId.containsKey(attemptedChallenge.Id)) {
+                challengeWrapper.challengeAttempts = attemptsByChallengeId.get(attemptedChallenge.Id);
+            } else {
+                challengeWrapper.challengeAttempts = new List<Challenge_Attempt__c>();
+            }
+
+            challengeWrapper.hasAttempts = !challengeWrapper.challengeAttempts.isEmpty();
+
+            response.attemptedChallenges.add(challengeWrapper);
+        }
+
+        return response;
 
     } catch (Exception e) {
         throw new AuraHandledException(e.getMessage());
     }
-    }
+}
 
     @AuraEnabled
     public static List<User_Achievement__C> getUserAchievements(String username){

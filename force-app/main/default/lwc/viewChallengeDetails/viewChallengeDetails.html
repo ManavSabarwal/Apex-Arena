@@ -9,6 +9,13 @@
         <!-- HEADER -->
         <c-nav-bar-component onnavigate={setNavigating}></c-nav-bar-component>
 
+        <template if:true={userSearchProfile}>
+                    <div style="    text-align: center;font-weight: 700;background: linear-gradient(45deg, #ed4b4b, orange);">
+                        <span>You are viewing {username}'s profile.</span>
+                        <button class="backToProfileButton" onclick={backToProfile} data-id='profile'> Back to My Profile</button>
+                    </div>
+                </template>
+
         <div class="main-container">
             <div class="header-container">
                 <span class="back-btn" onclick={backToProfile}> ← Back to Profile</span>
@@ -265,7 +272,7 @@
 
                         </div>
 
-                            <button class="tryAgainButton" onclick={tryAgainMethod}>Try Again ?
+                            <button class="tryAgainButton" onclick={tryAgainMethod}>{isUserSearchTryButtonText} ?
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                     stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
                                     stroke-linejoin="round" style="width: 20px;">

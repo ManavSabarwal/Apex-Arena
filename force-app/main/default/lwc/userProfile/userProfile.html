@@ -125,6 +125,14 @@
 
 
         </div>
+        <template if:true={userSearchProfile}>
+            <div style="    text-align: center;font-weight: 700;background: linear-gradient(45deg, #ed4b4b, orange);">
+                <span>You are viewing {capitalizedName}'s profile. Navbar components would still take you to your
+                    respective arenas</span>
+                <button class="backToProfileButton" onclick={handleUserResultSelected} data-id='profile'> Back to My
+                    Profile</button>
+            </div>
+        </template>
         <div class="display-container">
 
             <div class={searchBackdrop} onclick={closeSearch}></div>
@@ -146,7 +154,7 @@
                 <div style="width: stretch;">
                     <template lwc:if={isUserItemSelected}>
                         <template for:each={searchusers} for:item="user">
-                            <div key={user.recordId} data-id={user.recordId} class="resultItemDiv"
+                            <div key={user.recordId} data-id={user.title} class="resultItemDiv"
                                 onclick={handleUserResultSelected}>
                                 <p>{user.title}</p>
                                 <p>{user.subtitle}</p>
@@ -166,6 +174,8 @@
             </div>
 
             <template if:true={showProfile}>
+
+
 
                 <!-- MAIN CONTENT -->
                 <div class="hero">
@@ -409,38 +419,40 @@
                     </div>
 
                     <div class="hero-right">
-                        <template if:false={editProfile}>
-                            <button onclick={editProfileFun} class="edit-btn">
-                                <svg fill="#ffffff" width="20" height="20" viewBox="-2.5 -2.5 24 24"
-                                    xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin"
-                                    class="jam jam-pencil">
-                                    <path
-                                        d='M12.238 5.472L3.2 14.51l-.591 2.016 1.975-.571 9.068-9.068-1.414-1.415zM13.78 3.93l1.414 1.414 1.318-1.318a.5.5 0 0 0 0-.707l-.708-.707a.5.5 0 0 0-.707 0L13.781 3.93zm3.439-2.732l.707.707a2.5 2.5 0 0 1 0 3.535L5.634 17.733l-4.22 1.22a1 1 0 0 1-1.237-1.241l1.248-4.255 12.26-12.26a2.5 2.5 0 0 1 3.535 0z' />
-                                </svg> Edit Profile </button>
-                        </template>
-                        <template if:true={editProfile}>
-                            <div style="display:flex;gap:5px;">
-                                <button onclick={editProfileFun} class="edit-btn">{editButtonText}</button>
-                                <button onclick={editProfileClose} class="close-btn">Cancel</button>
-                            </div>
-
-                        </template>
-                        <label class="custom-checkbox">
-                            <input type="checkbox" checked={isPublic} onchange={handlePublicChange}
-                                disabled={inputReadonly} />
-                            <span class="checkmark"></span>
-                            <span class="checkbox-label">Public Profile</span>
-                            <template if:true={editProfile}>
-                                <span style="display: flex;gap: 5px;color: rgb(125, 125, 125);">
+                        <template if:false={userSearchProfile}>
+                            <template if:false={editProfile}>
+                                <button onclick={editProfileFun} class="edit-btn">
                                     <svg fill="#ffffff" width="20" height="20" viewBox="-2.5 -2.5 24 24"
                                         xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin"
                                         class="jam jam-pencil">
                                         <path
                                             d='M12.238 5.472L3.2 14.51l-.591 2.016 1.975-.571 9.068-9.068-1.414-1.415zM13.78 3.93l1.414 1.414 1.318-1.318a.5.5 0 0 0 0-.707l-.708-.707a.5.5 0 0 0-.707 0L13.781 3.93zm3.439-2.732l.707.707a2.5 2.5 0 0 1 0 3.535L5.634 17.733l-4.22 1.22a1 1 0 0 1-1.237-1.241l1.248-4.255 12.26-12.26a2.5 2.5 0 0 1 3.535 0z' />
-                                    </svg>
-                                </span>
+                                    </svg> Edit Profile </button>
                             </template>
-                        </label>
+                            <template if:true={editProfile}>
+                                <div style="display:flex;gap:5px;">
+                                    <button onclick={editProfileFun} class="edit-btn">{editButtonText}</button>
+                                    <button onclick={editProfileClose} class="close-btn">Cancel</button>
+                                </div>
+
+                            </template>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" checked={isPublic} onchange={handlePublicChange}
+                                    disabled={inputReadonly} />
+                                <span class="checkmark"></span>
+                                <span class="checkbox-label">Public Profile</span>
+                                <template if:true={editProfile}>
+                                    <span style="display: flex;gap: 5px;color: rgb(125, 125, 125);">
+                                        <svg fill="#ffffff" width="20" height="20" viewBox="-2.5 -2.5 24 24"
+                                            xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin"
+                                            class="jam jam-pencil">
+                                            <path
+                                                d='M12.238 5.472L3.2 14.51l-.591 2.016 1.975-.571 9.068-9.068-1.414-1.415zM13.78 3.93l1.414 1.414 1.318-1.318a.5.5 0 0 0 0-.707l-.708-.707a.5.5 0 0 0-.707 0L13.781 3.93zm3.439-2.732l.707.707a2.5 2.5 0 0 1 0 3.535L5.634 17.733l-4.22 1.22a1 1 0 0 1-1.237-1.241l1.248-4.255 12.26-12.26a2.5 2.5 0 0 1 3.535 0z' />
+                                        </svg>
+                                    </span>
+                                </template>
+                            </label>
+                        </template>
                     </div>
 
                 </div>
@@ -665,7 +677,7 @@
                                 <p>View All</p>
                             </template>
                         </div>
-                        <div>
+                        <div style="display:grid;gap:5px;">
                             <template lwc:if={showActivities}>
                                 <template for:each={recent3problems} for:item="problem">
                                     <div key={problem.id} class="activity-cont" data-id={problem.id}
@@ -800,7 +812,7 @@
 
                             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="challenge-icon">
+                                stroke-linejoin="round" class="challenge-icon-activity">
 
                                 <path d="M4 7h16"></path>
                                 <path d="M4 12h16"></path>
@@ -851,147 +863,205 @@
                             </div>
                         </div>
                     </div>
-                    <div class="utilities-container">
 
-                        <input type="text" placeholder="🔍 Search by problem name or path" class="search-input"
-                            onkeyup={handleSearch} />
-                        <select id="result" onchange={handleResultFilterChange} class="category-dropdown">
-                            <template for:each={resultOptions} for:item="result">
-                                <option key={result.value} value={result.value}>{result.label}</option>
-                            </template>
-                        </select>
-                        <select id="category" onchange={handleCategoryChange} class="category-dropdown">
-                            <template for:each={categoryOptions} for:item="category">
-                                <option key={category.value} value={category.value}>{category.label}</option>
-                            </template>
-                        </select>
+                    <template lwc:if={showAllChallenges}>
+                        <div class="utilities-container">
 
-                        <select id="difficulty" onchange={handleDifficultyChange} class="category-dropdown">
-                            <template for:each={difficultyOptions} for:item="difficulty">
-                                <option key={difficulty.value} value={difficulty.value}>{difficulty.label}</option>
-                            </template>
-                        </select>
+                            <input type="text" placeholder="🔍 Search by problem name or path" class="search-input"
+                                onkeyup={handleSearch} />
+                            <select id="result" onchange={handleResultFilterChange} class="category-dropdown">
+                                <template for:each={resultOptions} for:item="result">
+                                    <option key={result.value} value={result.value}>{result.label}</option>
+                                </template>
+                            </select>
+                            <select id="category" onchange={handleCategoryChange} class="category-dropdown">
+                                <template for:each={categoryOptions} for:item="category">
+                                    <option key={category.value} value={category.value}>{category.label}</option>
+                                </template>
+                            </select>
 
-                        <select id="sort" onchange={handlePathChange} class="category-dropdown">
-                            <template for:each={pathOptions} for:item="path">
-                                <option key={path.value} value={path.value}>{path.label}</option>
-                            </template>
-                        </select>
+                            <select id="difficulty" onchange={handleDifficultyChange} class="category-dropdown">
+                                <template for:each={difficultyOptions} for:item="difficulty">
+                                    <option key={difficulty.value} value={difficulty.value}>{difficulty.label}</option>
+                                </template>
+                            </select>
 
-
-                    </div>
-
+                            <select id="sort" onchange={handlePathChange} class="category-dropdown">
+                                <template for:each={pathOptions} for:item="path">
+                                    <option key={path.value} value={path.value}>{path.label}</option>
+                                </template>
+                            </select>
 
 
-                    <div class="history-container">
-
-                        <!-- Header -->
-                        <div class="table-header">
-                            <div>CHALLENGE</div>
-                            <div>CATEGORY</div>
-                            <div>DIFFICULTY</div>
-                            <div>RESULT</div>
-                            <div>SOLVED ON</div>
-                            <div>PATH</div>
-                            <div></div>
                         </div>
 
-                        <!-- Rows -->
-                        <template for:each={challengeData} for:item="item">
+                        <div class="history-container">
 
-                            <div key={item.Id} data-id={item.Id} class="table-row">
+                            <!-- Header -->
+                            <div class="table-header">
+                                <div>CHALLENGE</div>
+                                <div>CATEGORY</div>
+                                <div>DIFFICULTY</div>
+                                <div>RESULT</div>
+                                <div>SOLVED ON</div>
+                                <div>PATH</div>
+                                <div></div>
+                            </div>
 
-                                <!-- Challenge -->
-                                <div class="challenge-section">
-                                    <div>
-                                        <div class="challenge-name">
-                                            {item.Name}
+                            <!-- Rows -->
+                            <template for:each={challengeData} for:item="item">
+
+                                <div key={item.Id} data-id={item.Id} class="table-row">
+
+                                    <!-- Challenge -->
+                                    <div class="challenge-section">
+                                        <div>
+                                            <div class="challenge-name">
+                                                {item.Name}
+                                            </div>
                                         </div>
+
+                                    </div>
+
+                                    <!-- Category -->
+                                    <div class="category">
+
+                                        <span>{item.Type__c}</span>
+                                    </div>
+
+                                    <!-- Difficulty -->
+                                    <div>
+                                        <span class={item.diffClass}>
+                                            {item.DifficultyLevel__c}
+                                        </span>
+                                    </div>
+
+                                    <!-- Points -->
+                                    <div class={item.Result__c}>
+                                        <lightning-icon icon-name={item.statusIcon} size="small"
+                                            class={item.statusClass} alternative-text={item.Result__c}>
+                                        </lightning-icon>
+                                    </div>
+
+                                    <!-- Solved On -->
+                                    <div class="date">
+                                        {item.LastModifiedDate}
+                                    </div>
+
+                                    <!-- Time -->
+                                    <div class={item.Path__c}>
+                                        {item.Path__c}
+                                    </div>
+
+                                    <!-- Action -->
+                                    <div class="btn-container">
+                                        <button data-id={item.Id} class="details-btn" onclick={viewDetails}>
+                                            View Details
+                                        </button>
                                     </div>
 
                                 </div>
 
-                                <!-- Category -->
-                                <div class="category">
+                            </template>
 
-                                    <span>{item.Type__c}</span>
+                            <!-- Footer -->
+                            <div class="footer">
+
+                                <div class="results-text">
+                                    {showingText}
                                 </div>
 
-                                <!-- Difficulty -->
-                                <div>
-                                    <span class={item.diffClass}>
-                                        {item.DifficultyLevel__c}
-                                    </span>
-                                </div>
+                                <div class="pagination">
 
-                                <!-- Points -->
-                                <div class={item.Result__c}>
-                                    <lightning-icon icon-name={item.statusIcon} size="small" class={item.statusClass}
-                                        alternative-text={item.Result__c}>
-                                    </lightning-icon>
-                                </div>
+                                    <!-- Previous -->
+                                    <button class="page-btn" onclick={handlePrevious}>
 
-                                <!-- Solved On -->
-                                <div class="date">
-                                    {item.LastModifiedDate}
-                                </div>
-
-                                <!-- Time -->
-                                <div class={item.Path__c}>
-                                    {item.Path__c}
-                                </div>
-
-                                <!-- Action -->
-                                <div class="btn-container">
-                                    <button data-id={item.Id} class="details-btn" onclick={viewDetails}>
-                                        View Details
-                                    </button>
-                                </div>
-
-                            </div>
-
-                        </template>
-
-                        <!-- Footer -->
-                        <div class="footer">
-
-                            <div class="results-text">
-                                {showingText}
-                            </div>
-
-                            <div class="pagination">
-
-                                <!-- Previous -->
-                                <button class="page-btn" onclick={handlePrevious}>
-
-                                    ‹
-
-                                </button>
-
-                                <!-- Dynamic Pages -->
-                                <template for:each={pageNumbers} for:item="page">
-
-                                    <button key={page.number} data-page={page.number} class={page.className}
-                                        onclick={handlePageClick}>
-
-                                        {page.number}
+                                        ‹
 
                                     </button>
 
-                                </template>
+                                    <!-- Dynamic Pages -->
+                                    <template for:each={pageNumbers} for:item="page">
 
-                                <!-- Next -->
-                                <button class="page-btn" onclick={handleNext}>
+                                        <button key={page.number} data-page={page.number} class={page.className}
+                                            onclick={handlePageClick}>
 
-                                    ›
+                                            {page.number}
 
-                                </button>
+                                        </button>
+
+                                    </template>
+
+                                    <!-- Next -->
+                                    <button class="page-btn" onclick={handleNext}>
+
+                                        ›
+
+                                    </button>
+
+                                </div>
 
                             </div>
 
                         </div>
+                    </template>
+                    <template lwc:else>
+                        <div class="noAch-wrapper">
+                            <svg class="no-activity-svg" width="290" height="270" viewBox="0 0 320 220"
+                                xmlns="http://www.w3.org/2000/svg" fill="none">
+                                <defs>
+                                    <linearGradient id="terminaBorder" x1="55" y1="35" x2="265" y2="175"
+                                        gradientUnits="userSpaceOnUse">
+                                        <stop stop-color="#8b5cf6" />
+                                        <stop offset="1" stop-color="#22d3ee" />
+                                    </linearGradient>
 
-                    </div>
+                                    <filter id="terminaGlow" x="-40%" y="-40%" width="180%" height="180%">
+                                        <feGaussianBlur stdDeviation="4" result="blur" />
+                                        <feMerge>
+                                            <feMergeNode in="blur" />
+                                            <feMergeNode in="SourceGraphic" />
+                                        </feMerge>
+                                    </filter>
+                                </defs>
+
+                                <!-- Ground glow -->
+                                <ellipse cx="160" cy="178" rx="92" ry="17" fill="#8b5cf6" opacity="0.18" />
+
+                                <!-- Terminal window -->
+                                <rect x="58" y="45" width="204" height="125" rx="16" fill="#080f24"
+                                    stroke="url(#terminalBorder)" stroke-width="2" />
+
+                                <!-- Top bar -->
+                                <path d="M58 74H262" stroke="#334155" stroke-width="2" />
+
+                                <circle cx="80" cy="60" r="5" fill="#ef4444" />
+                                <circle cx="98" cy="60" r="5" fill="#f59e0b" />
+                                <circle cx="116" cy="60" r="5" fill="#22c55e" />
+
+                                <!-- Prompt symbol -->
+                                <path d="M91 105L108 118L91 131" stroke="#a78bfa" stroke-width="6"
+                                    stroke-linecap="round" stroke-linejoin="round" filter="url(#terminalGlow)" />
+
+                                <!-- Empty cursor -->
+                                <rect x="128" y="128" width="52" height="6" rx="3" fill="#38bdf8" opacity="0.9"
+                                    filter="url(#terminalGlow)" />
+
+                                <!-- Muted ghost lines -->
+                                <rect x="128" y="100" width="84" height="7" rx="3.5" fill="#334155" opacity="0.75" />
+                                <rect x="128" y="114" width="58" height="7" rx="3.5" fill="#334155" opacity="0.55" />
+
+                                <!-- Small empty badge -->
+                                <circle cx="235" cy="128" r="18" fill="#020617" stroke="#64748b" stroke-width="2" />
+                                <path d="M228 128H242" stroke="#94a3b8" stroke-width="3" stroke-linecap="round" />
+
+                                <!-- Spark -->
+                                <path d="M47 92L51 100L59 104L51 108L47 116L43 108L35 104L43 100L47 92Z" fill="#8b5cf6"
+                                    opacity="0.85" />
+                            </svg>
+                            <p style="font-weight: 700;">No Recent Activity!!</p>
+                        </div>
+                    </template>
 
 
 

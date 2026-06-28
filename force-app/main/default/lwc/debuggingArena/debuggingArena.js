@@ -1,16 +1,16 @@
-import { LightningElement } from 'lwc';
+import { LightningElement, wire } from 'lwc';
 import invokePrompt from '@salesforce/apex/PromptTemplateController.invokePrompt';
 import invokeValidationPrompt from '@salesforce/apex/PromptTemplateController.invokeValidationPrompt';
 import saveAttemptedChallenge from '@salesforce/apex/recordController.saveAttemptedChallenge';
 import createChallengeAttempt from '@salesforce/apex/recordController.createChallengeAttempt';
 import updateExpPoints from '@salesforce/apex/recordController.updateExpPoints';
 import getChallengeDetails from '@salesforce/apex/recordController.getChallengeDetails';
-import { NavigationMixin } from 'lightning/navigation';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 
 
 export default class DebuggingArena extends NavigationMixin(LightningElement) {
 
-    isNavigating=false;
+    isNavigating = false;
     loginName = '';
     problem;
     scenario = '';
@@ -42,6 +42,8 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
 
     unlockedAchievements = [];
 
+    createChallenge = false;
+
     get sectionClass() {
         return this.isProblemOptionHidden
             ? 'selectOptions collapsed'
@@ -64,16 +66,46 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             : 'problemSection problemSectionexpanded';
     }
 
-    setNavigating()
-    {
-        this.isNavigating=true;
+    setNavigating() {
+        this.isNavigating = true;
+    }
+
+    @wire(CurrentPageReference)
+    getPageReference(pageRef) {
+        if (!pageRef || this.hasLoadedChallenge) {
+            return;
+        }
+
+        this.createChallenge = pageRef.state?.create === 'true' || pageRef.state?.create === true;
+
+        this.hasLoadedChallenge = true;
+
+        const challengeId = window.sessionStorage.getItem('challengeId');
+
+        if (challengeId) {
+            this.loadChallenge(challengeId);
+        }
+
+        if (this.createChallenge) {
+            const newState = { ...pageRef.state };
+            delete newState.create;
+
+            this[NavigationMixin.Navigate](
+                {
+                    type: pageRef.type,
+                    attributes: pageRef.attributes,
+                    state: newState
+                },
+                true
+            );
+        }
     }
 
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
-        
+
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
-        
+
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
@@ -82,13 +114,9 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                 }
             });
         }
-        const challengeId = window.sessionStorage.getItem('challengeId');
-        if (challengeId)
-            this.loadChallenge(challengeId);
     }
 
     async loadChallenge(challengeId) {
-        console.log("loadChallenge " + challengeId);
         try {
 
             const result = await getChallengeDetails(
@@ -96,10 +124,15 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
                     challengeId: challengeId
                 }
             )
-            this.savedId = challengeId;
-            console.log("load " + this.savedId);
-
             this.populateData(result);
+            if (this.createChallenge) {
+                const newchallengeId = await this.createAttemptedChallenge();
+                this.savedId = newchallengeId;
+                console.log(this.savedId);
+            }
+            else {
+                this.savedId = challengeId;
+            }
 
         }
         catch (error) {
@@ -107,9 +140,9 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         }
     }
 
-    disconnectedCallback()
-    {
-        window.sessionStorage.setItem('challengeId',null);
+    disconnectedCallback() {
+        window.sessionStorage.removeItem('challengeId');
+        sessionStorage.removeItem('createChallenge');
     }
 
 
@@ -148,7 +181,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
     openProfile() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
-        this.isNavigating=true;
+        this.isNavigating = true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -161,7 +194,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
 
-        this.isNavigating=true;
+        this.isNavigating = true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -332,17 +365,16 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
             let message = parsedResponse.message;
             let expPoints = parsedResponse.expPoints;
             this.unlockedAchievements = parsedResponse.unlockedAchievements;
-            if (this.unlockedAchievements.length > 0 && this.unlockedAchievements.formulaKey=='FIRST_SUBMISSION') {
+            if (this.unlockedAchievements.length > 0 && this.unlockedAchievements.formulaKey == 'FIRST_SUBMISSION') {
                 this.template.querySelector('c-show-achievement-modal').openModal(this.unlockedAchievements);
             }
             if (this.result.toLowerCase().includes('pass')) {
                 this.template.querySelector('c-modal-component').openModal(message, expPoints);
-                if(this.unlockedAchievements.length > 0 && this.unlockedAchievements.formulaKey!='FIRST_SUBMISSION')
-                {
+                if (this.unlockedAchievements.length > 0 && this.unlockedAchievements.formulaKey != 'FIRST_SUBMISSION') {
                     this.template.querySelector('c-show-achievement-modal').openModal(this.unlockedAchievements);
                 }
             }
-            
+
 
         } catch (error) {
             console.error('Error in submitSolution method:', error);
@@ -357,7 +389,7 @@ export default class DebuggingArena extends NavigationMixin(LightningElement) {
     showNewAchievements() {
         console.log(this.unlockedAchievements.length);
         this.template.querySelector('c-show-achievement-modal').openModal(this.unlockedAchievements);
-        
+
     }
 
 }

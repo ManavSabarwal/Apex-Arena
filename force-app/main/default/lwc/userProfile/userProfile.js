@@ -11,7 +11,8 @@ import globalSearch from '@salesforce/apex/recordController.globalSearch';
 
 
 export default class UserProfile extends NavigationMixin(LightningElement) {
-    loginName = 'Test User';
+    loginName = null;
+    username = null;
     limitSize = '3';
     isPublic = false;
     isLoggedIn = false;
@@ -104,6 +105,10 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         { "label": 'Legendary Salesforce Developer', "limit": 8500 }
     ]
 
+    get userSearchProfile() {
+        return window.sessionStorage.getItem('username') ? true : false;
+    }
+
     get ProgressBarWidth() {
         return `width:`
     }
@@ -111,8 +116,8 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
     get capitalizedName() {
         let displayName = '';
-        if (this.loginName.includes(' ')) {
-            let names = this.loginName.split(' ');
+        if (this.username.includes(' ')) {
+            let names = this.username.split(' ');
 
             for (let name of names) {
 
@@ -121,7 +126,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
             return displayName.trimStart();
         }
         else {
-            displayName = this.loginName.charAt(0).toUpperCase() + this.loginName.substring(1);
+            displayName = this.username.charAt(0).toUpperCase() + this.username.substring(1);
 
         }
         return displayName;
@@ -239,7 +244,9 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
+        this.username = window.sessionStorage.getItem('username') ? window.sessionStorage.getItem('username') : this.loginName;
         this.randomQuote = this.getTodaysQuote();
+        this.isNavigating = false;
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
@@ -250,13 +257,13 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         }
         else {
 
-            this.loadUserandChallengeDetails();
+            this.loadUserandChallengeDetails(this.username);
 
             //this.loadAttemptedChallenges();
 
             getUserAchievements(
                 {
-                    username: this.loginName
+                    username: this.username
                 }
             )
 
@@ -294,6 +301,12 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
     }
 
+    disconnectedCallback()
+    {
+        window.sessionStorage.removeItem('username');
+    }
+
+
     getTodaysQuote() {
         const today = new Date().toLocaleDateString('en-US', {
             weekday: 'long'
@@ -310,22 +323,26 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         return todaysQuotes[randomIndex];
     }
 
-    loadUserandChallengeDetails() {
+    loadUserandChallengeDetails(username) {
 
         getUserandChalengeDetails({
-            username: this.loginName
+            username: username
         })
 
             .then(result => {
+                this.isNavigating = false;
                 this.bifData(result);
             })
 
             .catch(error => {
-
+                this.isNavigating = false;
                 console.log(error);
-            });
+            })
+
     }
 
+
+    /*
     bifData(result) {
         try {
             this.testAttempts = 0;
@@ -485,10 +502,189 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
         } catch (error) {
             console.log('Error in bifData', error);
-            console.log('Raw error:', JSON.parse(JSON.stringify(error)));
         }
     }
 
+    */
+
+    bifData(result) {
+        try {
+            this.testAttempts = 0;
+            this.submitAttempts = 0;
+
+            if (!result || !result.userDetails) {
+                this.submissions = 0;
+                this.attemptedChallenges = 0;
+                this.solved = 0;
+                this.easy = 0;
+                this.medium = 0;
+                this.hard = 0;
+                this.wrong = 0;
+                this.acceptanceRate = 0.00;
+                return;
+            }
+
+            const userDetails = result.userDetails;
+            const attemptedChallengeWrappers = result.attemptedChallenges || [];
+
+            const normalizedResult = [];
+
+            attemptedChallengeWrappers.forEach(item => {
+                const attemptedChallenge = item.attemptedChallenge;
+                const challengeAttempts = item.challengeAttempts || [];
+
+                if (challengeAttempts.length > 0) {
+                    challengeAttempts.forEach(attempt => {
+                        normalizedResult.push({
+                            ...attempt,
+                            Attempted_Challenge__c: attempt.Attempted_Challenge__c || attemptedChallenge?.Id,
+                            Attempted_Challenge__r: attemptedChallenge
+                        });
+                    });
+                } else {
+                    normalizedResult.push({
+                        Attempted_Challenge__c: attemptedChallenge?.Id,
+                        Attempted_Challenge__r: attemptedChallenge
+                    });
+                }
+            });
+
+            const actualAttempts = normalizedResult.filter(item => item.Id);
+
+            this.attemptedChallenges = attemptedChallengeWrappers.length;
+            this.submissions = actualAttempts.length;
+
+            this.getRecentProblems(result);
+
+            this.expPoints = parseInt(userDetails.Total_Exp_Points__c || 0, 10);
+
+            this.levels = this.levels.map(level => {
+                const percent = Math.min(
+                    Math.floor(((this.expPoints == 0 ? 1 : this.expPoints) / (level.limit == 0 ? 1 : level.limit)) * 100),
+                    100
+                );
+
+                return {
+                    ...level,
+                    unlocked: (this.expPoints >= level.limit || level.label == 'Beginner'),
+                    limitDisplay: level.limit == 12000 ? '' : level.limit + ' XP',
+                    widthStyle: `width:${percent}%;`
+                };
+            });
+
+            this.isPublic = userDetails.isPublicProfile__c;
+
+            this.nextLevel =
+                this.expPoints < 1000 ? 'Apprentice' :
+                    this.expPoints < 3000 ? 'Skilled Developer' :
+                        this.expPoints < 5500 ? 'Expert Architect' :
+                            this.expPoints < 8500 ? 'Legendary Salesforce Hero' :
+                                'Max Level';
+
+            this.xpToNextLevel =
+                this.expPoints < 1000 ? 1001 - this.expPoints :
+                    this.expPoints < 3000 ? 3001 - this.expPoints :
+                        this.expPoints < 5500 ? 5501 - this.expPoints :
+                            this.expPoints < 8500 ? 8501 - this.expPoints :
+                                0;
+
+            this.nextLevelXp =
+                this.expPoints < 1000 ? 1001 :
+                    this.expPoints < 3000 ? 3001 :
+                        this.expPoints < 5500 ? 5501 :
+                            this.expPoints < 8500 ? 8501 :
+                                this.expPoints;
+
+            this.currentLevelStartXp =
+                this.expPoints < 1000 ? 0 :
+                    this.expPoints < 3000 ? 1001 :
+                        this.expPoints < 5500 ? 3001 :
+                            this.expPoints < 8500 ? 5501 :
+                                8501;
+
+            const levelRange = this.nextLevelXp - this.currentLevelStartXp;
+            const xpGainedInCurrentLevel = this.expPoints - this.currentLevelStartXp;
+
+            this.xpProgressPercent =
+                this.nextLevel === 'Max Level'
+                    ? 100
+                    : Math.floor((xpGainedInCurrentLevel / levelRange) * 100);
+
+            let setChallenges = new Set();
+            let setEasy = new Set();
+            let setMedium = new Set();
+            let setHard = new Set();
+
+            this.currentStreak = userDetails.Current_Streak__c || 0;
+            this.bestStreak = userDetails.Best_Streak__c || 0;
+            this.aboutMe = userDetails.AboutMe__c ? userDetails.AboutMe__c : this.aboutMe;
+            this.profilePic = userDetails.profilePic__c;
+            this.userLevel = userDetails.Level__c;
+
+            this.joinDate = userDetails.CreatedDate
+                ? new Date(userDetails.CreatedDate).toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: '2-digit',
+                    year: 'numeric'
+                })
+                : '';
+
+            for (let res of actualAttempts) {
+                const attemptedChallenge = res.Attempted_Challenge__r;
+                const attemptedChallengeId = res.Attempted_Challenge__c;
+
+                if (attemptedChallenge?.Result__c?.toLowerCase() === 'pass') {
+                    setChallenges.add(attemptedChallengeId);
+
+                    if (
+                        attemptedChallenge.DifficultyLevel__c === 'Beginner' ||
+                        attemptedChallenge.DifficultyLevel__c === 'Apprentice' ||
+                        attemptedChallenge.DifficultyLevel__c === 'Easy'
+                    ) {
+                        setEasy.add(attemptedChallengeId);
+                    }
+                    else if (
+                        attemptedChallenge.DifficultyLevel__c === 'Skilled Developer' ||
+                        attemptedChallenge.DifficultyLevel__c === 'Medium'
+                    ) {
+                        setMedium.add(attemptedChallengeId);
+                    }
+                    else if (
+                        attemptedChallenge.DifficultyLevel__c === 'Expert Architect' ||
+                        attemptedChallenge.DifficultyLevel__c === 'Legendary Salesforce Hero' ||
+                        attemptedChallenge.DifficultyLevel__c === 'Hard'
+                    ) {
+                        setHard.add(attemptedChallengeId);
+                    }
+                }
+
+                if (res.Action_Type__c?.toLowerCase() === 'test') {
+                    this.testAttempts++;
+                }
+                else if (res.Action_Type__c?.toLowerCase() === 'submit') {
+                    this.submitAttempts++;
+                }
+            }
+
+            this.solved = setChallenges.size;
+            this.easy = setEasy.size;
+            this.medium = setMedium.size;
+            this.hard = setHard.size;
+
+            this.wrong = this.submissions - this.solved;
+
+            this.acceptanceRate =
+                this.submissions > 0
+                    ? ((this.solved / this.submissions) * 100).toFixed(2)
+                    : 0.00;
+
+        } catch (error) {
+            console.log('Error in bifData', error);
+        }
+    }
+
+
+    /*
     getRecentProblems(result) {
 
         const seenChallenges = new Set();
@@ -526,8 +722,6 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 };
             });
 
-        console.log(this.recent3problems);
-
         this.recent3problems = this.recent3problems.map(record => {
 
             const modifiedDate = new Date(record.LastModifiedDate);
@@ -551,6 +745,71 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
             return {
                 ...record,
                 timeAgo: timeAgo,
+            };
+        });
+    }
+
+    */
+
+    getRecentProblems(result) {
+        const attemptedChallengeWrappers = result?.attemptedChallenges || [];
+
+        this.recent3problems = attemptedChallengeWrappers
+            .filter(item => item.attemptedChallenge?.Id)
+            .slice(0, 3)
+            .map(item => {
+                const attemptedChallenge = item.attemptedChallenge;
+                const latestAttempt = item.challengeAttempts?.length > 0
+                    ? item.challengeAttempts[0]
+                    : null;
+
+                const challengeName = attemptedChallenge.Name || '';
+                const path = attemptedChallenge.Path__c || '';
+                const resultValue = attemptedChallenge.Result__c || '';
+
+                return {
+                    id: attemptedChallenge.Id,
+                    attemptId: latestAttempt?.Id,
+                    name: challengeName.length > 48
+                        ? challengeName.substring(0, 47) + ". . ."
+                        : challengeName,
+                    scenario: attemptedChallenge.Scenario__c,
+                    path: path,
+                    pathStyle: `color:${path.toLowerCase().includes('coding') ? '#00E5FF' : '#FF5C5C'};`,
+                    difficulty: attemptedChallenge.DifficultyLevel__c,
+                    type: attemptedChallenge.Type__c,
+                    result: resultValue,
+                    isPass: resultValue.toLowerCase().includes('pass'),
+                    isFail: resultValue.toLowerCase().includes('fail'),
+                    isPending: resultValue.toLowerCase().includes('pending'),
+                    score: latestAttempt?.Score__c,
+                    exp: latestAttempt?.Exp_gained__c?latestAttempt?.Exp_gained__c:0,
+                    LastModifiedDate: attemptedChallenge.LastModifiedDate
+                };
+            });
+
+        this.recent3problems = this.recent3problems.map(record => {
+            const modifiedDate = new Date(record.LastModifiedDate);
+            const now = new Date();
+
+            const diffMs = now - modifiedDate;
+            const diffMinutes = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMinutes / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            let timeAgo = '';
+
+            if (diffMinutes < 60) {
+                timeAgo = diffMinutes + ' min ago';
+            } else if (diffHours < 24) {
+                timeAgo = diffHours + ' hr ago';
+            } else {
+                timeAgo = diffDays + ' day ago';
+            }
+
+            return {
+                ...record,
+                timeAgo: timeAgo
             };
         });
     }
@@ -592,12 +851,12 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         this.editProfile = !this.editProfile;
         if ((!this.editProfile) && this.aboutMe.length <= 200) {
             console.log('Saving Data');
-            const result = await saveChanges({ username: this.loginName, aboutMe: this.aboutMe, imageUrl: this.profilePic, isPublic: this.isPublic });
+            const result = await saveChanges({ username: this.username, aboutMe: this.aboutMe, imageUrl: this.profilePic, isPublic: this.isPublic });
 
             if (result == 'Changes Saved');
             {
 
-                this.loadUserandChallengeDetails();
+                this.loadUserandChallengeDetails(this.username);
             }
 
         }
@@ -773,6 +1032,11 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
 
     */
 
+    get showAllChallenges()
+    {
+        return this.challengeData.length>0;
+    }
+
     async viewAllProblems() {
         this.item = 'activity';
         this.showProfile = false;
@@ -786,7 +1050,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 difficultyFilter: this.selectedDifficulty,
                 pathFilter: this.selectedPath,
                 resultFilter: this.selectedResultFilter,
-                username: this.loginName
+                username: this.username
             });
             console.log(result);
             this.challengeData = result.records;
@@ -873,7 +1137,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     }
 
     async viewDetails(event) {
-        const recordId = event.currentTarget.dataset.id?event.currentTarget.dataset.id:event.target.dataset.id;
+        const recordId = event.currentTarget.dataset.id ? event.currentTarget.dataset.id : event.target.dataset.id;
         this.isNavigating = true;
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
@@ -883,7 +1147,8 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
                 name: 'viewDetails__c'
             },
             state: {
-                recordId: recordId
+                recordId: recordId,
+                username:this.username
             }
         });
     }
@@ -983,15 +1248,15 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         this.viewAllProblems();
     }
 
-    get showActivities()
-    {
-        return this.recent3problems.length>0;
+    get showActivities() {
+        return this.recent3problems.length > 0;
     }
 
     handleLogout() {
         this.isNavigating = true;
         window.sessionStorage.removeItem('loginName');
         window.sessionStorage.removeItem('isLoggedIn');
+        window.sessionStorage.removeItem('username');
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -1026,7 +1291,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         const response = await globalSearch(
             {
                 searchKey: searchItem,
-                username: this.loginName
+                username: this.loginname
             }
         );
         this.responseReturned = true;
@@ -1071,7 +1336,22 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
     }
 
     handleUserResultSelected(event) {
-        const recordId = event.currentTarget.dataset.id;
+        const dataId = event.target.dataset.id;
+        if (dataId != null && dataId == 'profile') {
+            window.sessionStorage.removeItem('username');
+            this.isNavigating = true;
+            this.loadUserandChallengeDetails(this.loginName);
+            window.location.reload();
+        }
+        else {
+            const username = event.currentTarget.dataset.id;
+            window.sessionStorage.setItem('username', username);
+            console.log(window.sessionStorage.getItem('username'));
+            this.isNavigating = true;
+            this.loadUserandChallengeDetails(username);
+            window.location.reload();
+        }
+
 
     }
 
@@ -1079,6 +1359,7 @@ export default class UserProfile extends NavigationMixin(LightningElement) {
         const recordId = event.currentTarget.dataset.id;
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
+        window.sessionStorage.setItem('username', this.username);
         this[NavigationMixin.Navigate]({
             type: 'comm__namedPage',
             attributes: {

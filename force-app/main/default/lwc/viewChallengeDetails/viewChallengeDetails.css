@@ -332,6 +332,23 @@
     filter: drop-shadow(0 0 8px rgba(220, 38, 38, 0.5));
 }
 
+.backToProfileButton
+{
+    border-radius: 10px;
+    outline: none;
+    border: 1px solid;
+    color: #f4f6af;
+    background: transparent;
+    margin: 6px;
+    transition:0.3s ease all;
+}
+
+.backToProfileButton:hover
+{
+    transform:scale(0.95);
+    background:#f4f6af8f;
+}
+
 .failed-attempts{
     font-size: 20px;
     color: #dc2626;

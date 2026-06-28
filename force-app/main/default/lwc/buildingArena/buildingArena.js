@@ -1,17 +1,17 @@
-import { LightningElement } from 'lwc';
+import { LightningElement, wire } from 'lwc';
 import invokePrompt from '@salesforce/apex/PromptTemplateController.invokePrompt';
 import invokeValidationPromptCoding from '@salesforce/apex/PromptTemplateController.invokeValidationPromptCoding';
 import saveAttemptedChallenge from '@salesforce/apex/recordController.saveAttemptedChallenge';
 import createChallengeAttempt from '@salesforce/apex/recordController.createChallengeAttempt';
 import updateExpPoints from '@salesforce/apex/recordController.updateExpPoints';
 import getChallengeDetails from '@salesforce/apex/recordController.getChallengeDetails';
-import { NavigationMixin } from 'lightning/navigation';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 
 
 
 export default class buildingArena extends NavigationMixin(LightningElement) {
 
-    isNavigating=false;
+    isNavigating = false;
     isProblemOptionHidden = false;
     isProblemHidden = false;
     expReward = 0;
@@ -31,11 +31,11 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     difficultyfromPrompt = '';
     result = 'Pending';
     resultIcon = '⏳';
-    testCaseCount=0;
-    passedTestCases=0;
-    
-    submitReadOnly=true;
-    testdone=false;
+    testCaseCount = 0;
+    passedTestCases = 0;
+
+    submitReadOnly = true;
+    testdone = false;
 
     thegood = ['Submit your solution to see detailed feedback.'];
     thebad = ['Submit your solution to see detailed feedback.'];
@@ -52,13 +52,44 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     isLoggedIn = false;
     loadingMessages = ['Nothing yet'];
 
-    sessionToken=''
+    createChallenge = false;
 
+
+    @wire(CurrentPageReference)
+    getPageReference(pageRef) {
+        if (!pageRef || this.hasLoadedChallenge) {
+            return;
+        }
+
+        this.createChallenge = pageRef.state?.create === 'true' || pageRef.state?.create === true;
+
+        this.hasLoadedChallenge = true;
+
+        const challengeId = window.sessionStorage.getItem('challengeId');
+
+        if (challengeId) {
+            this.loadChallenge(challengeId);
+        }
+
+        if (this.createChallenge) {
+            const newState = { ...pageRef.state };
+            delete newState.create;
+
+            this[NavigationMixin.Navigate](
+                {
+                    type: pageRef.type,
+                    attributes: pageRef.attributes,
+                    state: newState
+                },
+                true
+            );
+        }
+    }
 
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
-        
+        console.log('CC this.createChallenge : ' + this.createChallenge);
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
@@ -67,29 +98,28 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                 }
             });
         }
-        const challengeId=window.sessionStorage.getItem('challengeId');
-        if(challengeId)
-        {
-           this.loadChallenge(challengeId);
-        }
     }
 
-    async loadChallenge(challengeId)
-    {
-        try{
+    async loadChallenge(challengeId) {
+        try {
 
-            const result=await getChallengeDetails(
+            const result = await getChallengeDetails(
                 {
-                    challengeId:challengeId
+                    challengeId: challengeId
                 }
             )
-            this.savedId=challengeId;
-
             this.populateData(result);
+            if (this.createChallenge) {
+                const newchallengeId = await this.createAttemptedChallenge();
+                this.savedId = newchallengeId;
+                console.log(this.savedId);
+            }
+            else {
+                this.savedId = challengeId;
+            }
 
         }
-        catch(error)
-        {
+        catch (error) {
             console.log(error);
         }
     }
@@ -102,14 +132,13 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         }
     }
 
-    disconnectedCallback()
-    {
-        window.sessionStorage.setItem('challengeId',null);
+    disconnectedCallback() {
+        window.sessionStorage.removeItem('challengeId');
+        sessionStorage.removeItem('createChallenge');
     }
 
-    setNavigating()
-    {
-        this.isNavigating=true;
+    setNavigating() {
+        this.isNavigating = true;
     }
 
     get sectionClass() {
@@ -142,7 +171,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
     get two() {
         return this.dataLoaded
-            ? this.testdone==true? 'two completed' : 'two highlighted'
+            ? this.testdone == true ? 'two completed' : 'two highlighted'
             : 'two';
     }
 
@@ -152,21 +181,20 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
             : 'generate';
     }
 
-    get three(){
-        return this.testdone==true? 'three completed' : 'three';
+    get three() {
+        return this.testdone == true ? 'three completed' : 'three';
     }
 
-    get test(){
-        return this.testdone==true? 'generate gen-highlighted' : 'generate';
+    get test() {
+        return this.testdone == true ? 'generate gen-highlighted' : 'generate';
     }
 
-    get four(){
-        return this.result.toLowerCase().includes('pass')? 'four completed' : 'four';
+    get four() {
+        return this.result.toLowerCase().includes('pass') ? 'four completed' : 'four';
     }
 
-    get sub()
-    {
-        return this.result.toLowerCase().includes('pass')? 'generate gen-highlighted' : 'generate';
+    get sub() {
+        return this.result.toLowerCase().includes('pass') ? 'generate gen-highlighted' : 'generate';
     }
 
     hideProblemOptions() {
@@ -181,7 +209,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     openProfile() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
-        this.isNavigating=true;
+        this.isNavigating = true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -194,7 +222,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     choosePath() {
         window.sessionStorage.setItem('isLoggedIn', true);
         window.sessionStorage.setItem('loginName', this.loginName);
-        this.isNavigating=true;
+        this.isNavigating = true;
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
@@ -206,7 +234,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     }
 
     showSampleData() {
-        
+
         this.template.querySelector('c-sampledata-modal-component').openModal(this.sampleData);
     }
 
@@ -228,11 +256,10 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         }
     }
 
-    populateData(response)
-    {
-        
-        try{
-            this.dataLoaded=true;
+    populateData(response) {
+
+        try {
+            this.dataLoaded = true;
             const parsedData = response;
             this.scenario = parsedData.Scenario;
             this.requirements = parsedData.BusinessRequirements;
@@ -253,21 +280,18 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
                 this.isProblemOptionHidden = !this.isProblemOptionHidden;
             }
         }
-        catch(error)
-        {
+        catch (error) {
             console.log('Error in populateData method');
             console.log(error);
         }
-        finally
-        {
+        finally {
             this.isLoading = false;
             this.isReadonly = false;
-            
+
         }
     }
 
-    get generateDisabled()
-    {
+    get generateDisabled() {
         return this.isLoading || this.submitting;
     }
 
@@ -276,11 +300,9 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         this.textAreacode = '';
         this.isReadonly = true;
         this.submitCount = 0;
-        
-        this.submitReadOnly=true;
-        this.dataLoaded=false;
 
-
+        this.submitReadOnly = true;
+        this.dataLoaded = false;
 
         //reseting the results we get after submitting the solution
         this.result = 'Pending';
@@ -292,7 +314,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
         try {
             this.isLoading = true;
-            
+
             response = await invokePrompt(
                 {
                     difficulty: this.difficulty,
@@ -303,7 +325,7 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
 
             this.dataLoaded = true;
             this.populateData(JSON.parse(response));
-
+            this.savedId = await this.createAttemptedChallenge()
 
 
         } catch (error) {
@@ -312,31 +334,31 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
         } finally {
             this.isLoading = false;
             this.isReadonly = false;
-           
             response = '';
-            try {
+        }
+    }
 
-                this.savedId = await saveAttemptedChallenge({
-                    problemTitle: this.problemTitle,
-                    scenario: this.scenario,
-                    errorcode: '',
-                    symptoms: this.requirements,
-                    type: this.type,
-                    difficultylevel: this.difficultyfromPrompt,
-                    username: this.loginName,
-                    path: 'Coding',
-                    sampledata: this.sampleData,
-                    expectedOutput: '',
-                    constraints: this.constraints
-                })
-                console.log('Challenge Saved');
+    async createAttemptedChallenge() {
+        try {
+            const newChallengeId = await saveAttemptedChallenge({
+                problemTitle: this.problemTitle,
+                scenario: this.scenario,
+                errorcode: '',
+                symptoms: this.requirements,
+                type: this.type,
+                difficultylevel: this.difficultyfromPrompt,
+                username: this.loginName,
+                path: 'Coding',
+                sampledata: this.sampleData,
+                expectedOutput: '',
+                constraints: this.constraints
+            });
 
-            }
-            catch (error) {
-                console.error('Error Saving Attempted Challenge:', error);
-            }
+            return newChallengeId;
 
-
+        } catch (error) {
+            console.error('Error creating attempted challenge', error);
+            throw error;
         }
     }
 
@@ -405,30 +427,28 @@ export default class buildingArena extends NavigationMixin(LightningElement) {
     }
 
     get progressStyle() {
-    return `--progress:${this.score * 3.6}deg`;
-}
+        return `--progress:${this.score * 3.6}deg`;
+    }
 
-get testReadonly()
-{
-    return this.submitting || !this.dataLoaded || !this.textAreacode;
-}
+    get testReadonly() {
+        return this.submitting || !this.dataLoaded || !this.textAreacode;
+    }
 
     async submitSolution(event) {
         this.submitting = true;
 
-        this.passedTestCases=0;
-        this.testCaseCount=0;
+        this.passedTestCases = 0;
+        this.testCaseCount = 0;
         this.loadingMessages = [];
         const actionType = event.currentTarget.dataset.id;
-        if(actionType==='Test')
-        {
+        if (actionType === 'Test') {
             this.testdone = true;
         }
         const timestamp = '[ ' + new Date(Date.now()).toLocaleTimeString('en-GB') + ' ]';
         this.loadingMessages.push(timestamp + ' Initializing Apex Runtime...\n');
         const steps = [
             ' Connecting to Challenge Engine...\n',
-           ' Saving Solution...\n',
+            ' Saving Solution...\n',
             ' Executing Apex Tests...\n',
             ' Validating Business Rules...\n',
             ' Running Hidden Test Cases...\n',
@@ -451,11 +471,11 @@ get testReadonly()
             console.log('Submitting solution...');
 
             this.isReadonly = true;
-            const response = await invokeValidationPromptCoding({ scenario: this.scenario, solution: this.textAreacode, sampleData: this.sampleData, submissionType: actionType + ' ' + this.difficulty , requirements: this.requirements,challengeId: this.savedId});
+            const response = await invokeValidationPromptCoding({ scenario: this.scenario, solution: this.textAreacode, sampleData: this.sampleData, submissionType: actionType + ' ' + this.difficulty, requirements: this.requirements, challengeId: this.savedId });
 
             clearInterval(intervalId);
             // Add all remaining messages immediately
-            const timenow='[ ' + new Date(Date.now()).toLocaleTimeString('en-GB') + ' ]'
+            const timenow = '[ ' + new Date(Date.now()).toLocaleTimeString('en-GB') + ' ]'
             if (currentIndex < steps.length) {
                 this.loadingMessages = [
                     ...this.loadingMessages,
@@ -472,12 +492,11 @@ get testReadonly()
             this.recommendations = response.recommendedImprovements;
             this.scenarioResults = response.scenarioResults;
             this.score = response.score;
-            let message=response.message;
-            let expPoints=response.expPoints;
+            let message = response.message;
+            let expPoints = response.expPoints;
             this.unlockedAchievements = response.unlockedAchievements;
-            this.scenarioResults.forEach(item=>{
-                if(item.status.toLowerCase().includes('pass'))
-                {
+            this.scenarioResults.forEach(item => {
+                if (item.status.toLowerCase().includes('pass')) {
                     this.passedTestCases++;
                 }
                 this.testCaseCount++;
@@ -486,13 +505,12 @@ get testReadonly()
 
             this.loadingMessages.push('[ ' + new Date(Date.now()).toLocaleTimeString('en-GB') + ' ]' + ' Submission Complete\n');
 
-            if(this.testdone==true)
+            if (this.testdone == true)
                 this.submitReadOnly = false;
 
-            if (this.result.toLowerCase().includes('pass') && actionType=='Submit') {
-                   this.template.querySelector('c-modal-component').openModal(message,expPoints);
-                   if(this.unlockedAchievements.length > 0 && this.unlockedAchievements.formulaKey!='FIRST_SUBMISSION')
-                {
+            if (this.result.toLowerCase().includes('pass') && actionType == 'Submit') {
+                this.template.querySelector('c-modal-component').openModal(message, expPoints);
+                if (this.unlockedAchievements.length > 0 && this.unlockedAchievements.formulaKey != 'FIRST_SUBMISSION') {
                     this.template.querySelector('c-show-achievement-modal').openModal(this.unlockedAchievements);
                 }
             }
@@ -504,14 +522,14 @@ get testReadonly()
         finally {
             this.submitting = false;
             this.isReadonly = false;
-          
-            
+
+
 
         }
     }
     showNewAchievements() {
         this.template.querySelector('c-show-achievement-modal').openModal(this.unlockedAchievements);
-        
+
     }
 
 }

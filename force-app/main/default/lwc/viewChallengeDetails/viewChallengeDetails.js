@@ -30,6 +30,7 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     total=0;
 
     isNavigating=false;
+    username=null;
 
     get DiffClass()
     {
@@ -79,6 +80,16 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
         return this.selectedMenu === 'AI';
     }
 
+    get isUserSearchTryButtonText()
+    {
+        return this.username!=null && this.username!=this.loginName?'Give It a Try':'Try Again';
+    }
+
+    get userSearchProfile()
+    {
+        return this.username!=null && this.username!=this.loginName;
+    }
+
 
     handleMenuClick(event) {
         this.selectedMenu = event.target.dataset.menu;
@@ -89,6 +100,7 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     getPageReference(pageRef) {
         if (pageRef) {
             this.recordId = pageRef.state?.recordId;
+            this.username = pageRef.state?.username;
 
         }
     }
@@ -121,7 +133,7 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     connectedCallback() {
         this.loginName = window.sessionStorage.getItem('loginName');
         this.isLoggedIn = window.sessionStorage.getItem('isLoggedIn');
-        
+        console.log('LoginName : '+this.loginName+' - Username : '+this.username);
         if (this.loginName == null || this.isLoggedIn == null || this.isLoggedIn == false) {
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
@@ -346,9 +358,12 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
             }
         }
 
+    
+
     backToProfile() {
             this.loginName = window.sessionStorage.setItem('loginName', this.loginName);
             this.isLoggedIn = window.sessionStorage.setItem('isLoggedIn', this.isLoggedIn);
+            window.sessionStorage.removeItem('username');
             this.isNavigating=true;
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
@@ -361,29 +376,37 @@ export default class ViewChallengeDetails extends NavigationMixin(LightningEleme
     tryAgainMethod()
     {
         console.log(this.path.toLowerCase());
+        sessionStorage.setItem('challengeId',this.recordId);
+        const createChallenge=false;
+        if(this.username!=null && this.username.trim()!=this.loginName.trim())
+            {
+                createChallenge=true;
+            }
         if(this.path.toLowerCase().includes('coding'))
         {
-            sessionStorage.setItem(
-            'challengeId',
-            this.recordId);
             this.isNavigating=true;
             this[NavigationMixin.Navigate]({
             type: 'comm__namedPage',
             attributes: {
             name: 'buildinArena__c'
+            },
+            state:
+            {
+                create: createChallenge
             }
         });
         }
         else if(this.path.toLowerCase().includes('debugging'))
         {
-            sessionStorage.setItem(
-            'challengeId',
-            this.recordId);
             this.isNavigating=true;
             this[NavigationMixin.Navigate]({
             type: 'comm__namedPage',
             attributes: {
             name: 'debuggingarena__c'
+            },
+            state:
+            {
+                create: createChallenge
             }
         });
         }
